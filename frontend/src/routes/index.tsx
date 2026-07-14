@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 
 import { AuthenticationRoutes } from '@/features/authentication/routes';
+import { RbacRoutes } from '@/features/rbac/routes';
 import { AuthenticatedHome } from '@/routes/authenticated-home';
 import { ProtectedRoute } from '@/routes/protected-route';
 
@@ -18,6 +19,7 @@ export const AppRoutes = () => (
     <Route path="/login" element={<AuthenticationRoutes.login />} />
     <Route element={<ProtectedRoute />}>
       <Route path="/" element={<AuthenticatedHome />} />
+      <Route path="/admin/roles/*" element={<RbacRoutes />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>
