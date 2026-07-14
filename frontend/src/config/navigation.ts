@@ -79,6 +79,13 @@ export const navigationGroups: NavigationGroup[] = [
         description: 'Secure RouterOS connections, discovery, and health monitoring.',
         requiredPermission: 'mikrotik.view',
       },
+      {
+        label: 'PPPoE Management',
+        path: '/network/pppoe',
+        icon: '⇋',
+        description: 'Enterprise PPPoE subscriber secrets, live active sessions, and synchronization.',
+        requiredPermission: 'pppoe.view',
+      },
     ],
   },
   {

@@ -35,4 +35,7 @@ return static function (Router $router, Container $container): void {
 
     $registerMikrotikRoutes = require dirname(__DIR__) . '/src/Mikrotik/Routes/mikrotik.php';
     $registerMikrotikRoutes($router, $container);
+
+    $registerPppoeRoutes = require dirname(__DIR__) . '/src/Pppoe/Routes/pppoe.php';
+    $registerPppoeRoutes($router, $container);
 };
