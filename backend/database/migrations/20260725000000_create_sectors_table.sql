@@ -1,0 +1,35 @@
+-- Sectors module schema
+-- Apply through the project's migration runner; do not alter production manually.
+
+CREATE TABLE sectors (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    tower_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    azimuth SMALLINT UNSIGNED NOT NULL,
+    beamwidth SMALLINT UNSIGNED NULL,
+    frequency_mhz INT UNSIGNED NOT NULL,
+    channel_width_mhz SMALLINT UNSIGNED NULL,
+    ssid VARCHAR(64) NULL,
+    eirp_dbm SMALLINT NULL,
+    device_id BIGINT UNSIGNED NULL,
+    capacity_mbps INT UNSIGNED NULL,
+    max_subscribers INT UNSIGNED NULL,
+    status ENUM('planning', 'active', 'maintenance', 'decommissioned') DEFAULT 'planning',
+    notes TEXT NULL,
+    created_by BIGINT UNSIGNED NOT NULL,
+    updated_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    PRIMARY KEY (id),
+    KEY idx_sectors_tower (tower_id),
+    KEY idx_sectors_device (device_id),
+    KEY idx_sectors_status (status),
+    KEY idx_sectors_frequency (frequency_mhz),
+    KEY idx_sectors_deleted_at (deleted_at),
+    CONSTRAINT fk_sectors_tower FOREIGN KEY (tower_id) REFERENCES towers (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_sectors_device FOREIGN KEY (device_id) REFERENCES network_devices (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_sectors_created_by FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_sectors_updated_by FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT chk_azimuth CHECK (azimuth >= 0 AND azimuth <= 359)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
