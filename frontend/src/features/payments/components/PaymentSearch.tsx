@@ -1,0 +1,1 @@
+import{Input}from'@/components/ui/input';export const PaymentSearch=({value,onChange}:{value:string;onChange:(v:string)=>void})=><Input aria-label="Search payments" placeholder="Payment, receipt, reference, customer…" value={value} onChange={e=>onChange(e.target.value)}/>;

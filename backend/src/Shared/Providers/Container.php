@@ -12,6 +12,10 @@ use SkyFi\Billing\Contracts\InvoiceServiceContract;
 use SkyFi\Billing\Repositories\PdoBillingScheduleRepository;
 use SkyFi\Billing\Repositories\PdoInvoiceRepository;
 use SkyFi\Billing\Services\InvoiceService;
+use SkyFi\Payments\Controllers\PaymentController;
+use SkyFi\Payments\Repositories\PdoPaymentRepository;
+use SkyFi\Payments\Services\PaymentService;
+use SkyFi\Payments\Validators\PaymentValidator;
 use SkyFi\Connections\Controllers\ConnectionController;
 use SkyFi\Connections\Repositories\PdoConnectionRepository;
 use SkyFi\Connections\Services\ConnectionService;
@@ -95,7 +99,8 @@ final class Container
             $this->instances[RequirePermissionMiddleware::class]
         );
 
-        $this->instances[DashboardService::class] = new DashboardService();
+        $this->instances[PdoPaymentRepository::class] = new PdoPaymentRepository($pdo);
+        $this->instances[DashboardService::class] = new DashboardService($this->instances[PdoPaymentRepository::class]);
         $this->instances[DashboardController::class] = new DashboardController($this->instances[DashboardService::class]);
 
         $this->instances[PdoCustomerRepository::class] = new PdoCustomerRepository($pdo);
@@ -137,6 +142,18 @@ final class Container
         );
         $this->instances[InvoiceController::class] = new InvoiceController(
             $this->instances[InvoiceService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[PaymentValidator::class] = new PaymentValidator();
+        $this->instances[PaymentService::class] = new PaymentService(
+            $this->instances[PdoPaymentRepository::class],
+            $this->instances[PaymentValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[PaymentController::class] = new PaymentController(
+            $this->instances[PaymentService::class],
+            $this->instances[PaymentValidator::class],
             $this->instances[RequirePermissionMiddleware::class],
         );
 

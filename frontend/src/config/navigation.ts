@@ -53,6 +53,13 @@ export const navigationGroups: NavigationGroup[] = [
         description: 'Generate and manage customer invoices and billing schedules.',
         requiredPermission: 'billing.view',
       },
+      {
+        label: 'Payments',
+        path: '/payments',
+        icon: '💳',
+        description: 'Receive, allocate, reconcile, and refund customer payments.',
+        requiredPermission: 'payments.view',
+      },
     ],
   },
   {

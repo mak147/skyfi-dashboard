@@ -1,0 +1,30 @@
+<?php
+
+declare(strict_types=1);
+namespace SkyFi\Payments\Controllers;
+use SkyFi\Payments\Contracts\PaymentServiceContract;use SkyFi\Payments\DTOs\{PaymentData,PaymentListFilters};use SkyFi\Payments\Validators\PaymentValidator;
+use SkyFi\Rbac\Middleware\RequirePermissionMiddleware;use SkyFi\Shared\Http\{ApiResponse,Request,Response};use SkyFi\Shared\Exceptions\ValidationException;
+final class PaymentController
+{
+ public function __construct(private readonly PaymentServiceContract $service,private readonly PaymentValidator $validator,private readonly RequirePermissionMiddleware $auth){}
+ public function index(Request $r):Response{$this->allow($r,'payments.view');$x=$this->service->list(PaymentListFilters::fromQuery($r->query()));return new Response(200,['data'=>array_map(fn($p)=>['type'=>'payments','id'=>(string)$p->id(),'attributes'=>$p->toArray()],$x['items']),'meta'=>['current_page'=>$x['page'],'per_page'=>$x['perPage'],'total'=>$x['total'],'last_page'=>$x['lastPage']]]);}
+ public function show(Request $r):Response{$this->allow($r,'payments.view');$p=$this->service->get($this->id($r));return ApiResponse::resource('payments',(string)$p->id(),$p->toArray());}
+ public function store(Request $r):Response{$u=$this->allow($r,'payments.create');$c=$this->validator->validate($r->body());$p=$this->service->create(PaymentData::fromArray($r->body(),$c),$u,$r->ipAddress(),$r->userAgent());return ApiResponse::resource('payments',(string)$p->id(),$p->toArray(),201);}
+ public function receive(Request $r):Response{$u=$this->allow($r,'payments.create');$c=$this->validator->validate($r->body(),true);$p=$this->service->receive(PaymentData::fromArray($r->body(),$c),$u,$r->ipAddress(),$r->userAgent());return ApiResponse::resource('payments',(string)$p->id(),$p->toArray(),201);}
+ public function update(Request $r):Response{$u=$this->allow($r,'payments.update');$c=$this->validator->validate($r->body());$p=$this->service->update($this->id($r),PaymentData::fromArray($r->body(),$c),$u,$r->ipAddress(),$r->userAgent());return ApiResponse::resource('payments',(string)$p->id(),$p->toArray());}
+ public function destroy(Request $r):Response{$u=$this->allow($r,'payments.delete');$this->service->delete($this->id($r),$u,$r->ipAddress(),$r->userAgent());return ApiResponse::noContent();}
+ public function allocate(Request $r):Response{$u=$this->allow($r,'payments.manage');$a=$r->body()['allocations']??null;if(!is_array($a))throw new ValidationException([['code'=>'invalid','detail'=>'Allocations must be a list.','source'=>['pointer'=>'/data/attributes/allocations']]]);$p=$this->service->allocate($this->id($r),$a,$u,$r->ipAddress(),$r->userAgent());return ApiResponse::resource('payments',(string)$p->id(),$p->toArray());}
+ public function reverse(Request $r):Response{$u=$this->allow($r,'payments.manage');$p=$this->service->reverse($this->id($r),(string)($r->body()['reason']??''),$u,$r->ipAddress(),$r->userAgent());return ApiResponse::resource('payments',(string)$p->id(),$p->toArray());}
+ public function refund(Request $r):Response{$u=$this->allow($r,'payments.refund');$p=$this->service->refund($this->id($r),$r->body(),$u,$r->ipAddress(),$r->userAgent());return ApiResponse::resource('payments',(string)$p->id(),$p->toArray());}
+ public function bulk(Request $r):Response{$u=$this->allow($r,'payments.manage');$items=$r->body()['payments']??null;if(!is_array($items))throw new ValidationException([['code'=>'invalid','detail'=>'Payments must be a list.','source'=>['pointer'=>'/data/attributes/payments']]]);return new Response(200,['data'=>$this->service->bulk($items,$u,$r->ipAddress(),$r->userAgent())]);}
+ public function statistics(Request $r):Response{$this->allow($r,'payments.view');return new Response(200,['data'=>$this->service->statistics()]);}
+ public function lookups(Request $r):Response{$this->allow($r,'payments.view');return new Response(200,['data'=>$this->service->lookups()]);}
+ public function methods(Request $r):Response{$this->allow($r,'payments.view');return new Response(200,['data'=>$this->service->lookups()['methods']]);}
+ public function accounts(Request $r):Response{$this->allow($r,'payments.view');return new Response(200,['data'=>$this->service->lookups()['accounts']]);}
+ public function activity(Request $r):Response{$this->allow($r,'payments.view');return new Response(200,['data'=>$this->service->get($this->id($r))->toArray()['activities']]);}
+ public function allocations(Request $r):Response{$this->allow($r,'payments.view');return new Response(200,['data'=>$this->service->get($this->id($r))->toArray()['allocations']]);}
+ public function receipt(Request $r):Response{$this->allow($r,'payments.view');$p=$this->service->get($this->id($r));return new Response(200,['data'=>['type'=>'receipts','id'=>(string)$p->id(),'attributes'=>$p->toArray()]]);}
+ public function pdf(Request $r):Response{$this->allow($r,'payments.export');$p=$this->service->get($this->id($r));return new Response(200,['data'=>['payment_id'=>$p->id(),'pdf_status'=>'placeholder','message'=>'Receipt PDF generation is reserved for the document service.','preview_url'=>'/api/v1/payments/'.$p->id().'/receipt']]);}
+ public function export(Request $r):Response{$this->allow($r,'payments.export');$rows=[['Payment Number','Receipt Number','Date','Customer','Connection','Method','Account','Amount','Applied','Refunded','Status','Reference']];foreach($this->service->export(PaymentListFilters::fromQuery($r->query())) as $p)$rows[]=[$p['payment_number'],$p['receipt_number']??'',$p['payment_date'],$p['customer_name']??'',$p['connection_number']??'',$p['payment_method_name']??'',$p['payment_account_name']??'',$p['amount'],$p['applied_amount'],$p['refunded_amount'],$p['status'],$p['reference_number']??''];return Response::downloadCsv($rows,'skyfi-payments.csv');}
+ private function allow(Request $r,string $p):int{$u=(int)($r->attributes()['claims']['sub']??0);$this->auth->authorize($u,$p);return$u;}private function id(Request $r):int{return(int)($r->attributes()['route_params']['id']??0);}
+}

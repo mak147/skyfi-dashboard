@@ -7,10 +7,15 @@ namespace SkyFi\Dashboard\Services;
 use SkyFi\Dashboard\Contracts\DashboardServiceContract;
 use SkyFi\Dashboard\Data\DashboardPayload;
 use SkyFi\Shared\Exceptions\AuthorizationException;
+use SkyFi\Payments\Contracts\PaymentRepositoryContract;
 
 final class DashboardService implements DashboardServiceContract
 {
     private const CACHE_TTL_SECONDS = 300;
+
+    public function __construct(private readonly PaymentRepositoryContract $payments)
+    {
+    }
 
     /**
      * @param array<int, string> $roles Role names from the validated JWT claims.
@@ -132,6 +137,7 @@ final class DashboardService implements DashboardServiceContract
     private function executiveWidgets(): array
     {
         return [
+            ...$this->collectionSummaryWidgets(),
             $this->stat('mrr', 'Monthly recurring revenue', '$52,480', '+2.5%', 'up', 'emerald', 'Recurring revenue recognized for the current month.'),
             $this->stat('active-subscribers', 'Active subscribers', '1,250', '+12 this month', 'up', 'indigo', 'Customers with at least one active service.'),
             $this->stat('invoices-this-month', 'Invoices this month', '0', 'Live', 'neutral', 'indigo', 'Total invoices issued in the current month.'),
@@ -178,21 +184,24 @@ final class DashboardService implements DashboardServiceContract
     /** @return array<int, array<string, mixed>> */
     private function financeWidgets(): array
     {
+        $data = $this->payments->statistics();
+        $money = static fn (mixed $value): string => 'PKR ' . number_format((float) $value, 2);
+        $recent = array_map(static fn (array $receipt): array => [
+            'id' => (string) $receipt['receipt_number'],
+            'primaryText' => (string) $receipt['customer_name'],
+            'secondaryText' => (string) $receipt['payment_number'] . ' • ' . $money($receipt['amount']),
+            'status' => 'Received',
+        ], $data['recent_receipts']);
+        $labels = array_map(static fn (array $row): string => (string) $row['collection_date'], $data['daily_collections']);
+        $values = array_map(static fn (array $row): int => (int) round((float) $row['amount']), $data['daily_collections']);
+
         return [
-            $this->stat('invoices-today', 'Invoices today', '0', 'Live', 'neutral', 'indigo', 'Invoices created during the current business day.'),
-            $this->stat('invoices-this-month', 'Invoices this month', '0', 'Live', 'neutral', 'indigo', 'Total invoices issued in the current month.'),
-            $this->stat('pending-invoices', 'Pending invoices', '0', 'Awaiting issue', 'neutral', 'amber', 'Invoices in draft or pending status.'),
-            $this->stat('overdue-invoices', 'Overdue invoices', '0', 'Collection follow-up', 'neutral', 'red', 'Invoices past their due date.'),
-            $this->stat('billing-readiness', 'Billing readiness', '94%', '+6 pts', 'up', 'emerald', 'Accounts ready for the next billing run.'),
-            $this->stat('payments-today', 'Payments today', '$8,940', '+18%', 'up', 'indigo', 'Payments recorded during the current business day.'),
-            $this->chart('collection-health', 'Collection Health', 'bar', ['Current', '1-30', '31-60', '61+'], [
-                ['label' => 'Invoices', 'data' => [410, 52, 21, 14]],
-            ]),
-            $this->list('finance-followups', 'Collection Follow-Ups', [
-                ['id' => 'FIN-21', 'primaryText' => 'Large account promised payment', 'secondaryText' => 'Due by end of day', 'status' => 'Due'],
-                ['id' => 'FIN-19', 'primaryText' => 'Manual payment review', 'secondaryText' => '3 records need confirmation', 'status' => 'Review'],
-                ['id' => 'FIN-14', 'primaryText' => 'Credit memo approval queue', 'secondaryText' => '2 pending approvals', 'status' => 'Pending'],
-            ]),
+            $this->stat('today-collections', "Today's Collections", $money($data['today_collections']), 'Live', 'neutral', 'emerald', 'Completed collections recorded today.'),
+            $this->stat('monthly-collections', 'Monthly Collections', $money($data['monthly_collections']), 'Live', 'neutral', 'indigo', 'Net completed collections this month.'),
+            $this->stat('outstanding-balance', 'Outstanding Balance', $money($data['outstanding_balance']), 'Collection follow-up', 'neutral', 'red', 'Balance remaining on collectible invoices.'),
+            $this->stat('pending-payments', 'Pending Payments', (string) $data['pending_payments'], 'Awaiting completion', 'neutral', 'amber', 'Payment records awaiting completion.'),
+            $this->chart('daily-collections', 'Daily Collections', 'bar', $labels, [['label' => 'PKR', 'data' => $values]]),
+            $this->list('recent-receipts', 'Recent Receipts', $recent),
         ];
     }
 
@@ -303,6 +312,26 @@ final class DashboardService implements DashboardServiceContract
                 ['id' => 'NEXT-1', 'primaryText' => 'Review your assigned queue', 'secondaryText' => 'Prioritize due-today work first', 'status' => 'Suggested'],
                 ['id' => 'NEXT-2', 'primaryText' => 'Check pending notifications', 'secondaryText' => 'Follow escalations before SLA windows', 'status' => 'Suggested'],
             ]),
+        ];
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function collectionSummaryWidgets(): array
+    {
+        $data = $this->payments->statistics();
+        $money = static fn (mixed $value): string => 'PKR ' . number_format((float) $value, 2);
+        $recent = array_map(static fn (array $receipt): array => [
+            'id' => (string) $receipt['receipt_number'],
+            'primaryText' => (string) $receipt['customer_name'],
+            'secondaryText' => (string) $receipt['payment_number'] . ' • ' . $money($receipt['amount']),
+            'status' => 'Received',
+        ], $data['recent_receipts']);
+        return [
+            $this->stat('today-collections', "Today's Collections", $money($data['today_collections']), 'Live', 'neutral', 'emerald', 'Completed collections recorded today.'),
+            $this->stat('monthly-collections', 'Monthly Collections', $money($data['monthly_collections']), 'Live', 'neutral', 'indigo', 'Net completed collections this month.'),
+            $this->stat('outstanding-balance', 'Outstanding Balance', $money($data['outstanding_balance']), 'Collection follow-up', 'neutral', 'red', 'Balance remaining on collectible invoices.'),
+            $this->stat('pending-payments', 'Pending Payments', (string) $data['pending_payments'], 'Awaiting completion', 'neutral', 'amber', 'Payment records awaiting completion.'),
+            $this->list('recent-receipts', 'Recent Receipts', $recent),
         ];
     }
 
