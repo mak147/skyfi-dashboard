@@ -32,4 +32,7 @@ return static function (Router $router, Container $container): void {
 
     $registerFinanceRoutes = require dirname(__DIR__) . '/src/Finance/Routes/finance.php';
     $registerFinanceRoutes($router, $container);
+
+    $registerMikrotikRoutes = require dirname(__DIR__) . '/src/Mikrotik/Routes/mikrotik.php';
+    $registerMikrotikRoutes($router, $container);
 };

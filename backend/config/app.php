@@ -15,4 +15,5 @@ return [
     'refresh_cookie_name' => getenv('REFRESH_COOKIE_NAME') ?: 'skyfi_refresh_token',
     'refresh_cookie_path' => getenv('REFRESH_COOKIE_PATH') ?: '/api/v1/auth',
     'refresh_cookie_secure' => filter_var(getenv('REFRESH_COOKIE_SECURE') ?: 'false', FILTER_VALIDATE_BOOLEAN),
+    'mikrotik' => require __DIR__ . '/mikrotik.php',
 ];

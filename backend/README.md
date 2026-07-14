@@ -29,8 +29,17 @@ This directory contains the PHP REST API for the SkyFi Networks ISP Management S
 
 A successful login/refresh returns a JSON:API resource with `data.attributes.accessToken` and a safe `data.attributes.user` object. The refresh token is never returned in JSON.
 
+## MikroTik integration platform
+
+The `src/Mikrotik` module provides secured router inventory, groups/tags, TLS RouterOS API testing, on-demand discovery, and health snapshots. It is intentionally read-only with respect to RouterOS: PPPoE, Hotspot, queues, firewall, and IP pool management are not implemented here.
+
+- Use RouterOS `api-ssl` with a dedicated least-privilege API user and restrict router firewall access to SkyFi application-server IPs.
+- Set `MIKROTIK_CREDENTIAL_ENCRYPTION_KEY` to a secret, base64-encoded 32-byte key. Router passwords are encrypted using authenticated XChaCha20-Poly1305 encryption before persistence.
+- TLS peer verification is enabled by default. Supply the private CA path with `MIKROTIK_API_TLS_CA_FILE` when routers use an internal CA; do not disable verification in production.
+- The current stateless PHP runtime opens one bounded, authenticated session for each discovery/health batch. The connection-pool contract is intentionally reusable by a future long-lived monitoring worker.
+
 ## Security notes
 
-- Never log passwords, access tokens, refresh tokens, secrets, or raw payment data.
+- Never log passwords, RouterOS credentials, access tokens, refresh tokens, secrets, or raw payment data.
 - Use HTTPS and set `REFRESH_COOKIE_SECURE=true` outside local development.
 - The frontend keeps access tokens in memory only; the refresh token remains inaccessible to JavaScript.
