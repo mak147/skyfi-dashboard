@@ -1,0 +1,81 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SkyFi\Database\Seeders;
+
+final class PermissionCatalog
+{
+    /** @return array<string, string> Permission name to description. */
+    public static function all(): array
+    {
+        return [
+            '*' => 'Unrestricted access to all permissions.',
+            'view:dashboard' => 'View a dashboard.',
+            'view:dashboard:company' => 'View the company dashboard.',
+            'view:dashboard:regional' => 'View a regional dashboard.',
+            'view:report:financial' => 'View financial reports.',
+            'view:report:subscriber' => 'View subscriber reports.',
+            'view:report:network' => 'View network reports.',
+            'view:report:regional' => 'View regional reports.',
+            'view:report:inventory' => 'View inventory reports.',
+            'view:audit-log' => 'View the audit log.',
+            'view:customer' => 'View customer records.',
+            'view:customer:basic' => 'View basic customer records within scope.',
+            'view:customer:own' => 'View the signed-in customer record.',
+            'view:customer:contact_and_address' => 'View scoped customer contact and address details.',
+            'view:customer:network-details' => 'View customer network details.',
+            'update:customer:contact' => 'Update customer contact details.',
+            'update:customer:notes' => 'Update customer notes.',
+            'update:customer:own' => 'Update the signed-in customer record.',
+            'manage:invoice' => 'Manage invoices.',
+            'view:invoice' => 'View invoices.',
+            'view:invoice:own' => 'View the signed-in customer invoices.',
+            'manage:payment' => 'Manage payments.',
+            'view:payment' => 'View payments.',
+            'view:payment:own' => 'View the signed-in customer payments.',
+            'create:payment:manual' => 'Record a manual payment.',
+            'create:payment:own' => 'Create a payment for the signed-in customer.',
+            'manage:credit' => 'Manage customer credits.',
+            'create:refund:small' => 'Create a small refund.',
+            'create:refund:large' => 'Create a large refund requiring approval.',
+            'execute:billing-run' => 'Execute a billing run.',
+            'execute:dunning-process' => 'Execute the dunning process.',
+            'manage:service-plan' => 'Manage service plans.',
+            'view:service-plan' => 'View service plans.',
+            'view:service' => 'View services.',
+            'view:service:own' => 'View the signed-in customer service.',
+            'execute:service-availability-check' => 'Check service availability.',
+            'execute:service:reconnect' => 'Reconnect a customer service.',
+            'manage:lead' => 'Manage sales leads.',
+            'create:quote' => 'Create a quote.',
+            'create:customer' => 'Create a customer.',
+            'manage:ticket' => 'Manage support tickets.',
+            'view:ticket' => 'View support tickets.',
+            'view:ticket:own' => 'View the signed-in customer tickets.',
+            'view:network-status:customer' => 'View customer network status.',
+            'view:network-status:global' => 'View global network status.',
+            'execute:site-survey' => 'Execute a site survey.',
+            'execute:service:diagnostics' => 'Execute service diagnostics.',
+            'view:work-order' => 'View work orders.',
+            'view:work-order:own' => 'View assigned work orders.',
+            'update:work-order:own' => 'Update assigned work orders.',
+            'manage:tower' => 'Manage towers.',
+            'manage:mikrotik-router' => 'Manage MikroTik routers.',
+            'view:ip-address-pool' => 'View IP address pools.',
+            'execute:provisioning:manual' => 'Execute manual provisioning.',
+            'execute:config-backup' => 'Execute a configuration backup.',
+            'view:inventory:own-vehicle' => 'View inventory in the assigned vehicle.',
+            'manage:inventory-item' => 'Manage inventory items.',
+            'manage:warehouse' => 'Manage warehouses.',
+            'execute:stock-transfer' => 'Execute a stock transfer.',
+            'manage:vendor' => 'Manage vendors.',
+            'manage:purchase-order' => 'Manage purchase orders.',
+            'manage:user' => 'Manage users.',
+            'manage:role' => 'Manage roles.',
+            'manage:settings' => 'Manage system settings.',
+            'update:user:role' => 'Update user roles within scope.',
+            'manage:ticket:own' => 'Manage the signed-in customer tickets.',
+        ];
+    }
+}

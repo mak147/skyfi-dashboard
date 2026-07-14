@@ -1,0 +1,21 @@
+# Dependencies and build outputs
+node_modules/
+frontend/node_modules/
+frontend/dist/
+backend/vendor/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+
+# Runtime data
+backend/storage/logs/*
+!backend/storage/logs/.gitkeep
+
+# IDE and OS files
+.DS_Store
+.idea/
+.vscode/
