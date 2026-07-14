@@ -220,6 +220,66 @@ final class Container
             $this->instances[RequirePermissionMiddleware::class],
         );
 
+        $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeAccountRepository::class] = new \SkyFi\Pppoe\Repositories\PdoPppoeAccountRepository($pdo);
+        $this->instances[\SkyFi\Pppoe\Contracts\PppoeAccountRepositoryContract::class] = $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeAccountRepository::class];
+
+        $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeSessionRepository::class] = new \SkyFi\Pppoe\Repositories\PdoPppoeSessionRepository($pdo);
+        $this->instances[\SkyFi\Pppoe\Contracts\PppoeSessionRepositoryContract::class] = $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeSessionRepository::class];
+
+        $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeSyncLogger::class] = new \SkyFi\Pppoe\Repositories\PdoPppoeSyncLogger($pdo);
+        $this->instances[\SkyFi\Pppoe\Contracts\PppoeSyncLoggerContract::class] = $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeSyncLogger::class];
+
+        $this->instances[\SkyFi\Pppoe\Validators\PppoeValidator::class] = new \SkyFi\Pppoe\Validators\PppoeValidator();
+
+        $this->instances[\SkyFi\Pppoe\Services\PppoeService::class] = new \SkyFi\Pppoe\Services\PppoeService(
+            $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeAccountRepository::class],
+            $this->instances[\SkyFi\Customers\Repositories\PdoCustomerRepository::class],
+            $this->instances[\SkyFi\Connections\Repositories\PdoConnectionRepository::class],
+            $this->instances[\SkyFi\Packages\Repositories\PdoPackageRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class],
+            $this->instances[\SkyFi\Mikrotik\Services\CredentialCipher::class],
+            $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeSyncLogger::class],
+            $this->instances[\SkyFi\Pppoe\Validators\PppoeValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Pppoe\Contracts\PppoeServiceContract::class] = $this->instances[\SkyFi\Pppoe\Services\PppoeService::class];
+
+        $this->instances[\SkyFi\Pppoe\Services\PppoeSessionMonitorService::class] = new \SkyFi\Pppoe\Services\PppoeSessionMonitorService(
+            $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeAccountRepository::class],
+            $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeSessionRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+
+        $this->instances[\SkyFi\Pppoe\Services\PppoeSyncService::class] = new \SkyFi\Pppoe\Services\PppoeSyncService(
+            $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeAccountRepository::class],
+            $this->instances[\SkyFi\Customers\Repositories\PdoCustomerRepository::class],
+            $this->instances[\SkyFi\Connections\Repositories\PdoConnectionRepository::class],
+            $this->instances[\SkyFi\Packages\Repositories\PdoPackageRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class],
+            $this->instances[\SkyFi\Mikrotik\Services\CredentialCipher::class],
+            $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeSyncLogger::class],
+        );
+
+        $this->instances[\SkyFi\Pppoe\Controllers\PppoeAccountController::class] = new \SkyFi\Pppoe\Controllers\PppoeAccountController(
+            $this->instances[\SkyFi\Pppoe\Services\PppoeService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[\SkyFi\Pppoe\Controllers\PppoeSessionController::class] = new \SkyFi\Pppoe\Controllers\PppoeSessionController(
+            $this->instances[\SkyFi\Pppoe\Services\PppoeSessionMonitorService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[\SkyFi\Pppoe\Controllers\PppoeSyncController::class] = new \SkyFi\Pppoe\Controllers\PppoeSyncController(
+            $this->instances[\SkyFi\Pppoe\Services\PppoeSyncService::class],
+            $this->instances[\SkyFi\Pppoe\Repositories\PdoPppoeSyncLogger::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners
