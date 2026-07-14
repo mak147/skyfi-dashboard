@@ -21,6 +21,9 @@ final class Request
     /** @var array<string, mixed> */
     private array $attributes;
 
+    /** @var array<string, mixed> */
+    private array $query;
+
     /** @param array<string, mixed> $server @param array<string, mixed> $cookies @param array<string, mixed> $attributes */
     public function __construct(
         private readonly string $method,
@@ -29,11 +32,13 @@ final class Request
         ?string $rawBody = null,
         array $cookies = [],
         array $attributes = [],
+        array $query = [],
     ) {
         $this->server = $server;
         $this->cookies = $cookies;
         $this->attributes = $attributes;
         $this->headers = self::extractHeaders($server);
+        $this->query = $query;
         $decoded = json_decode($rawBody ?? '', true);
         $this->body = is_array($decoded) ? $decoded : [];
     }
@@ -51,6 +56,8 @@ final class Request
             $_SERVER,
             file_get_contents('php://input') ?: null,
             $_COOKIE,
+            [],
+            $_GET,
         );
     }
 
@@ -70,6 +77,12 @@ final class Request
     public function body(): array
     {
         return $this->body;
+    }
+
+    /** @return array<string, mixed> Parsed query parameters. */
+    public function query(): array
+    {
+        return $this->query;
     }
 
     /** @param string $name Header name. */

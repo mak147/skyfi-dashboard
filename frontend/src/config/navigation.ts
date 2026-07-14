@@ -25,6 +25,12 @@ export const navigationGroups: NavigationGroup[] = [
         icon: '⌂',
         description: 'Role-aware operational KPIs and activity widgets.',
       },
+      {
+        label: 'Customers',
+        path: '/customers',
+        icon: '👤',
+        description: 'Manage customer lifecycle from leads to archived accounts.',
+      },
     ],
   },
   {
