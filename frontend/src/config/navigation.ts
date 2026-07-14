@@ -60,6 +60,13 @@ export const navigationGroups: NavigationGroup[] = [
         description: 'Receive, allocate, reconcile, and refund customer payments.',
         requiredPermission: 'payments.view',
       },
+      {
+        label: 'Finance & Accounting',
+        path: '/finance',
+        icon: '📊',
+        description: 'Manage chart of accounts, general ledger, and journal entries.',
+        requiredPermission: 'finance.view',
+      },
     ],
   },
   {

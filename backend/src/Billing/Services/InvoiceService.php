@@ -322,6 +322,8 @@ final class InvoiceService implements InvoiceServiceContract
             userAgent: $ua,
         );
 
+        \SkyFi\Shared\Events\EventDispatcher::dispatch('invoice.generated', $invoice->toArray());
+
         return $this->get($invoice->id);
     }
 
