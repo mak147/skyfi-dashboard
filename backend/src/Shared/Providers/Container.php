@@ -476,6 +476,88 @@ final class Container
         );
         // ─── End Infrastructure Module ──────────────────────────────────
 
+        // ─── Monitoring & Observability Module ──────────────────────────
+        $this->instances[\SkyFi\Monitoring\Repositories\PdoEventLoggingRepository::class] = new \SkyFi\Monitoring\Repositories\PdoEventLoggingRepository($pdo);
+        $this->instances[\SkyFi\Monitoring\Contracts\EventLoggingRepositoryContract::class] = $this->instances[\SkyFi\Monitoring\Repositories\PdoEventLoggingRepository::class];
+
+        $this->instances[\SkyFi\Monitoring\Repositories\PdoDeviceStatusRepository::class] = new \SkyFi\Monitoring\Repositories\PdoDeviceStatusRepository($pdo);
+        $this->instances[\SkyFi\Monitoring\Contracts\DeviceStatusRepositoryContract::class] = $this->instances[\SkyFi\Monitoring\Repositories\PdoDeviceStatusRepository::class];
+
+        $this->instances[\SkyFi\Monitoring\Repositories\PdoInterfaceSnapshotRepository::class] = new \SkyFi\Monitoring\Repositories\PdoInterfaceSnapshotRepository($pdo);
+        $this->instances[\SkyFi\Monitoring\Contracts\InterfaceSnapshotRepositoryContract::class] = $this->instances[\SkyFi\Monitoring\Repositories\PdoInterfaceSnapshotRepository::class];
+
+        $this->instances[\SkyFi\Monitoring\Repositories\PdoAlertRepository::class] = new \SkyFi\Monitoring\Repositories\PdoAlertRepository($pdo);
+        $this->instances[\SkyFi\Monitoring\Contracts\AlertRepositoryContract::class] = $this->instances[\SkyFi\Monitoring\Repositories\PdoAlertRepository::class];
+
+        $this->instances[\SkyFi\Monitoring\Repositories\PdoSyncEventRepository::class] = new \SkyFi\Monitoring\Repositories\PdoSyncEventRepository($pdo);
+        $this->instances[\SkyFi\Monitoring\Contracts\SyncEventRepositoryContract::class] = $this->instances[\SkyFi\Monitoring\Repositories\PdoSyncEventRepository::class];
+
+        $this->instances[\SkyFi\Monitoring\Validators\AlertValidator::class] = new \SkyFi\Monitoring\Validators\AlertValidator();
+        $this->instances[\SkyFi\Monitoring\Validators\MonitoringValidator::class] = new \SkyFi\Monitoring\Validators\MonitoringValidator();
+
+        $this->instances[\SkyFi\Monitoring\Services\EventLoggingService::class] = new \SkyFi\Monitoring\Services\EventLoggingService(
+            $this->instances[\SkyFi\Monitoring\Repositories\PdoEventLoggingRepository::class],
+            $this->instances[\SkyFi\Monitoring\Repositories\PdoSyncEventRepository::class],
+            $this->instances[\SkyFi\Monitoring\Validators\MonitoringValidator::class],
+        );
+        $this->instances[\SkyFi\Monitoring\Contracts\EventLoggingServiceContract::class] = $this->instances[\SkyFi\Monitoring\Services\EventLoggingService::class];
+
+        $this->instances[\SkyFi\Monitoring\Services\AlertManagementService::class] = new \SkyFi\Monitoring\Services\AlertManagementService(
+            $this->instances[\SkyFi\Monitoring\Repositories\PdoAlertRepository::class],
+            $this->instances[\SkyFi\Monitoring\Services\EventLoggingService::class],
+            $this->instances[\SkyFi\Monitoring\Validators\AlertValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Monitoring\Contracts\AlertManagementServiceContract::class] = $this->instances[\SkyFi\Monitoring\Services\AlertManagementService::class];
+
+        $this->instances[\SkyFi\Monitoring\Services\DeviceHealthPollingService::class] = new \SkyFi\Monitoring\Services\DeviceHealthPollingService(
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterHealthService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class],
+            $this->instances[NetworkDeviceService::class],
+            $this->instances[\SkyFi\Monitoring\Repositories\PdoDeviceStatusRepository::class],
+            $this->instances[\SkyFi\Monitoring\Repositories\PdoInterfaceSnapshotRepository::class],
+            $this->instances[\SkyFi\Monitoring\Services\AlertManagementService::class],
+            $this->instances[\SkyFi\Monitoring\Services\EventLoggingService::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Monitoring\Contracts\DeviceHealthPollingServiceContract::class] = $this->instances[\SkyFi\Monitoring\Services\DeviceHealthPollingService::class];
+
+        $this->instances[\SkyFi\Monitoring\Services\MonitoringDashboardService::class] = new \SkyFi\Monitoring\Services\MonitoringDashboardService(
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterHealthService::class],
+            $this->instances[NetworkDeviceService::class],
+            $this->instances[\SkyFi\Monitoring\Repositories\PdoAlertRepository::class],
+            $this->instances[\SkyFi\Monitoring\Repositories\PdoInterfaceSnapshotRepository::class],
+            $this->instances[\SkyFi\Monitoring\Repositories\PdoDeviceStatusRepository::class],
+            $this->instances[\SkyFi\Pppoe\Services\PppoeSessionMonitorService::class],
+            $this->instances[\SkyFi\Hotspot\Services\HotspotSessionMonitorService::class],
+        );
+        $this->instances[\SkyFi\Monitoring\Contracts\MonitoringDashboardServiceContract::class] = $this->instances[\SkyFi\Monitoring\Services\MonitoringDashboardService::class];
+
+        $this->instances[\SkyFi\Monitoring\Controllers\MonitoringDashboardController::class] = new \SkyFi\Monitoring\Controllers\MonitoringDashboardController(
+            $this->instances[\SkyFi\Monitoring\Services\MonitoringDashboardService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[\SkyFi\Monitoring\Controllers\DeviceHealthController::class] = new \SkyFi\Monitoring\Controllers\DeviceHealthController(
+            $this->instances[\SkyFi\Monitoring\Services\MonitoringDashboardService::class],
+            $this->instances[\SkyFi\Monitoring\Services\DeviceHealthPollingService::class],
+            $this->instances[\SkyFi\Monitoring\Repositories\PdoInterfaceSnapshotRepository::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[\SkyFi\Monitoring\Controllers\AlertController::class] = new \SkyFi\Monitoring\Controllers\AlertController(
+            $this->instances[\SkyFi\Monitoring\Services\AlertManagementService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[\SkyFi\Monitoring\Controllers\EventLogController::class] = new \SkyFi\Monitoring\Controllers\EventLogController(
+            $this->instances[\SkyFi\Monitoring\Services\EventLoggingService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        // ─── End Monitoring & Observability Module ──────────────────────
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners

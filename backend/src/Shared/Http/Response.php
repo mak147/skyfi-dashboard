@@ -23,6 +23,12 @@ final class Response
         $this->headers['Content-Type'] = 'application/json; charset=utf-8';
     }
 
+    /** @param array<string, mixed>|null $payload */
+    public static function json(?array $payload = null, int $statusCode = 200): self
+    {
+        return new self($statusCode, $payload);
+    }
+
     /** @param array<int, array<int, string>> $rows */
     public static function downloadCsv(array $rows, string $filename): self
     {
