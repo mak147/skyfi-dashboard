@@ -12,6 +12,7 @@ import { RbacRoutes } from '@/features/rbac/routes';
 import { MikrotikRoutes } from '@/features/mikrotik/routes';
 import { PppoeRoutes } from '@/features/pppoe/routes';
 import { HotspotRoutes } from '@/features/hotspot/routes';
+import { SupportRoutes } from '@/features/support/routes';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
 
@@ -40,6 +41,7 @@ export const AppRoutes = () => (
         <Route path="/network/routers/*" element={<MikrotikRoutes />} />
         <Route path="/network/pppoe/*" element={<PppoeRoutes />} />
         <Route path="/hotspot/*" element={<HotspotRoutes />} />
+        <Route path="/support/*" element={<SupportRoutes />} />
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
       </Route>
     </Route>

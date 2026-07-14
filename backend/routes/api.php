@@ -47,4 +47,7 @@ return static function (Router $router, Container $container): void {
 
     $registerMonitoringRoutes = require dirname(__DIR__) . '/src/Monitoring/Routes/monitoring.php';
     $registerMonitoringRoutes($router, $container);
+
+    $registerSupportRoutes = require dirname(__DIR__) . '/src/Support/Routes/support.php';
+    $registerSupportRoutes($router, $container);
 };

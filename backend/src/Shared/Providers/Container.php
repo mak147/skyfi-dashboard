@@ -558,6 +558,35 @@ final class Container
         );
         // ─── End Monitoring & Observability Module ──────────────────────
 
+        // ─── Support Ticket & Helpdesk Module ───────────────────────────
+        $this->instances[\SkyFi\Support\Repositories\PdoTicketRepository::class] = new \SkyFi\Support\Repositories\PdoTicketRepository($pdo);
+        $this->instances[\SkyFi\Support\Contracts\TicketRepositoryContract::class] = $this->instances[\SkyFi\Support\Repositories\PdoTicketRepository::class];
+        $this->instances[\SkyFi\Support\Repositories\PdoTicketCommentRepository::class] = new \SkyFi\Support\Repositories\PdoTicketCommentRepository($pdo);
+        $this->instances[\SkyFi\Support\Contracts\TicketCommentRepositoryContract::class] = $this->instances[\SkyFi\Support\Repositories\PdoTicketCommentRepository::class];
+        $this->instances[\SkyFi\Support\Repositories\PdoTicketAssignmentRepository::class] = new \SkyFi\Support\Repositories\PdoTicketAssignmentRepository($pdo);
+        $this->instances[\SkyFi\Support\Contracts\TicketAssignmentRepositoryContract::class] = $this->instances[\SkyFi\Support\Repositories\PdoTicketAssignmentRepository::class];
+        $this->instances[\SkyFi\Support\Validators\TicketValidator::class] = new \SkyFi\Support\Validators\TicketValidator();
+        $this->instances[\SkyFi\Support\Validators\TicketWorkflowValidator::class] = new \SkyFi\Support\Validators\TicketWorkflowValidator();
+        $this->instances[\SkyFi\Support\Services\TicketService::class] = new \SkyFi\Support\Services\TicketService(
+            $this->instances[\SkyFi\Support\Repositories\PdoTicketRepository::class],
+            $this->instances[\SkyFi\Support\Repositories\PdoTicketCommentRepository::class],
+            $this->instances[\SkyFi\Support\Repositories\PdoTicketAssignmentRepository::class],
+            $this->instances[\SkyFi\Support\Validators\TicketValidator::class],
+            $this->instances[\SkyFi\Support\Validators\TicketWorkflowValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Support\Contracts\TicketServiceContract::class] = $this->instances[\SkyFi\Support\Services\TicketService::class];
+        $this->instances[\SkyFi\Support\Services\SupportDashboardService::class] = new \SkyFi\Support\Services\SupportDashboardService($this->instances[\SkyFi\Support\Repositories\PdoTicketRepository::class]);
+        $this->instances[\SkyFi\Support\Contracts\SupportDashboardServiceContract::class] = $this->instances[\SkyFi\Support\Services\SupportDashboardService::class];
+        $this->instances[\SkyFi\Support\Controllers\TicketController::class] = new \SkyFi\Support\Controllers\TicketController($this->instances[\SkyFi\Support\Services\TicketService::class],$this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Support\Controllers\TicketActionController::class] = new \SkyFi\Support\Controllers\TicketActionController($this->instances[\SkyFi\Support\Services\TicketService::class],$this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Support\Controllers\TicketCommentController::class] = new \SkyFi\Support\Controllers\TicketCommentController($this->instances[\SkyFi\Support\Services\TicketService::class],$this->instances[\SkyFi\Support\Repositories\PdoTicketCommentRepository::class],$this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Support\Controllers\TicketTimelineController::class] = new \SkyFi\Support\Controllers\TicketTimelineController($this->instances[\SkyFi\Support\Repositories\PdoTicketRepository::class],$this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Support\Controllers\SupportDashboardController::class] = new \SkyFi\Support\Controllers\SupportDashboardController($this->instances[\SkyFi\Support\Services\SupportDashboardService::class],$this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Support\Controllers\SupportLookupController::class] = new \SkyFi\Support\Controllers\SupportLookupController($this->instances[\SkyFi\Support\Repositories\PdoTicketRepository::class],$this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Support\Controllers\SupportConfigurationController::class] = new \SkyFi\Support\Controllers\SupportConfigurationController($this->instances[\SkyFi\Support\Repositories\PdoTicketRepository::class],$this->instances[RequirePermissionMiddleware::class]);
+        // ─── End Support Ticket & Helpdesk Module ────────────────────────
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners

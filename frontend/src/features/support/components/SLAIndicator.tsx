@@ -1,0 +1,3 @@
+import type { SupportTicket } from '../types';
+const relative=(date:string)=>{const mins=Math.round((new Date(date).getTime()-Date.now())/60000);if(mins<0)return `${Math.abs(mins)}m overdue`;if(mins<60)return `${mins}m remaining`;return `${Math.round(mins/60)}h remaining`;};
+export const SLAIndicator=({ticket}:{ticket:SupportTicket})=>{const breached=Boolean(ticket.response_breached_at||ticket.resolution_breached_at);const done=['resolved','closed','cancelled'].includes(ticket.status);return <div className={`text-xs font-semibold ${breached?'text-red-600':done?'text-slate-500':'text-emerald-700'}`}>{breached?'SLA breached':done?'SLA completed':relative(ticket.resolution_due_at)}</div>;};
