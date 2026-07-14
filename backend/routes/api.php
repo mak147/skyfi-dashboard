@@ -11,4 +11,7 @@ return static function (Router $router, Container $container): void {
 
     $registerRbacRoutes = require __DIR__ . '/rbac.php';
     $registerRbacRoutes($router, $container);
+
+    $registerDashboardRoutes = require __DIR__ . '/dashboard.php';
+    $registerDashboardRoutes($router, $container);
 };
