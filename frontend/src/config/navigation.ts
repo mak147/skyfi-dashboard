@@ -70,6 +70,18 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Support',
+    items: [
+      {
+        label: 'Helpdesk',
+        path: '/support',
+        icon: '🎧',
+        description: 'Manage support tickets, assignments, timelines, and SLA performance.',
+        requiredPermission: 'support.view',
+      },
+    ],
+  },
+  {
     label: 'Network',
     items: [
       {

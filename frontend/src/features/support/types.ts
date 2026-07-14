@@ -1,0 +1,14 @@
+export type TicketStatus = 'new'|'open'|'assigned'|'in_progress'|'waiting_customer'|'escalated'|'resolved'|'closed'|'cancelled';
+export type TicketPriority = 'low'|'normal'|'high'|'urgent';
+export type CommentType = 'internal_note'|'customer_reply'|'staff_reply';
+export interface SupportTicket { id:number;ticket_number:string;customer_id:number;customer_name?:string;customer_code?:string;connection_id?:number|null;connection_number?:string|null;package_id?:number|null;package_name?:string|null;pppoe_account_id?:number|null;hotspot_user_id?:number|null;router_id?:number|null;network_device_id?:number|null;monitoring_alert_id?:number|null;category_id:number;category_name?:string;sla_policy_id:number;sla_name?:string;priority:TicketPriority;status:TicketStatus;source:string;subject:string;description:string;resolution?:string|null;root_cause?:string|null;assigned_team_id?:number|null;assigned_team_name?:string|null;assigned_staff_id?:number|null;assigned_staff_name?:string|null;first_response_due_at:string;resolution_due_at:string;first_responded_at?:string|null;response_breached_at?:string|null;resolution_breached_at?:string|null;created_at:string;updated_at:string;closed_at?:string|null;attachments:unknown[];attachments_supported:boolean;}
+export interface TicketFormValues {customer_id:number;connection_id?:number|null;package_id?:number|null;pppoe_account_id?:number|null;hotspot_user_id?:number|null;router_id?:number|null;network_device_id?:number|null;monitoring_alert_id?:number|null;category_id:number;priority:TicketPriority;source:string;subject:string;description:string;resolution?:string;root_cause?:string;}
+export interface TicketComment {id:number;ticket_id:number;type:CommentType;body:string;author_user_name?:string;author_customer_name?:string;created_at:string;}
+export interface TimelineItem {id:number;item_kind:'history'|'comment';type:string;body:string;author_user_id?:number;author_customer_id?:number;old_status?:string;new_status?:string;created_at:string;}
+export interface Category {id:number;name:string;slug:string;description?:string;is_active:number;}
+export interface SupportTeam {id:number;name:string;member_count:number;}
+export interface SlaPolicy {id:number;name:string;priority:TicketPriority;response_minutes:number;resolution_minutes:number;category_name?:string;}
+export interface ListMeta {current_page:number;per_page:number;total:number;last_page:number;}
+export interface TicketFilters {search?:string;status?:string;priority?:string;category_id?:string;assigned_staff_id?:string;sla?:string;}
+export interface TicketDetail {ticket:SupportTicket;context:Record<string,Record<string,unknown>>;comments:TicketComment[];timeline:TimelineItem[];assignments:Record<string,unknown>[];}
+export interface DashboardData {summary:Record<string,number|null>;by_priority:{label:string;value:number}[];by_category:{label:string;value:number}[];by_technician:{label:string;value:number}[];}

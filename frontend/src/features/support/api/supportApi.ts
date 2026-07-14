@@ -1,0 +1,16 @@
+import { apiClient } from '@/lib/apiClient';
+import type { Category,DashboardData,ListMeta,SlaPolicy,SupportTeam,SupportTicket,TicketComment,TicketDetail,TicketFilters,TicketFormValues } from '../types';
+const attrs=<T>(response:{data:{attributes:T}})=>response.data.attributes;
+export const listTickets=async(page:number,filters:TicketFilters,sort:string)=>{const p=new URLSearchParams({'page[number]':String(page),'page[size]':'20',sort});Object.entries(filters).forEach(([k,v])=>{if(v)p.set(`filter[${k}]`,v);});const r=await apiClient.get<{data:{attributes:SupportTicket}[];meta:ListMeta}>(`/support/tickets?${p}`);return {tickets:r.data.data.map(x=>x.attributes),meta:r.data.meta};};
+export const getTicket=async(id:number)=>attrs((await apiClient.get<{data:{attributes:TicketDetail}}>(`/support/tickets/${id}`)).data);
+export const createTicket=async(data:TicketFormValues)=>attrs((await apiClient.post<{data:{attributes:SupportTicket}}>('/support/tickets',data)).data);
+export const updateTicket=async(id:number,data:TicketFormValues)=>attrs((await apiClient.put<{data:{attributes:SupportTicket}}>(`/support/tickets/${id}`,data)).data);
+export const ticketAction=async(id:number,action:string,data:Record<string,unknown>={})=>attrs((await apiClient.post<{data:{attributes:SupportTicket}}>(`/support/tickets/${id}/${action}`,data)).data);
+export const changeStatus=async(id:number,data:Record<string,unknown>)=>attrs((await apiClient.patch<{data:{attributes:SupportTicket}}>(`/support/tickets/${id}/status`,data)).data);
+export const addComment=async(id:number,data:{type:string;body:string})=>attrs((await apiClient.post<{data:{attributes:TicketComment}}>(`/support/tickets/${id}/comments`,data)).data);
+export const getDashboard=async()=> (await apiClient.get<{data:DashboardData}>('/support/dashboard')).data.data;
+export const getSlaDashboard=async()=> (await apiClient.get<{data:DashboardData&{policies:SlaPolicy[];by_priority:{label:string;total:number;breached:number}[]}}>('/support/sla/dashboard')).data.data;
+export const getCategories=async()=> (await apiClient.get<{data:Category[]}>('/support/categories')).data.data;
+export const getTeams=async()=> (await apiClient.get<{data:SupportTeam[]}>('/support/teams')).data.data;
+export const getPolicies=async()=> (await apiClient.get<{data:SlaPolicy[]}>('/support/sla-policies')).data.data;
+export const lookup=async(resource:string,search='',customerId?:number)=>{const p=new URLSearchParams({search});if(customerId)p.set('customer_id',String(customerId));return (await apiClient.get<{data:Record<string,unknown>[]}>(`/support/lookups/${resource}?${p}`)).data.data;};
