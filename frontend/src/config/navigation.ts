@@ -46,6 +46,13 @@ export const navigationGroups: NavigationGroup[] = [
         description: 'Manage pricing, bandwidth, and service package profiles.',
         requiredPermission: 'packages.view',
       },
+      {
+        label: 'Billing',
+        path: '/billing',
+        icon: '🧾',
+        description: 'Generate and manage customer invoices and billing schedules.',
+        requiredPermission: 'billing.view',
+      },
     ],
   },
   {

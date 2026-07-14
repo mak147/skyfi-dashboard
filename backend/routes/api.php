@@ -23,4 +23,7 @@ return static function (Router $router, Container $container): void {
 
     $registerConnectionRoutes = require dirname(__DIR__) . '/src/Connections/Routes/connections.php';
     $registerConnectionRoutes($router, $container);
+
+    $registerBillingRoutes = require dirname(__DIR__) . '/src/Billing/Routes/billing.php';
+    $registerBillingRoutes($router, $container);
 };

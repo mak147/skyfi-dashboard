@@ -25,9 +25,9 @@ export const ConnectionTable = ({
   isLoading,
   sort,
   onSortChange,
-  onDelete,
+  onDelete: _onDelete,
   canUpdate,
-  canDelete,
+  canDelete: _canDelete,
 }: ConnectionTableProps) => {
   const navigate = useNavigate();
 

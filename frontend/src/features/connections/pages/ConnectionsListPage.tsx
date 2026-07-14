@@ -10,7 +10,7 @@ import { getConnections } from '../api/connectionApi';
 import { ConnectionTable } from '../components/ConnectionTable';
 import { ConnectionCard } from '../components/ConnectionCard';
 import { ConnectionFiltersBar } from '../components/ConnectionFilters';
-import type { ConnectionFilters } from '../types';
+import type { ConnectionFilters, ConnectionStatus, ConnectionType } from '../types';
 
 export const ConnectionsListPage = () => {
   const navigate = useNavigate();
@@ -22,8 +22,8 @@ export const ConnectionsListPage = () => {
   const sort = searchParams.get('sort') ?? '-created_at';
 
   const [filters, setFilters] = useState<ConnectionFilters>({
-    status: (searchParams.get('status') as any) || undefined,
-    type: (searchParams.get('type') as any) || undefined,
+    status: (searchParams.get('status') as ConnectionStatus | '') || undefined,
+    type: (searchParams.get('type') as ConnectionType | '') || undefined,
     search: searchParams.get('search') || undefined,
   });
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ConnectionFilters, ConnectionStatus, ConnectionType } from '../types';
+import { ConnectionFilters } from '../types';
 
 interface ConnectionFiltersBarProps {
   filters: ConnectionFilters;

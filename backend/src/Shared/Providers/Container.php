@@ -5,6 +5,13 @@ declare(strict_types=1);
 namespace SkyFi\Shared\Providers;
 
 use PDO;
+use SkyFi\Billing\Controllers\InvoiceController;
+use SkyFi\Billing\Contracts\BillingScheduleRepositoryContract;
+use SkyFi\Billing\Contracts\InvoiceRepositoryContract;
+use SkyFi\Billing\Contracts\InvoiceServiceContract;
+use SkyFi\Billing\Repositories\PdoBillingScheduleRepository;
+use SkyFi\Billing\Repositories\PdoInvoiceRepository;
+use SkyFi\Billing\Services\InvoiceService;
 use SkyFi\Connections\Controllers\ConnectionController;
 use SkyFi\Connections\Repositories\PdoConnectionRepository;
 use SkyFi\Connections\Services\ConnectionService;
@@ -118,6 +125,18 @@ final class Container
         );
         $this->instances[ConnectionController::class] = new ConnectionController(
             $this->instances[ConnectionService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[PdoInvoiceRepository::class] = new PdoInvoiceRepository($pdo);
+        $this->instances[PdoBillingScheduleRepository::class] = new PdoBillingScheduleRepository($pdo);
+        $this->instances[InvoiceService::class] = new InvoiceService(
+            $this->instances[PdoInvoiceRepository::class],
+            $this->instances[PdoBillingScheduleRepository::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[InvoiceController::class] = new InvoiceController(
+            $this->instances[InvoiceService::class],
             $this->instances[RequirePermissionMiddleware::class],
         );
 
