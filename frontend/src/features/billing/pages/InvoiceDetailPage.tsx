@@ -173,11 +173,16 @@ export const InvoiceDetailPage = () => {
               </div>
             </div>
 
-            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 py-16 text-center">
-              <p className="font-semibold text-slate-600">Payment History</p>
-              <p className="mt-2 text-sm text-slate-400">
-                Payment records will be available when the Payments module is implemented.
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="font-semibold text-slate-700">Payment History</p>
+              <p className="mt-2 text-sm text-slate-500">
+                View all receipts and allocations recorded against this invoice.
               </p>
+              {can('payments.view') && (
+                <Button className="mt-4" variant="secondary" onClick={() => navigate(`/payments?invoice_id=${invoice.id}`)}>
+                  View Invoice Payments
+                </Button>
+              )}
             </div>
           </div>
           <BillingSummary invoice={invoice} />
