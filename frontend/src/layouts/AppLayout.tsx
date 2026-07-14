@@ -5,19 +5,21 @@ import { clsx } from 'clsx';
 import { Button } from '@/components/ui/button';
 import { canViewNavigationItem, navigationGroups } from '@/config/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 
 export const AppLayout = () => {
   const { user, signOut } = useAuth();
+  const { data: permissions = [] } = usePermissions();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const visibleNavigation = useMemo(
     () =>
       navigationGroups
         .map((group) => ({
           ...group,
-          items: group.items.filter((item) => canViewNavigationItem(item, user)),
+          items: group.items.filter((item) => canViewNavigationItem(item, user, permissions)),
         }))
         .filter((group) => group.items.length > 0),
-    [user],
+    [permissions, user],
   );
 
   return (

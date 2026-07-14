@@ -8,6 +8,9 @@ use PDO;
 use SkyFi\Customers\Controllers\CustomerController;
 use SkyFi\Customers\Repositories\PdoCustomerRepository;
 use SkyFi\Customers\Services\CustomerService;
+use SkyFi\Packages\Controllers\PackageController;
+use SkyFi\Packages\Repositories\PdoPackageRepository;
+use SkyFi\Packages\Services\PackageService;
 use SkyFi\Dashboard\Controllers\DashboardController;
 use SkyFi\Dashboard\Services\DashboardService;
 use SkyFi\Shared\Auth\Controllers\AuthController;
@@ -92,6 +95,16 @@ final class Container
         );
         $this->instances[CustomerController::class] = new CustomerController(
             $this->instances[CustomerService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[PdoPackageRepository::class] = new PdoPackageRepository($pdo);
+        $this->instances[PackageService::class] = new PackageService(
+            $this->instances[PdoPackageRepository::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[PackageController::class] = new PackageController(
+            $this->instances[PackageService::class],
             $this->instances[RequirePermissionMiddleware::class],
         );
 

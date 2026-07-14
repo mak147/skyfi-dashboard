@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthenticationRoutes } from '@/features/authentication/routes';
 import { CustomerRoutes } from '@/features/customers/routes';
 import { DashboardRoutes } from '@/features/dashboard/routes';
+import { PackageRoutes } from '@/features/packages/routes';
 import { RbacRoutes } from '@/features/rbac/routes';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
@@ -24,6 +25,7 @@ export const AppRoutes = () => (
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardRoutes.page />} />
         <Route path="/customers/*" element={<CustomerRoutes />} />
+        <Route path="/packages/*" element={<PackageRoutes />} />
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
       </Route>
     </Route>
