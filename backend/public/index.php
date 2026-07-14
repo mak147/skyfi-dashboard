@@ -43,9 +43,8 @@ $logger = new JsonLogger(
 try {
     $container = new Container($config, $databaseConfig);
     $router = $container->get(Router::class);
-    $controller = $container->get(\SkyFi\Shared\Auth\Controllers\AuthController::class);
     $registerRoutes = require dirname(__DIR__) . '/routes/api.php';
-    $registerRoutes($router, $controller);
+    $registerRoutes($router, $container);
     $response = $router->dispatch($request)->withHeaders(['X-Trace-Id' => $traceId]);
     $response->send();
 } catch (Throwable $exception) {

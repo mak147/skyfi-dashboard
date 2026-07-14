@@ -22,7 +22,20 @@ final class Router
     public function dispatch(Request $request): Response
     {
         foreach ($this->routes as $route) {
-            if ($route['method'] === $request->method() && $route['path'] === $request->path()) {
+            if ($route['method'] !== $request->method()) {
+                continue;
+            }
+            
+            $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<\1>[a-zA-Z0-9_-]+)', $route['path']);
+            $pattern = '#^' . $pattern . '$#';
+            
+            if (preg_match($pattern, $request->path(), $matches)) {
+                $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+                if (!empty($params)) {
+                    $attributes = $request->attributes();
+                    $attributes['route_params'] = $params;
+                    $request = $request->withAttributes($attributes);
+                }
                 return ($route['handler'])($request);
             }
         }

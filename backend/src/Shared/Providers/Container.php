@@ -12,6 +12,12 @@ use SkyFi\Shared\Auth\Services\AuthService;
 use SkyFi\Shared\Auth\Services\JwtTokenService;
 use SkyFi\Shared\Http\Router;
 use SkyFi\Shared\Logging\JsonLogger;
+use SkyFi\Shared\Http\Middleware\JwtAuthMiddleware;
+use SkyFi\Rbac\Repositories\PdoRbacRepository;
+use SkyFi\Rbac\Repositories\PdoAuditLogger;
+use SkyFi\Rbac\Services\RbacService;
+use SkyFi\Rbac\Middleware\RequirePermissionMiddleware;
+use SkyFi\Rbac\Controllers\RbacController;
 
 final class Container
 {
@@ -57,6 +63,20 @@ final class Container
             (string) $config['refresh_cookie_path'],
             (bool) $config['refresh_cookie_secure'],
         );
+        $this->instances[JwtAuthMiddleware::class] = new JwtAuthMiddleware($this->instances[JwtTokenService::class]);
+        
+        $this->instances[PdoRbacRepository::class] = new PdoRbacRepository($pdo);
+        $this->instances[PdoAuditLogger::class] = new PdoAuditLogger($pdo);
+        $this->instances[RbacService::class] = new RbacService(
+            $this->instances[PdoRbacRepository::class],
+            $this->instances[PdoAuditLogger::class]
+        );
+        $this->instances[RequirePermissionMiddleware::class] = new RequirePermissionMiddleware($this->instances[PdoRbacRepository::class]);
+        $this->instances[RbacController::class] = new RbacController(
+            $this->instances[RbacService::class],
+            $this->instances[RequirePermissionMiddleware::class]
+        );
+
         $this->instances[Router::class] = new Router();
     }
 
