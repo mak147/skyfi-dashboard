@@ -84,6 +84,7 @@ final class ApiResponse
             403 => 'Forbidden',
             404 => 'Not Found',
             422 => 'Unprocessable Entity',
+            503 => 'Service Unavailable',
             default => 'Bad Request',
         };
     }

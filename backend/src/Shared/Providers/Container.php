@@ -166,6 +166,60 @@ final class Container
             $this->instances[\SkyFi\Finance\Services\FinanceService::class]
         );
 
+        /** @var array<string, mixed> $mikrotikConfig */
+        $mikrotikConfig = $config['mikrotik'];
+        $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterRepository::class] = new \SkyFi\Mikrotik\Repositories\PdoRouterRepository($pdo);
+        $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterGroupRepository::class] = new \SkyFi\Mikrotik\Repositories\PdoRouterGroupRepository($pdo);
+        $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterTagRepository::class] = new \SkyFi\Mikrotik\Repositories\PdoRouterTagRepository($pdo);
+        $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterHealthRepository::class] = new \SkyFi\Mikrotik\Repositories\PdoRouterHealthRepository($pdo);
+        $this->instances[\SkyFi\Mikrotik\Validators\RouterValidator::class] = new \SkyFi\Mikrotik\Validators\RouterValidator();
+        $this->instances[\SkyFi\Mikrotik\Services\CredentialCipher::class] = new \SkyFi\Mikrotik\Services\CredentialCipher(
+            (string) $mikrotikConfig['credential_encryption_key'],
+        );
+        $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class] = new \SkyFi\Mikrotik\Services\MikrotikConnectionPool(
+            (int) $mikrotikConfig['connect_timeout_seconds'],
+            (int) $mikrotikConfig['command_timeout_seconds'],
+            (int) $mikrotikConfig['max_retries'],
+            (bool) $mikrotikConfig['tls_verify_peer'],
+            is_string($mikrotikConfig['tls_ca_file']) ? $mikrotikConfig['tls_ca_file'] : null,
+            (int) $mikrotikConfig['max_connections_per_router'],
+        );
+        $this->instances[\SkyFi\Mikrotik\Services\RouterOsApiClient::class] = new \SkyFi\Mikrotik\Services\RouterOsApiClient(
+            $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class],
+        );
+        $this->instances[\SkyFi\Mikrotik\Services\RouterService::class] = new \SkyFi\Mikrotik\Services\RouterService(
+            $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterGroupRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterTagRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\CredentialCipher::class],
+            $this->instances[\SkyFi\Mikrotik\Validators\RouterValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Mikrotik\Services\RouterTaxonomyService::class] = new \SkyFi\Mikrotik\Services\RouterTaxonomyService(
+            $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterGroupRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterTagRepository::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Mikrotik\Services\RouterDiscoveryService::class] = new \SkyFi\Mikrotik\Services\RouterDiscoveryService(
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterOsApiClient::class],
+            $this->instances[\SkyFi\Mikrotik\Validators\RouterValidator::class],
+        );
+        $this->instances[\SkyFi\Mikrotik\Services\RouterHealthService::class] = new \SkyFi\Mikrotik\Services\RouterHealthService(
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterHealthRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterOsApiClient::class],
+        );
+        $this->instances[\SkyFi\Mikrotik\Controllers\RouterController::class] = new \SkyFi\Mikrotik\Controllers\RouterController(
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterDiscoveryService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterHealthService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterTaxonomyService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners

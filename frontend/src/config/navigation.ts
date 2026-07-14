@@ -70,6 +70,18 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Network',
+    items: [
+      {
+        label: 'MikroTik Routers',
+        path: '/network/routers',
+        icon: '◉',
+        description: 'Secure RouterOS connections, discovery, and health monitoring.',
+        requiredPermission: 'mikrotik.view',
+      },
+    ],
+  },
+  {
     label: 'Administration',
     items: [
       {
