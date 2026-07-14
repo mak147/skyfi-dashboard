@@ -1,8 +1,9 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { AuthenticationRoutes } from '@/features/authentication/routes';
+import { DashboardRoutes } from '@/features/dashboard/routes';
 import { RbacRoutes } from '@/features/rbac/routes';
-import { AuthenticatedHome } from '@/routes/authenticated-home';
+import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
 
 const NotFound = () => (
@@ -18,8 +19,11 @@ export const AppRoutes = () => (
   <Routes>
     <Route path="/login" element={<AuthenticationRoutes.login />} />
     <Route element={<ProtectedRoute />}>
-      <Route path="/" element={<AuthenticatedHome />} />
-      <Route path="/admin/roles/*" element={<RbacRoutes />} />
+      <Route element={<AppLayout />}>
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardRoutes.page />} />
+        <Route path="/admin/roles/*" element={<RbacRoutes />} />
+      </Route>
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>

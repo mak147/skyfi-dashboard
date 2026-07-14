@@ -18,16 +18,21 @@ final class Request
     /** @var array<string, mixed> */
     private array $server;
 
-    /** @param array<string, mixed> $server @param array<string, mixed> $cookies */
+    /** @var array<string, mixed> */
+    private array $attributes;
+
+    /** @param array<string, mixed> $server @param array<string, mixed> $cookies @param array<string, mixed> $attributes */
     public function __construct(
         private readonly string $method,
         private readonly string $path,
         array $server,
         ?string $rawBody = null,
         array $cookies = [],
+        array $attributes = [],
     ) {
         $this->server = $server;
         $this->cookies = $cookies;
+        $this->attributes = $attributes;
         $this->headers = self::extractHeaders($server);
         $decoded = json_decode($rawBody ?? '', true);
         $this->body = is_array($decoded) ? $decoded : [];
@@ -98,6 +103,21 @@ final class Request
         $token = $this->cookies[$cookieName] ?? null;
 
         return is_string($token) && $token !== '' ? $token : null;
+    }
+
+    /** @return array<string, mixed> Request-scoped attributes set by middleware. */
+    public function attributes(): array
+    {
+        return $this->attributes;
+    }
+
+    /** @param array<string, mixed> $attributes Request-scoped attributes set by middleware. */
+    public function withAttributes(array $attributes): self
+    {
+        $request = clone $this;
+        $request->attributes = $attributes;
+
+        return $request;
     }
 
     /** @return string Client IP address. */

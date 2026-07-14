@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiErrorMessage } from '@/lib/apiClient';
 import { getRoles, getUserRoles, syncUserRoles } from '../api/rbacApi';
 import type { Role } from '../types';
 
@@ -18,8 +19,8 @@ export const UserRoleAssignment: React.FC = () => {
       const roles = await getUserRoles(Number(userId));
       setUserRoles(roles.map(r => r.id));
       setMessage('');
-    } catch (e: any) {
-      setMessage(e.response?.data?.errors?.[0]?.detail || 'Error fetching user');
+    } catch (error) {
+      setMessage(apiErrorMessage(error, 'Error fetching user'));
     }
   };
 
@@ -27,8 +28,8 @@ export const UserRoleAssignment: React.FC = () => {
     try {
       await syncUserRoles(Number(userId), userRoles);
       setMessage('Roles updated successfully');
-    } catch (e: any) {
-      setMessage('Error updating roles');
+    } catch (error) {
+      setMessage(apiErrorMessage(error, 'Error updating roles'));
     }
   };
 
