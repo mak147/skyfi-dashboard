@@ -4,6 +4,7 @@ import { AuthenticationRoutes } from '@/features/authentication/routes';
 import { ConnectionRoutes } from '@/features/connections/routes';
 import { CustomerRoutes } from '@/features/customers/routes';
 import { DashboardRoutes } from '@/features/dashboard/routes';
+import { BillingRoutes } from '@/features/billing/routes';
 import { PackageRoutes } from '@/features/packages/routes';
 import { RbacRoutes } from '@/features/rbac/routes';
 import { AppLayout } from '@/layouts/AppLayout';
@@ -28,6 +29,7 @@ export const AppRoutes = () => (
         <Route path="/customers/*" element={<CustomerRoutes />} />
         <Route path="/connections/*" element={<ConnectionRoutes />} />
         <Route path="/packages/*" element={<PackageRoutes />} />
+        <Route path="/billing/*" element={<BillingRoutes />} />
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
       </Route>
     </Route>

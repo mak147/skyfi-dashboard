@@ -5,6 +5,7 @@ import { apiErrorMessage } from '@/lib/apiClient';
 
 import { getConnection, updateConnection } from '../api/connectionApi';
 import { ConnectionForm } from '../components/ConnectionForm';
+import type { ConnectionFormData } from '../types';
 
 export const EditConnectionPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,7 +18,7 @@ export const EditConnectionPage = () => {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: any) => updateConnection(Number(id), data),
+    mutationFn: (data: ConnectionFormData) => updateConnection(Number(id), data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['connections', id] });
       navigate(`/connections/${id}`);

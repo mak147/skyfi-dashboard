@@ -134,6 +134,9 @@ final class DashboardService implements DashboardServiceContract
         return [
             $this->stat('mrr', 'Monthly recurring revenue', '$52,480', '+2.5%', 'up', 'emerald', 'Recurring revenue recognized for the current month.'),
             $this->stat('active-subscribers', 'Active subscribers', '1,250', '+12 this month', 'up', 'indigo', 'Customers with at least one active service.'),
+            $this->stat('invoices-this-month', 'Invoices this month', '0', 'Live', 'neutral', 'indigo', 'Total invoices issued in the current month.'),
+            $this->stat('pending-invoices', 'Pending invoices', '0', 'Awaiting issue', 'neutral', 'amber', 'Invoices in draft or pending status.'),
+            $this->stat('overdue-invoices', 'Overdue invoices', '0', 'Collection follow-up', 'neutral', 'red', 'Invoices past their due date.'),
             $this->stat('monthly-churn', 'Monthly churn', '1.8%', '-0.3 pts', 'down', 'emerald', 'Subscriber churn compared with the previous month.'),
             $this->stat('open-tickets', 'Open tickets', '15', '3 urgent', 'neutral', 'amber', 'Tickets still requiring staff action.'),
             $this->chart('revenue-expenses', 'Revenue vs. Expenses', 'bar', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], [
@@ -176,8 +179,11 @@ final class DashboardService implements DashboardServiceContract
     private function financeWidgets(): array
     {
         return [
+            $this->stat('invoices-today', 'Invoices today', '0', 'Live', 'neutral', 'indigo', 'Invoices created during the current business day.'),
+            $this->stat('invoices-this-month', 'Invoices this month', '0', 'Live', 'neutral', 'indigo', 'Total invoices issued in the current month.'),
+            $this->stat('pending-invoices', 'Pending invoices', '0', 'Awaiting issue', 'neutral', 'amber', 'Invoices in draft or pending status.'),
+            $this->stat('overdue-invoices', 'Overdue invoices', '0', 'Collection follow-up', 'neutral', 'red', 'Invoices past their due date.'),
             $this->stat('billing-readiness', 'Billing readiness', '94%', '+6 pts', 'up', 'emerald', 'Accounts ready for the next billing run.'),
-            $this->stat('overdue-invoices', 'Overdue invoices', '87', '-11 this week', 'down', 'emerald', 'Invoices requiring collection follow-up.'),
             $this->stat('payments-today', 'Payments today', '$8,940', '+18%', 'up', 'indigo', 'Payments recorded during the current business day.'),
             $this->chart('collection-health', 'Collection Health', 'bar', ['Current', '1-30', '31-60', '61+'], [
                 ['label' => 'Invoices', 'data' => [410, 52, 21, 14]],
