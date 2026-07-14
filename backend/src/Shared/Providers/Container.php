@@ -35,6 +35,24 @@ use SkyFi\Shared\Auth\Services\JwtTokenService;
 use SkyFi\Shared\Http\Router;
 use SkyFi\Shared\Logging\JsonLogger;
 use SkyFi\Shared\Http\Middleware\JwtAuthMiddleware;
+use SkyFi\Infrastructure\Repositories\PdoPopSiteRepository;
+use SkyFi\Infrastructure\Repositories\PdoTowerRepository;
+use SkyFi\Infrastructure\Repositories\PdoSectorRepository;
+use SkyFi\Infrastructure\Repositories\PdoNetworkDeviceRepository;
+use SkyFi\Infrastructure\Services\PopSiteService;
+use SkyFi\Infrastructure\Services\TowerService;
+use SkyFi\Infrastructure\Services\SectorService;
+use SkyFi\Infrastructure\Services\NetworkDeviceService;
+use SkyFi\Infrastructure\Services\InfrastructureDashboardService;
+use SkyFi\Infrastructure\Validators\PopSiteValidator;
+use SkyFi\Infrastructure\Validators\TowerValidator;
+use SkyFi\Infrastructure\Validators\SectorValidator;
+use SkyFi\Infrastructure\Validators\NetworkDeviceValidator;
+use SkyFi\Infrastructure\Controllers\PopSiteController;
+use SkyFi\Infrastructure\Controllers\TowerController;
+use SkyFi\Infrastructure\Controllers\SectorController;
+use SkyFi\Infrastructure\Controllers\NetworkDeviceController;
+use SkyFi\Infrastructure\Controllers\InfrastructureDashboardController;
 use SkyFi\Rbac\Repositories\PdoRbacRepository;
 use SkyFi\Rbac\Repositories\PdoAuditLogger;
 use SkyFi\Rbac\Services\RbacService;
@@ -382,6 +400,81 @@ final class Container
             $this->instances[RequirePermissionMiddleware::class],
         );
         // ─── End Hotspot Module ───────────────────────────────────────────────
+
+        // ─── Infrastructure Module ──────────────────────────────────────
+        $this->instances[PdoPopSiteRepository::class] = new PdoPopSiteRepository($pdo);
+        $this->instances[PdoTowerRepository::class] = new PdoTowerRepository($pdo);
+        $this->instances[PdoSectorRepository::class] = new PdoSectorRepository($pdo);
+        $this->instances[PdoNetworkDeviceRepository::class] = new PdoNetworkDeviceRepository($pdo);
+
+        $this->instances[PopSiteValidator::class] = new PopSiteValidator();
+        $this->instances[TowerValidator::class] = new TowerValidator();
+        $this->instances[SectorValidator::class] = new SectorValidator();
+        $this->instances[NetworkDeviceValidator::class] = new NetworkDeviceValidator();
+
+        $this->instances[PopSiteService::class] = new PopSiteService(
+            $this->instances[PdoPopSiteRepository::class],
+            $this->instances[PopSiteValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[PopSiteServiceContract::class] = $this->instances[PopSiteService::class];
+
+        $this->instances[TowerService::class] = new TowerService(
+            $this->instances[PdoTowerRepository::class],
+            $this->instances[PdoPopSiteRepository::class],
+            $this->instances[TowerValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[TowerServiceContract::class] = $this->instances[TowerService::class];
+
+        $this->instances[SectorService::class] = new SectorService(
+            $this->instances[PdoSectorRepository::class],
+            $this->instances[PdoTowerRepository::class],
+            $this->instances[PdoNetworkDeviceRepository::class],
+            $this->instances[SectorValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[SectorServiceContract::class] = $this->instances[SectorService::class];
+
+        $this->instances[NetworkDeviceService::class] = new NetworkDeviceService(
+            $this->instances[PdoNetworkDeviceRepository::class],
+            $this->instances[PdoPopSiteRepository::class],
+            $this->instances[PdoTowerRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Repositories\PdoRouterRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\CredentialCipher::class],
+            $this->instances[NetworkDeviceValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[NetworkDeviceServiceContract::class] = $this->instances[NetworkDeviceService::class];
+
+        $this->instances[InfrastructureDashboardService::class] = new InfrastructureDashboardService($pdo);
+        $this->instances[InfrastructureDashboardContract::class] = $this->instances[InfrastructureDashboardService::class];
+
+        $this->instances[PopSiteController::class] = new PopSiteController(
+            $this->instances[PopSiteService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[TowerController::class] = new TowerController(
+            $this->instances[TowerService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[SectorController::class] = new SectorController(
+            $this->instances[SectorService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[NetworkDeviceController::class] = new NetworkDeviceController(
+            $this->instances[NetworkDeviceService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[InfrastructureDashboardController::class] = new InfrastructureDashboardController(
+            $this->instances[InfrastructureDashboardService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        // ─── End Infrastructure Module ──────────────────────────────────
 
         $this->instances[Router::class] = new Router();
 
