@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace SkyFi\Shared\Providers;
 
 use PDO;
+use SkyFi\Customers\Controllers\CustomerController;
+use SkyFi\Customers\Repositories\PdoCustomerRepository;
+use SkyFi\Customers\Services\CustomerService;
 use SkyFi\Dashboard\Controllers\DashboardController;
 use SkyFi\Dashboard\Services\DashboardService;
 use SkyFi\Shared\Auth\Controllers\AuthController;
@@ -81,6 +84,16 @@ final class Container
 
         $this->instances[DashboardService::class] = new DashboardService();
         $this->instances[DashboardController::class] = new DashboardController($this->instances[DashboardService::class]);
+
+        $this->instances[PdoCustomerRepository::class] = new PdoCustomerRepository($pdo);
+        $this->instances[CustomerService::class] = new CustomerService(
+            $this->instances[PdoCustomerRepository::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[CustomerController::class] = new CustomerController(
+            $this->instances[CustomerService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
 
         $this->instances[Router::class] = new Router();
     }

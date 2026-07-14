@@ -85,14 +85,14 @@ final class AuthSeeder
     {
         $rolePermissions = [
             'Super Administrator' => ['*'],
-            'Company Owner' => ['view:dashboard:company', 'view:report:financial', 'view:report:subscriber', 'view:report:network', 'view:audit-log'],
-            'Regional Manager' => ['view:dashboard:regional', 'view:customer', 'view:invoice', 'view:payment', 'view:ticket', 'view:tower', 'view:report:regional', 'update:user:role', 'view:work-order'],
-            'Finance Department' => ['manage:invoice', 'manage:payment', 'manage:credit', 'create:refund:small', 'create:refund:large', 'execute:billing-run', 'execute:dunning-process', 'manage:service-plan', 'view:customer', 'view:report:financial'],
-            'Sales Team' => ['manage:lead', 'execute:service-availability-check', 'create:quote', 'create:customer', 'view:customer:basic', 'view:service-plan'],
-            'Customer Support' => ['manage:ticket', 'view:customer', 'update:customer:contact', 'update:customer:notes', 'view:invoice', 'view:payment', 'create:payment:manual', 'view:service', 'view:network-status:customer', 'execute:service:reconnect'],
-            'Installation Team / Field Technician' => ['view:work-order:own', 'update:work-order:own', 'view:customer:contact_and_address', 'view:inventory:own-vehicle', 'execute:site-survey', 'execute:service:diagnostics'],
-            'Network Engineer' => ['manage:tower', 'manage:mikrotik-router', 'view:ip-address-pool', 'execute:provisioning:manual', 'execute:config-backup', 'view:network-status:global', 'view:customer:network-details', 'view:report:network'],
-            'Inventory Manager' => ['manage:inventory-item', 'manage:warehouse', 'execute:stock-transfer', 'manage:vendor', 'manage:purchase-order', 'view:report:inventory'],
+            'Company Owner' => ['view:dashboard:company', 'view:report:financial', 'view:report:subscriber', 'view:report:network', 'view:audit-log', 'customers.view', 'customers.export'],
+            'Regional Manager' => ['view:dashboard:regional', 'view:customer', 'view:invoice', 'view:payment', 'view:ticket', 'view:tower', 'view:report:regional', 'update:user:role', 'view:work-order', 'customers.view', 'customers.create', 'customers.update', 'customers.export', 'customers.manage'],
+            'Finance Department' => ['manage:invoice', 'manage:payment', 'manage:credit', 'create:refund:small', 'create:refund:large', 'execute:billing-run', 'execute:dunning-process', 'manage:service-plan', 'view:customer', 'view:report:financial', 'customers.view', 'customers.export'],
+            'Sales Team' => ['manage:lead', 'execute:service-availability-check', 'create:quote', 'create:customer', 'view:customer:basic', 'view:service-plan', 'customers.view', 'customers.create', 'customers.update'],
+            'Customer Support' => ['manage:ticket', 'view:customer', 'update:customer:contact', 'update:customer:notes', 'view:invoice', 'view:payment', 'create:payment:manual', 'view:service', 'view:network-status:customer', 'execute:service:reconnect', 'customers.view', 'customers.update'],
+            'Installation Team / Field Technician' => ['view:work-order:own', 'update:work-order:own', 'view:customer:contact_and_address', 'view:inventory:own-vehicle', 'execute:site-survey', 'execute:service:diagnostics', 'customers.view'],
+            'Network Engineer' => ['manage:tower', 'manage:mikrotik-router', 'view:ip-address-pool', 'execute:provisioning:manual', 'execute:config-backup', 'view:network-status:global', 'view:customer:network-details', 'view:report:network', 'customers.view', 'customers.manage'],
+            'Inventory Manager' => ['manage:inventory-item', 'manage:warehouse', 'execute:stock-transfer', 'manage:vendor', 'manage:purchase-order', 'view:report:inventory', 'customers.view'],
         ];
         $statement = $connection->prepare(
             'INSERT IGNORE INTO permission_role (permission_id, role_id) VALUES (:permission_id, :role_id)',

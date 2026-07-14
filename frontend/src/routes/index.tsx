@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { AuthenticationRoutes } from '@/features/authentication/routes';
+import { CustomerRoutes } from '@/features/customers/routes';
 import { DashboardRoutes } from '@/features/dashboard/routes';
 import { RbacRoutes } from '@/features/rbac/routes';
 import { AppLayout } from '@/layouts/AppLayout';
@@ -22,6 +23,7 @@ export const AppRoutes = () => (
       <Route element={<AppLayout />}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardRoutes.page />} />
+        <Route path="/customers/*" element={<CustomerRoutes />} />
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
       </Route>
     </Route>
