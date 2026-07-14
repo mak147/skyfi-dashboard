@@ -33,6 +33,13 @@ export const navigationGroups: NavigationGroup[] = [
         description: 'Manage customer lifecycle from leads to archived accounts.',
       },
       {
+        label: 'Connections',
+        path: '/connections',
+        icon: '⚡',
+        description: 'Manage internet service connections and network profiles.',
+        requiredPermission: 'connections.view',
+      },
+      {
         label: 'Internet Packages',
         path: '/packages',
         icon: '◫',

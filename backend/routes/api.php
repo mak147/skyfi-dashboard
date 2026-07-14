@@ -20,4 +20,7 @@ return static function (Router $router, Container $container): void {
 
     $registerPackageRoutes = require dirname(__DIR__) . '/src/Packages/Routes/packages.php';
     $registerPackageRoutes($router, $container);
+
+    $registerConnectionRoutes = require dirname(__DIR__) . '/src/Connections/Routes/connections.php';
+    $registerConnectionRoutes($router, $container);
 };

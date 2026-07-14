@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace SkyFi\Shared\Providers;
 
 use PDO;
+use SkyFi\Connections\Controllers\ConnectionController;
+use SkyFi\Connections\Repositories\PdoConnectionRepository;
+use SkyFi\Connections\Services\ConnectionService;
 use SkyFi\Customers\Controllers\CustomerController;
 use SkyFi\Customers\Repositories\PdoCustomerRepository;
 use SkyFi\Customers\Services\CustomerService;
@@ -105,6 +108,16 @@ final class Container
         );
         $this->instances[PackageController::class] = new PackageController(
             $this->instances[PackageService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[PdoConnectionRepository::class] = new PdoConnectionRepository($pdo);
+        $this->instances[ConnectionService::class] = new ConnectionService(
+            $this->instances[PdoConnectionRepository::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[ConnectionController::class] = new ConnectionController(
+            $this->instances[ConnectionService::class],
             $this->instances[RequirePermissionMiddleware::class],
         );
 
