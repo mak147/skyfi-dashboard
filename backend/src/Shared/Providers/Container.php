@@ -280,6 +280,109 @@ final class Container
             $this->instances[RequirePermissionMiddleware::class],
         );
 
+        // ─── Hotspot Module ───────────────────────────────────────────────────
+        $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotUserRepository::class] = new \SkyFi\Hotspot\Repositories\PdoHotspotUserRepository($pdo);
+        $this->instances[\SkyFi\Hotspot\Contracts\HotspotUserRepositoryContract::class] = $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotUserRepository::class];
+
+        $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotProfileRepository::class] = new \SkyFi\Hotspot\Repositories\PdoHotspotProfileRepository($pdo);
+        $this->instances[\SkyFi\Hotspot\Contracts\HotspotProfileRepositoryContract::class] = $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotProfileRepository::class];
+
+        $this->instances[\SkyFi\Hotspot\Repositories\PdoVoucherRepository::class] = new \SkyFi\Hotspot\Repositories\PdoVoucherRepository($pdo);
+        $this->instances[\SkyFi\Hotspot\Contracts\VoucherRepositoryContract::class] = $this->instances[\SkyFi\Hotspot\Repositories\PdoVoucherRepository::class];
+
+        $this->instances[\SkyFi\Hotspot\Repositories\PdoVoucherBatchRepository::class] = new \SkyFi\Hotspot\Repositories\PdoVoucherBatchRepository($pdo);
+        $this->instances[\SkyFi\Hotspot\Contracts\VoucherBatchRepositoryContract::class] = $this->instances[\SkyFi\Hotspot\Repositories\PdoVoucherBatchRepository::class];
+
+        $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotSessionRepository::class] = new \SkyFi\Hotspot\Repositories\PdoHotspotSessionRepository($pdo);
+        $this->instances[\SkyFi\Hotspot\Contracts\HotspotSessionRepositoryContract::class] = $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotSessionRepository::class];
+
+        $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotSyncLogger::class] = new \SkyFi\Hotspot\Repositories\PdoHotspotSyncLogger($pdo);
+        $this->instances[\SkyFi\Hotspot\Contracts\HotspotSyncLoggerContract::class] = $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotSyncLogger::class];
+
+        $this->instances[\SkyFi\Hotspot\Validators\HotspotUserValidator::class] = new \SkyFi\Hotspot\Validators\HotspotUserValidator();
+        $this->instances[\SkyFi\Hotspot\Validators\HotspotProfileValidator::class] = new \SkyFi\Hotspot\Validators\HotspotProfileValidator();
+        $this->instances[\SkyFi\Hotspot\Validators\VoucherValidator::class] = new \SkyFi\Hotspot\Validators\VoucherValidator();
+
+        $this->instances[\SkyFi\Hotspot\Services\HotspotUserService::class] = new \SkyFi\Hotspot\Services\HotspotUserService(
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotUserRepository::class],
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotProfileRepository::class],
+            $this->instances[\SkyFi\Customers\Repositories\PdoCustomerRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class],
+            $this->instances[\SkyFi\Mikrotik\Services\CredentialCipher::class],
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotSyncLogger::class],
+            $this->instances[\SkyFi\Hotspot\Validators\HotspotUserValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Hotspot\Contracts\HotspotUserServiceContract::class] = $this->instances[\SkyFi\Hotspot\Services\HotspotUserService::class];
+
+        $this->instances[\SkyFi\Hotspot\Services\HotspotProfileService::class] = new \SkyFi\Hotspot\Services\HotspotProfileService(
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotProfileRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class],
+            $this->instances[\SkyFi\Hotspot\Validators\HotspotProfileValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Hotspot\Contracts\HotspotProfileServiceContract::class] = $this->instances[\SkyFi\Hotspot\Services\HotspotProfileService::class];
+
+        $this->instances[\SkyFi\Hotspot\Services\VoucherService::class] = new \SkyFi\Hotspot\Services\VoucherService(
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoVoucherRepository::class],
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoVoucherBatchRepository::class],
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotUserRepository::class],
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotProfileRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class],
+            $this->instances[\SkyFi\Mikrotik\Services\CredentialCipher::class],
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotSyncLogger::class],
+            $this->instances[\SkyFi\Hotspot\Validators\VoucherValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Hotspot\Contracts\VoucherServiceContract::class] = $this->instances[\SkyFi\Hotspot\Services\VoucherService::class];
+
+        $this->instances[\SkyFi\Hotspot\Services\HotspotSessionMonitorService::class] = new \SkyFi\Hotspot\Services\HotspotSessionMonitorService(
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotUserRepository::class],
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotSessionRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+
+        $this->instances[\SkyFi\Hotspot\Services\HotspotSyncService::class] = new \SkyFi\Hotspot\Services\HotspotSyncService(
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotUserRepository::class],
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotProfileRepository::class],
+            $this->instances[\SkyFi\Mikrotik\Services\RouterService::class],
+            $this->instances[\SkyFi\Mikrotik\Services\MikrotikConnectionPool::class],
+            $this->instances[\SkyFi\Mikrotik\Services\CredentialCipher::class],
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotSyncLogger::class],
+        );
+
+        $this->instances[\SkyFi\Hotspot\Controllers\HotspotUserController::class] = new \SkyFi\Hotspot\Controllers\HotspotUserController(
+            $this->instances[\SkyFi\Hotspot\Services\HotspotUserService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[\SkyFi\Hotspot\Controllers\HotspotProfileController::class] = new \SkyFi\Hotspot\Controllers\HotspotProfileController(
+            $this->instances[\SkyFi\Hotspot\Services\HotspotProfileService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[\SkyFi\Hotspot\Controllers\VoucherController::class] = new \SkyFi\Hotspot\Controllers\VoucherController(
+            $this->instances[\SkyFi\Hotspot\Services\VoucherService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[\SkyFi\Hotspot\Controllers\HotspotSessionController::class] = new \SkyFi\Hotspot\Controllers\HotspotSessionController(
+            $this->instances[\SkyFi\Hotspot\Services\HotspotSessionMonitorService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+
+        $this->instances[\SkyFi\Hotspot\Controllers\HotspotSyncController::class] = new \SkyFi\Hotspot\Controllers\HotspotSyncController(
+            $this->instances[\SkyFi\Hotspot\Services\HotspotSyncService::class],
+            $this->instances[\SkyFi\Hotspot\Repositories\PdoHotspotSyncLogger::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        // ─── End Hotspot Module ───────────────────────────────────────────────
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners

@@ -239,6 +239,12 @@ final class DashboardService implements DashboardServiceContract
         $syncStatusText = '100% Synced';
         $syncAccent = 'emerald';
 
+        // Hotspot metrics defaults
+        $hotspotOnlineUsers = '0';
+        $hotspotActiveVouchers = '0';
+        $hotspotExpiredVouchers = '0';
+        $hotspotDailyLogins = '0';
+
         if ($this->pdo !== null) {
             try {
                 $totalActive = (int) $this->pdo->query("SELECT COUNT(*) FROM pppoe_accounts WHERE status = 'active' AND deleted_at IS NULL")->fetchColumn();
@@ -263,6 +269,21 @@ final class DashboardService implements DashboardServiceContract
             } catch (\Throwable) {
                 // Keep default values if query fails or tables do not exist yet
             }
+
+            // Hotspot metrics
+            try {
+                $hsOnline = (int) $this->pdo->query("SELECT COUNT(*) FROM hotspot_users WHERE status = 'active' AND deleted_at IS NULL")->fetchColumn();
+                $hsActiveVouchers = (int) $this->pdo->query("SELECT COUNT(*) FROM hotspot_vouchers WHERE status = 'new' AND deleted_at IS NULL")->fetchColumn();
+                $hsExpiredVouchers = (int) $this->pdo->query("SELECT COUNT(*) FROM hotspot_vouchers WHERE (status = 'expired' OR (expires_at IS NOT NULL AND expires_at < NOW())) AND deleted_at IS NULL")->fetchColumn();
+                $hsDailyLogins = (int) $this->pdo->query("SELECT COUNT(*) FROM hotspot_vouchers WHERE status = 'used' AND DATE(used_at) = CURDATE() AND deleted_at IS NULL")->fetchColumn();
+
+                $hotspotOnlineUsers = (string) $hsOnline;
+                $hotspotActiveVouchers = (string) $hsActiveVouchers;
+                $hotspotExpiredVouchers = (string) $hsExpiredVouchers;
+                $hotspotDailyLogins = (string) $hsDailyLogins;
+            } catch (\Throwable) {
+                // Keep default values if hotspot tables do not exist yet
+            }
         }
 
         return [
@@ -272,7 +293,11 @@ final class DashboardService implements DashboardServiceContract
             $this->stat('pppoe-offline-users', 'Offline / Suspended Users', $offlineUsersCount, 'Disabled / hold', 'neutral', 'slate', 'Subscribers offline or suspended.'),
             $this->stat('pppoe-failed-logins', 'Failed Logins (24h)', $failedLoginsCount, 'Auth alerts', 'down', 'red', 'Recent failed CPE authentication attempts on RouterOS.'),
             $this->stat('pppoe-session-errors', 'Session / Sync Errors', $sessionErrorsCount, 'Reconciliation', 'neutral', 'amber', 'Accounts out of sync or reporting errors.'),
-            $this->stat('pppoe-sync-status', 'Sync Status', $syncStatusText, 'Audit state', 'neutral', $syncAccent, 'Overall synchronization health between database and routers.'),
+            $this->stat('pppoe-sync-status', 'PPPoE Sync Status', $syncStatusText, 'Audit state', 'neutral', $syncAccent, 'Overall PPPoE synchronization health.'),
+            $this->stat('hotspot-online-users', 'Online Hotspot Users', $hotspotOnlineUsers, 'Active access', 'up', 'indigo', 'Currently active hotspot users across all routers.'),
+            $this->stat('hotspot-active-vouchers', 'Active Vouchers', $hotspotActiveVouchers, 'Available', 'neutral', 'emerald', 'Unused vouchers available for distribution.'),
+            $this->stat('hotspot-expired-vouchers', 'Expired Vouchers', $hotspotExpiredVouchers, 'Cleanup needed', 'neutral', 'slate', 'Vouchers past their expiration date.'),
+            $this->stat('hotspot-daily-logins', 'Daily Hotspot Logins', $hotspotDailyLogins, 'Today', 'up', 'amber', 'Voucher redemptions recorded today.'),
             $this->chart('bandwidth-throughput', 'System Bandwidth Throughput', 'line', ['Now-20m', 'Now-15m', 'Now-10m', 'Now-5m', 'Now'], [
                 ['label' => 'Down Mbps', 'data' => [620, 680, 710, 760, 735]],
                 ['label' => 'Up Mbps', 'data' => [210, 225, 240, 255, 248]],

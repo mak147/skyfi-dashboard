@@ -38,4 +38,7 @@ return static function (Router $router, Container $container): void {
 
     $registerPppoeRoutes = require dirname(__DIR__) . '/src/Pppoe/Routes/pppoe.php';
     $registerPppoeRoutes($router, $container);
+
+    $registerHotspotRoutes = require dirname(__DIR__) . '/src/Hotspot/Routes/hotspot.php';
+    $registerHotspotRoutes($router, $container);
 };

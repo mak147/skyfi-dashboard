@@ -11,6 +11,7 @@ import { FinanceRoutes } from '@/features/finance/routes';
 import { RbacRoutes } from '@/features/rbac/routes';
 import { MikrotikRoutes } from '@/features/mikrotik/routes';
 import { PppoeRoutes } from '@/features/pppoe/routes';
+import { HotspotRoutes } from '@/features/hotspot/routes';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
 
@@ -38,6 +39,7 @@ export const AppRoutes = () => (
         <Route path="/finance/*" element={<FinanceRoutes />} />
         <Route path="/network/routers/*" element={<MikrotikRoutes />} />
         <Route path="/network/pppoe/*" element={<PppoeRoutes />} />
+        <Route path="/hotspot/*" element={<HotspotRoutes />} />
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
       </Route>
     </Route>
