@@ -7,6 +7,7 @@ import { DashboardRoutes } from '@/features/dashboard/routes';
 import { BillingRoutes } from '@/features/billing/routes';
 import { PackageRoutes } from '@/features/packages/routes';
 import { PaymentRoutes } from '@/features/payments/routes';
+import { FinanceRoutes } from '@/features/finance/routes';
 import { RbacRoutes } from '@/features/rbac/routes';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
@@ -32,6 +33,7 @@ export const AppRoutes = () => (
         <Route path="/packages/*" element={<PackageRoutes />} />
         <Route path="/billing/*" element={<BillingRoutes />} />
         <Route path="/payments/*" element={<PaymentRoutes />} />
+        <Route path="/finance/*" element={<FinanceRoutes />} />
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
       </Route>
     </Route>

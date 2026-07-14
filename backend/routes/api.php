@@ -29,4 +29,7 @@ return static function (Router $router, Container $container): void {
 
     $registerPaymentRoutes = require dirname(__DIR__) . '/src/Payments/Routes/payments.php';
     $registerPaymentRoutes($router, $container);
+
+    $registerFinanceRoutes = require dirname(__DIR__) . '/src/Finance/Routes/finance.php';
+    $registerFinanceRoutes($router, $container);
 };

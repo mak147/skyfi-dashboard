@@ -157,7 +157,61 @@ final class Container
             $this->instances[RequirePermissionMiddleware::class],
         );
 
+        $this->instances[\SkyFi\Finance\Repositories\PdoFinanceRepository::class] = new \SkyFi\Finance\Repositories\PdoFinanceRepository($pdo);
+        $this->instances[\SkyFi\Finance\Contracts\FinanceRepositoryContract::class] = clone $this->instances[\SkyFi\Finance\Repositories\PdoFinanceRepository::class];
+        $this->instances[\SkyFi\Finance\Services\FinanceService::class] = new \SkyFi\Finance\Services\FinanceService(
+            $this->instances[\SkyFi\Finance\Repositories\PdoFinanceRepository::class]
+        );
+        $this->instances[\SkyFi\Finance\Controllers\FinanceController::class] = new \SkyFi\Finance\Controllers\FinanceController(
+            $this->instances[\SkyFi\Finance\Services\FinanceService::class]
+        );
+
         $this->instances[Router::class] = new Router();
+
+        // Register Finance Event Listeners
+        \SkyFi\Shared\Events\EventDispatcher::listen('invoice.generated', function($invoice) {
+            // Debit Accounts Receivable, Credit Revenue
+            // Need Accounts. For simplicity, we hardcode COA lookup or let FinanceService handle it.
+            $finance = $this->get(\SkyFi\Finance\Services\FinanceService::class);
+            $finance->createJournalEntry([
+                'description' => 'Invoice Generated: ' . $invoice['invoice_number'],
+                'transaction_date' => date('Y-m-d'),
+                'source_id' => $invoice['id'],
+                'source_type' => 'App\Models\Invoice'
+            ], [
+                // Assuming Account 1200 is A/R, Account 4000 is Revenue
+                ['account_id' => 2, 'debit_amount' => $invoice['total_amount'], 'credit_amount' => null],
+                ['account_id' => 4, 'debit_amount' => null, 'credit_amount' => $invoice['total_amount']]
+            ], 1); // Admin user
+        });
+
+        \SkyFi\Shared\Events\EventDispatcher::listen('payment.completed', function($payment) {
+            $finance = $this->get(\SkyFi\Finance\Services\FinanceService::class);
+            $finance->createJournalEntry([
+                'description' => 'Payment Received: ' . $payment['payment_number'],
+                'transaction_date' => date('Y-m-d'),
+                'source_id' => $payment['id'],
+                'source_type' => 'App\Models\Payment'
+            ], [
+                // Assuming Account 1000 is Cash/Bank, Account 1200 is A/R
+                ['account_id' => 1, 'debit_amount' => $payment['amount'], 'credit_amount' => null],
+                ['account_id' => 2, 'debit_amount' => null, 'credit_amount' => $payment['amount']]
+            ], 1);
+        });
+
+        \SkyFi\Shared\Events\EventDispatcher::listen('payment.reversed', function($payment) {
+            $finance = $this->get(\SkyFi\Finance\Services\FinanceService::class);
+            $finance->createJournalEntry([
+                'description' => 'Payment Reversed: ' . $payment['payment_number'],
+                'transaction_date' => date('Y-m-d'),
+                'source_id' => $payment['id'],
+                'source_type' => 'App\Models\Payment'
+            ], [
+                // Reverse of Payment Received
+                ['account_id' => 2, 'debit_amount' => $payment['amount'], 'credit_amount' => null],
+                ['account_id' => 1, 'debit_amount' => null, 'credit_amount' => $payment['amount']]
+            ], 1);
+        });
     }
 
     /** @template T of object @param class-string<T> $id @return T */
