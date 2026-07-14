@@ -24,6 +24,19 @@ final class RbacController
         return $claims && isset($claims['sub']) ? (int) $claims['sub'] : 0;
     }
 
+    public function getEffectivePermissions(Request $request): Response
+    {
+        $userId = $this->getUserIdFromRequest($request);
+        $permissions = [];
+        foreach ($this->service->getUserRoles($userId) as $role) {
+            foreach ($role->permissions as $permission) {
+                $permissions[$permission->name] = true;
+            }
+        }
+
+        return new Response(200, ['data' => array_keys($permissions)]);
+    }
+
     public function getAllRoles(Request $request): Response
     {
         $userId = $this->getUserIdFromRequest($request);

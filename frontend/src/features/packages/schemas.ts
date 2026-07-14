@@ -1,0 +1,11 @@
+import { z } from 'zod';
+const nullablePositive = z.preprocess((v) => v === '' || v === null ? null : Number(v), z.number().int().positive().nullable());
+const nonnegative = z.preprocess((v) => Number(v), z.number().nonnegative());
+export const packageSchema = z.object({
+ name:z.string().trim().min(1,'Package name is required.').max(150),code:z.string().trim().min(1,'Package code is required.').max(50).regex(/^[A-Za-z0-9][A-Za-z0-9_-]*$/,'Use letters, numbers, hyphens, or underscores.'),description:z.string().max(5000),category:z.enum(['residential','business','corporate','enterprise','dedicated','custom']),status:z.enum(['draft','active','inactive','archived']),
+ pricing:z.object({monthly:nonnegative,quarterly:nonnegative,semi_annual:nonnegative,annual:nonnegative,installation_charge:nonnegative,supports_tax:z.boolean(),supports_discount:z.boolean()}),
+ bandwidth:z.object({download_kbps:z.coerce.number().int().positive(),upload_kbps:z.coerce.number().int().positive(),burst_download_kbps:nullablePositive,burst_upload_kbps:nullablePositive,cir_kbps:nullablePositive,mir_kbps:nullablePositive,data_limit_bytes:nullablePositive,is_unlimited:z.boolean()}),
+ network:z.object({pppoe_profile_name:z.string().max(150),hotspot_profile_name:z.string().max(150),queue_type:z.string().max(50),vlan_id:z.preprocess(v=>v===''||v===null?null:Number(v),z.number().int().min(1).max(4094).nullable()),ip_pool:z.string().max(150),dns_profile:z.string().max(150)}),
+ customer_rules:z.object({max_devices:nullablePositive,allows_static_ip:z.boolean(),allows_public_ip:z.boolean(),allows_dynamic_ip:z.boolean(),suspension_policy:z.string(),grace_period_days:z.coerce.number().int().min(0).max(365)}),
+ billing:z.object({default_billing_cycle:z.string(),auto_renew:z.boolean(),invoice_generation_mode:z.string(),supports_late_fee:z.boolean()}),technical:z.object({radius_profile:z.string().max(150),authentication_method:z.string().max(50),qos_profile:z.string().max(150)})
+}).superRefine((v,ctx)=>{if(!v.bandwidth.is_unlimited&&!v.bandwidth.data_limit_bytes)ctx.addIssue({code:'custom',path:['bandwidth','data_limit_bytes'],message:'Data limit is required.'});if(v.bandwidth.cir_kbps&&v.bandwidth.mir_kbps&&v.bandwidth.cir_kbps>v.bandwidth.mir_kbps)ctx.addIssue({code:'custom',path:['bandwidth','cir_kbps'],message:'CIR cannot exceed MIR.'});});

@@ -22,6 +22,7 @@ return static function (Router $router, Container $container): void {
         };
     };
 
+    $router->add('GET', '/api/v1/me/permissions', $protect($controller->getEffectivePermissions(...)));
     $router->add('GET', '/api/v1/roles', $protect($controller->getAllRoles(...)));
     $router->add('POST', '/api/v1/roles', $protect($controller->createRole(...)));
     $router->add('GET', '/api/v1/roles/{id}', $protect($controller->getRole(...)));

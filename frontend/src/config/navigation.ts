@@ -8,6 +8,7 @@ export interface NavigationItem {
   icon: string;
   description: string;
   allowedRoles?: string[];
+  requiredPermission?: string;
 }
 
 export interface NavigationGroup {
@@ -31,6 +32,13 @@ export const navigationGroups: NavigationGroup[] = [
         icon: '👤',
         description: 'Manage customer lifecycle from leads to archived accounts.',
       },
+      {
+        label: 'Internet Packages',
+        path: '/packages',
+        icon: '◫',
+        description: 'Manage pricing, bandwidth, and service package profiles.',
+        requiredPermission: 'packages.view',
+      },
     ],
   },
   {
@@ -47,13 +55,15 @@ export const navigationGroups: NavigationGroup[] = [
   },
 ];
 
-export const canViewNavigationItem = (item: NavigationItem, user: AuthUser | null): boolean => {
-  if (!item.allowedRoles?.length) {
-    return Boolean(user);
-  }
-
+export const canViewNavigationItem = (item: NavigationItem, user: AuthUser | null, permissions: string[] = []): boolean => {
   if (!user) {
     return false;
+  }
+  if (item.requiredPermission && !permissions.includes('*') && !permissions.includes(item.requiredPermission)) {
+    return false;
+  }
+  if (!item.allowedRoles?.length) {
+    return true;
   }
 
   return user.roles.includes('Super Administrator') || item.allowedRoles.some((role) => user.roles.includes(role));

@@ -17,4 +17,7 @@ return static function (Router $router, Container $container): void {
 
     $registerCustomerRoutes = require dirname(__DIR__) . '/src/Customers/Routes/customers.php';
     $registerCustomerRoutes($router, $container);
+
+    $registerPackageRoutes = require dirname(__DIR__) . '/src/Packages/Routes/packages.php';
+    $registerPackageRoutes($router, $container);
 };

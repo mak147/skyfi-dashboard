@@ -18,8 +18,29 @@ final class Response
     public function __construct(
         private readonly int $statusCode,
         private readonly ?array $payload = null,
+        private readonly ?string $rawBody = null,
     ) {
         $this->headers['Content-Type'] = 'application/json; charset=utf-8';
+    }
+
+    /** @param array<int, array<int, string>> $rows */
+    public static function downloadCsv(array $rows, string $filename): self
+    {
+        $stream = fopen('php://temp', 'r+');
+        if ($stream === false) {
+            throw new \RuntimeException('Unable to create export.');
+        }
+        foreach ($rows as $row) {
+            fputcsv($stream, $row);
+        }
+        rewind($stream);
+        $csv = stream_get_contents($stream);
+        fclose($stream);
+
+        return (new self(200, null, $csv === false ? '' : $csv))->withHeaders([
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . preg_replace('/[^A-Za-z0-9._-]/', '', $filename) . '"',
+        ]);
     }
 
     /** @param array<string, string> $headers */
@@ -81,7 +102,9 @@ final class Response
             setcookie($cookie['name'], $cookie['value'], $cookie['options']);
         }
 
-        if ($this->statusCode !== 204 && $this->payload !== null) {
+        if ($this->statusCode !== 204 && $this->rawBody !== null) {
+            echo $this->rawBody;
+        } elseif ($this->statusCode !== 204 && $this->payload !== null) {
             echo json_encode($this->payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES);
         }
     }

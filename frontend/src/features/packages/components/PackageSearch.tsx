@@ -1,0 +1,1 @@
+import { Input } from '@/components/ui/input';export const PackageSearch=({value,onChange}:{value:string;onChange:(v:string)=>void})=><Input value={value} onChange={e=>onChange(e.target.value)} placeholder="Search name, code, or description…" aria-label="Search packages"/>;
