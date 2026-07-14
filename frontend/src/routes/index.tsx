@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { AuthenticationRoutes } from '@/features/authentication/routes';
+import { ConnectionRoutes } from '@/features/connections/routes';
 import { CustomerRoutes } from '@/features/customers/routes';
 import { DashboardRoutes } from '@/features/dashboard/routes';
 import { PackageRoutes } from '@/features/packages/routes';
@@ -25,6 +26,7 @@ export const AppRoutes = () => (
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardRoutes.page />} />
         <Route path="/customers/*" element={<CustomerRoutes />} />
+        <Route path="/connections/*" element={<ConnectionRoutes />} />
         <Route path="/packages/*" element={<PackageRoutes />} />
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
       </Route>
