@@ -129,6 +129,7 @@ final class Container
             (string) $config['refresh_cookie_name'],
             (string) $config['refresh_cookie_path'],
             (bool) $config['refresh_cookie_secure'],
+            (bool) $config['expose_password_reset_token'],
         );
         $this->instances[JwtAuthMiddleware::class] = new JwtAuthMiddleware($this->instances[JwtTokenService::class]);
         $this->instances[RateLimitMiddleware::class] = new RateLimitMiddleware($pdo, 20, 60);
@@ -242,7 +243,7 @@ final class Container
         );
 
         $this->instances[\SkyFi\Finance\Repositories\PdoFinanceRepository::class] = new \SkyFi\Finance\Repositories\PdoFinanceRepository($pdo);
-        $this->instances[\SkyFi\Finance\Contracts\FinanceRepositoryContract::class] = clone $this->instances[\SkyFi\Finance\Repositories\PdoFinanceRepository::class];
+        $this->instances[\SkyFi\Finance\Contracts\FinanceRepositoryContract::class] = $this->instances[\SkyFi\Finance\Repositories\PdoFinanceRepository::class];
         $this->instances[\SkyFi\Finance\Services\FinanceService::class] = new \SkyFi\Finance\Services\FinanceService(
             $this->instances[\SkyFi\Finance\Repositories\PdoFinanceRepository::class]
         );

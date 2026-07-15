@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SkyFi\Monitoring\DTOs;
 
+use SkyFi\Shared\Http\PaginationInput;
+
 final class EventLogListFilters
 {
     public function __construct(
@@ -20,8 +22,8 @@ final class EventLogListFilters
     public static function fromRequest(array $params): self
     {
         return new self(
-            page: isset($params['page']) && (int) $params['page'] > 0 ? (int) $params['page'] : 1,
-            perPage: isset($params['per_page']) && (int) $params['per_page'] > 0 ? (int) $params['per_page'] : 20,
+            page: PaginationInput::page($params),
+            perPage: PaginationInput::perPage($params, 20),
             eventType: isset($params['event_type']) && is_string($params['event_type']) && $params['event_type'] !== '' ? $params['event_type'] : null,
             severity: isset($params['severity']) && is_string($params['severity']) && $params['severity'] !== '' ? $params['severity'] : null,
             sourceType: isset($params['source_type']) && is_string($params['source_type']) && $params['source_type'] !== '' ? $params['source_type'] : null,
