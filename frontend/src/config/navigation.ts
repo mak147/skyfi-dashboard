@@ -70,6 +70,60 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Inventory',
+    items: [
+      {
+        label: 'Inventory Dashboard',
+        path: '/inventory',
+        icon: '▦',
+        description: 'Stock health, serialized assets, valuation, and transfer workload.',
+        requiredPermission: 'inventory.view',
+      },
+      {
+        label: 'Products',
+        path: '/inventory/products',
+        icon: '◫',
+        description: 'SKU catalog, categories, models, units, and reorder levels.',
+        requiredPermission: 'inventory.view',
+      },
+      {
+        label: 'Assets',
+        path: '/inventory/assets',
+        icon: '◇',
+        description: 'Serialized equipment, warranty, custody, and deployment history.',
+        requiredPermission: 'inventory.view',
+      },
+      {
+        label: 'Warehouses',
+        path: '/inventory/warehouses',
+        icon: '⌂',
+        description: 'Storage sites, technician vehicles, bins, and stock locations.',
+        requiredPermission: 'inventory.view',
+      },
+      {
+        label: 'Stock Movements',
+        path: '/inventory/stock-movements',
+        icon: '⇅',
+        description: 'Receipts, issues, adjustments, returns, damage, and scrap.',
+        requiredPermission: 'inventory.view',
+      },
+      {
+        label: 'Transfers',
+        path: '/inventory/transfers',
+        icon: '⇄',
+        description: 'Warehouse transfer approvals, dispatch, and receipt.',
+        requiredPermission: 'inventory.view',
+      },
+      {
+        label: 'Catalog Settings',
+        path: '/inventory/categories',
+        icon: '⚙',
+        description: 'Categories, brands, models, units, and vendors.',
+        requiredPermission: 'inventory.view',
+      },
+    ],
+  },
+  {
     label: 'Support',
     items: [
       {

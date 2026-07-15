@@ -1,0 +1,503 @@
+-- Inventory & Asset Management module schema.
+-- Apply after the Support migration through the project's migration runner.
+
+CREATE TABLE inventory_categories (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    parent_id BIGINT UNSIGNED NULL,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(120) NOT NULL,
+    description VARCHAR(500) NULL,
+    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_inventory_categories_code (code),
+    UNIQUE KEY uk_inventory_categories_name (name),
+    KEY idx_inventory_categories_parent (parent_id),
+    KEY idx_inventory_categories_status (status),
+    CONSTRAINT fk_inventory_categories_parent FOREIGN KEY (parent_id) REFERENCES inventory_categories (id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_brands (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(120) NOT NULL,
+    website VARCHAR(255) NULL,
+    notes TEXT NULL,
+    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_inventory_brands_code (code),
+    UNIQUE KEY uk_inventory_brands_name (name),
+    KEY idx_inventory_brands_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_product_models (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    brand_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    model_number VARCHAR(100) NULL,
+    description VARCHAR(500) NULL,
+    specifications JSON NULL,
+    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_inventory_models_brand_name (brand_id, name),
+    KEY idx_inventory_models_number (model_number),
+    CONSTRAINT fk_inventory_models_brand FOREIGN KEY (brand_id) REFERENCES inventory_brands (id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_units (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    code VARCHAR(30) NOT NULL,
+    name VARCHAR(80) NOT NULL,
+    symbol VARCHAR(20) NOT NULL,
+    decimal_places TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_inventory_units_code (code),
+    UNIQUE KEY uk_inventory_units_name (name),
+    CONSTRAINT chk_inventory_units_precision CHECK (decimal_places <= 4)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE vendors (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    status ENUM('active', 'inactive', 'on_hold') NOT NULL DEFAULT 'active',
+    contact_name VARCHAR(150) NULL,
+    email VARCHAR(255) NULL,
+    phone VARCHAR(50) NULL,
+    website VARCHAR(255) NULL,
+    tax_id VARCHAR(80) NULL,
+    payment_terms VARCHAR(100) NULL,
+    notes TEXT NULL,
+    created_by BIGINT UNSIGNED NOT NULL,
+    updated_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_vendors_code (code),
+    UNIQUE KEY uk_vendors_name (name),
+    KEY idx_vendors_status (status),
+    CONSTRAINT fk_vendors_created_by FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_vendors_updated_by FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_products (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    category_id BIGINT UNSIGNED NOT NULL,
+    model_id BIGINT UNSIGNED NULL,
+    unit_id BIGINT UNSIGNED NOT NULL,
+    sku VARCHAR(80) NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT NULL,
+    barcode VARCHAR(100) NULL,
+    qr_code_value VARCHAR(255) NULL,
+    tracking_mode ENUM('quantity', 'serialized') NOT NULL DEFAULT 'quantity',
+    standard_cost DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    minimum_stock DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    reorder_level DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    status ENUM('active', 'inactive', 'discontinued') NOT NULL DEFAULT 'active',
+    created_by BIGINT UNSIGNED NOT NULL,
+    updated_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_inventory_products_sku (sku),
+    UNIQUE KEY uk_inventory_products_barcode (barcode),
+    KEY idx_inventory_products_name (name),
+    KEY idx_inventory_products_category (category_id),
+    KEY idx_inventory_products_model (model_id),
+    KEY idx_inventory_products_status (status),
+    KEY idx_inventory_products_tracking (tracking_mode),
+    CONSTRAINT fk_inventory_products_category FOREIGN KEY (category_id) REFERENCES inventory_categories (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_products_model FOREIGN KEY (model_id) REFERENCES inventory_product_models (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_products_unit FOREIGN KEY (unit_id) REFERENCES inventory_units (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_products_created_by FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_products_updated_by FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT chk_inventory_products_cost CHECK (standard_cost >= 0),
+    CONSTRAINT chk_inventory_products_minimum CHECK (minimum_stock >= 0),
+    CONSTRAINT chk_inventory_products_reorder CHECK (reorder_level >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_product_vendors (
+    product_id BIGINT UNSIGNED NOT NULL,
+    vendor_id BIGINT UNSIGNED NOT NULL,
+    vendor_sku VARCHAR(100) NULL,
+    is_default TINYINT(1) NOT NULL DEFAULT 0,
+    last_purchase_cost DECIMAL(15,4) NULL,
+    lead_time_days SMALLINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (product_id, vendor_id),
+    KEY idx_inventory_product_vendors_vendor (vendor_id),
+    CONSTRAINT fk_inventory_product_vendors_product FOREIGN KEY (product_id) REFERENCES inventory_products (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_product_vendors_vendor FOREIGN KEY (vendor_id) REFERENCES vendors (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT chk_inventory_product_vendor_cost CHECK (last_purchase_cost IS NULL OR last_purchase_cost >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE warehouses (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    type ENUM('main', 'branch', 'technician_vehicle', 'repair_depot', 'site_store', 'other') NOT NULL DEFAULT 'branch',
+    status ENUM('active', 'inactive', 'maintenance', 'closed') NOT NULL DEFAULT 'active',
+    manager_user_id BIGINT UNSIGNED NULL,
+    address VARCHAR(500) NULL,
+    city VARCHAR(100) NULL,
+    region VARCHAR(100) NULL,
+    notes TEXT NULL,
+    created_by BIGINT UNSIGNED NOT NULL,
+    updated_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_warehouses_code (code),
+    UNIQUE KEY uk_warehouses_name (name),
+    KEY idx_warehouses_type_status (type, status),
+    CONSTRAINT fk_warehouses_manager FOREIGN KEY (manager_user_id) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_warehouses_created_by FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_warehouses_updated_by FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE warehouse_locations (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    warehouse_id BIGINT UNSIGNED NOT NULL,
+    parent_id BIGINT UNSIGNED NULL,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(120) NOT NULL,
+    description VARCHAR(500) NULL,
+    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_warehouse_locations_code (warehouse_id, code),
+    KEY idx_warehouse_locations_parent (parent_id),
+    KEY idx_warehouse_locations_status (warehouse_id, status),
+    CONSTRAINT fk_warehouse_locations_warehouse FOREIGN KEY (warehouse_id) REFERENCES warehouses (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_warehouse_locations_parent FOREIGN KEY (parent_id) REFERENCES warehouse_locations (id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_assets (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    product_id BIGINT UNSIGNED NOT NULL,
+    vendor_id BIGINT UNSIGNED NULL,
+    network_device_id BIGINT UNSIGNED NULL,
+    asset_tag VARCHAR(80) NOT NULL,
+    serial_number VARCHAR(150) NOT NULL,
+    mac_address VARCHAR(17) NULL,
+    imei VARCHAR(32) NULL,
+    barcode VARCHAR(100) NULL,
+    qr_code_value VARCHAR(255) NULL,
+    purchase_date DATE NULL,
+    acquisition_cost DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    warranty_starts_at DATE NULL,
+    warranty_expires_at DATE NULL,
+    status ENUM('in_stock', 'reserved', 'in_transit', 'assigned', 'deployed', 'under_repair', 'returned', 'damaged', 'lost', 'scrapped', 'retired') NOT NULL DEFAULT 'in_stock',
+    notes TEXT NULL,
+    created_by BIGINT UNSIGNED NOT NULL,
+    updated_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_inventory_assets_tag (asset_tag),
+    UNIQUE KEY uk_inventory_assets_serial (serial_number),
+    UNIQUE KEY uk_inventory_assets_mac (mac_address),
+    UNIQUE KEY uk_inventory_assets_imei (imei),
+    UNIQUE KEY uk_inventory_assets_barcode (barcode),
+    UNIQUE KEY uk_inventory_assets_network_device (network_device_id),
+    KEY idx_inventory_assets_product_status (product_id, status),
+    KEY idx_inventory_assets_warranty (warranty_expires_at),
+    CONSTRAINT fk_inventory_assets_product FOREIGN KEY (product_id) REFERENCES inventory_products (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assets_vendor FOREIGN KEY (vendor_id) REFERENCES vendors (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assets_network_device FOREIGN KEY (network_device_id) REFERENCES network_devices (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assets_created_by FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assets_updated_by FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT chk_inventory_assets_cost CHECK (acquisition_cost >= 0),
+    CONSTRAINT chk_inventory_assets_warranty CHECK (warranty_expires_at IS NULL OR warranty_starts_at IS NULL OR warranty_expires_at >= warranty_starts_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_asset_assignments (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    asset_id BIGINT UNSIGNED NOT NULL,
+    assignment_type ENUM('warehouse', 'customer', 'tower', 'pop_site', 'technician') NOT NULL,
+    warehouse_location_id BIGINT UNSIGNED NULL,
+    customer_id BIGINT UNSIGNED NULL,
+    tower_id BIGINT UNSIGNED NULL,
+    pop_site_id BIGINT UNSIGNED NULL,
+    technician_id BIGINT UNSIGNED NULL,
+    assigned_by BIGINT UNSIGNED NOT NULL,
+    released_by BIGINT UNSIGNED NULL,
+    assigned_at DATETIME NOT NULL,
+    released_at DATETIME NULL,
+    notes VARCHAR(1000) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_inventory_assignments_asset_current (asset_id, released_at),
+    KEY idx_inventory_assignments_customer (customer_id, released_at),
+    KEY idx_inventory_assignments_tower (tower_id, released_at),
+    KEY idx_inventory_assignments_pop (pop_site_id, released_at),
+    KEY idx_inventory_assignments_technician (technician_id, released_at),
+    CONSTRAINT fk_inventory_assignments_asset FOREIGN KEY (asset_id) REFERENCES inventory_assets (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assignments_location FOREIGN KEY (warehouse_location_id) REFERENCES warehouse_locations (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assignments_customer FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assignments_tower FOREIGN KEY (tower_id) REFERENCES towers (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assignments_pop FOREIGN KEY (pop_site_id) REFERENCES pop_sites (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assignments_technician FOREIGN KEY (technician_id) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assignments_assigned_by FOREIGN KEY (assigned_by) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_assignments_released_by FOREIGN KEY (released_by) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT chk_inventory_assignment_target CHECK (
+        (warehouse_location_id IS NOT NULL) + (customer_id IS NOT NULL) + (tower_id IS NOT NULL) + (pop_site_id IS NOT NULL) + (technician_id IS NOT NULL) = 1
+    )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_asset_events (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    asset_id BIGINT UNSIGNED NOT NULL,
+    event_type VARCHAR(60) NOT NULL,
+    description VARCHAR(1000) NOT NULL,
+    old_status VARCHAR(30) NULL,
+    new_status VARCHAR(30) NULL,
+    assignment_id BIGINT UNSIGNED NULL,
+    metadata JSON NULL,
+    actor_user_id BIGINT UNSIGNED NULL,
+    occurred_at DATETIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_inventory_asset_events_asset_date (asset_id, occurred_at),
+    CONSTRAINT fk_inventory_asset_events_asset FOREIGN KEY (asset_id) REFERENCES inventory_assets (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_asset_events_assignment FOREIGN KEY (assignment_id) REFERENCES inventory_asset_assignments (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_asset_events_actor FOREIGN KEY (actor_user_id) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_stock_balances (
+    product_id BIGINT UNSIGNED NOT NULL,
+    warehouse_location_id BIGINT UNSIGNED NOT NULL,
+    stock_condition ENUM('available', 'reserved', 'quarantine', 'damaged') NOT NULL DEFAULT 'available',
+    quantity DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    average_unit_cost DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (product_id, warehouse_location_id, stock_condition),
+    KEY idx_inventory_balances_location (warehouse_location_id, stock_condition),
+    CONSTRAINT fk_inventory_balances_product FOREIGN KEY (product_id) REFERENCES inventory_products (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_balances_location FOREIGN KEY (warehouse_location_id) REFERENCES warehouse_locations (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT chk_inventory_balance_quantity CHECK (quantity >= 0),
+    CONSTRAINT chk_inventory_balance_cost CHECK (average_unit_cost >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_stock_movements (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    movement_number VARCHAR(40) NOT NULL,
+    movement_type ENUM('opening_balance', 'stock_in', 'stock_out', 'transfer_dispatch', 'transfer_receipt', 'adjustment_in', 'adjustment_out', 'return', 'damaged', 'scrap', 'reversal') NOT NULL,
+    status ENUM('posted', 'reversed') NOT NULL DEFAULT 'posted',
+    reference_type VARCHAR(60) NULL,
+    reference_number VARCHAR(100) NULL,
+    support_ticket_id BIGINT UNSIGNED NULL,
+    vendor_id BIGINT UNSIGNED NULL,
+    reversal_of_id BIGINT UNSIGNED NULL,
+    reason VARCHAR(500) NULL,
+    notes TEXT NULL,
+    occurred_at DATETIME NOT NULL,
+    posted_at DATETIME NOT NULL,
+    created_by BIGINT UNSIGNED NOT NULL,
+    posted_by BIGINT UNSIGNED NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_inventory_movements_number (movement_number),
+    UNIQUE KEY uk_inventory_movements_reversal (reversal_of_id),
+    KEY idx_inventory_movements_type_date (movement_type, occurred_at),
+    KEY idx_inventory_movements_reference (reference_type, reference_number),
+    KEY idx_inventory_movements_ticket (support_ticket_id),
+    CONSTRAINT fk_inventory_movements_ticket FOREIGN KEY (support_ticket_id) REFERENCES support_tickets (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_movements_vendor FOREIGN KEY (vendor_id) REFERENCES vendors (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_movements_reversal FOREIGN KEY (reversal_of_id) REFERENCES inventory_stock_movements (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_movements_created_by FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_movements_posted_by FOREIGN KEY (posted_by) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_stock_movement_lines (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    movement_id BIGINT UNSIGNED NOT NULL,
+    product_id BIGINT UNSIGNED NOT NULL,
+    asset_id BIGINT UNSIGNED NULL,
+    source_location_id BIGINT UNSIGNED NULL,
+    destination_location_id BIGINT UNSIGNED NULL,
+    source_condition ENUM('available', 'reserved', 'quarantine', 'damaged') NULL,
+    destination_condition ENUM('available', 'reserved', 'quarantine', 'damaged') NULL,
+    quantity DECIMAL(15,4) NOT NULL,
+    unit_cost DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    total_cost DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    notes VARCHAR(1000) NULL,
+    PRIMARY KEY (id),
+    KEY idx_inventory_movement_lines_movement (movement_id),
+    KEY idx_inventory_movement_lines_product (product_id),
+    KEY idx_inventory_movement_lines_asset (asset_id),
+    KEY idx_inventory_movement_lines_source (source_location_id),
+    KEY idx_inventory_movement_lines_destination (destination_location_id),
+    CONSTRAINT fk_inventory_movement_lines_movement FOREIGN KEY (movement_id) REFERENCES inventory_stock_movements (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_movement_lines_product FOREIGN KEY (product_id) REFERENCES inventory_products (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_movement_lines_asset FOREIGN KEY (asset_id) REFERENCES inventory_assets (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_movement_lines_source FOREIGN KEY (source_location_id) REFERENCES warehouse_locations (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_movement_lines_destination FOREIGN KEY (destination_location_id) REFERENCES warehouse_locations (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT chk_inventory_movement_quantity CHECK (quantity > 0),
+    CONSTRAINT chk_inventory_movement_cost CHECK (unit_cost >= 0 AND total_cost >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_warehouse_transfers (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    transfer_number VARCHAR(40) NOT NULL,
+    source_warehouse_id BIGINT UNSIGNED NOT NULL,
+    destination_warehouse_id BIGINT UNSIGNED NOT NULL,
+    status ENUM('draft', 'pending', 'approved', 'in_transit', 'partially_received', 'completed', 'cancelled') NOT NULL DEFAULT 'draft',
+    requested_by BIGINT UNSIGNED NOT NULL,
+    approved_by BIGINT UNSIGNED NULL,
+    dispatched_by BIGINT UNSIGNED NULL,
+    received_by BIGINT UNSIGNED NULL,
+    requested_at DATETIME NOT NULL,
+    approved_at DATETIME NULL,
+    dispatched_at DATETIME NULL,
+    received_at DATETIME NULL,
+    expected_at DATETIME NULL,
+    notes TEXT NULL,
+    cancellation_reason VARCHAR(500) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_inventory_transfers_number (transfer_number),
+    KEY idx_inventory_transfers_status_date (status, requested_at),
+    KEY idx_inventory_transfers_source (source_warehouse_id),
+    KEY idx_inventory_transfers_destination (destination_warehouse_id),
+    CONSTRAINT fk_inventory_transfers_source FOREIGN KEY (source_warehouse_id) REFERENCES warehouses (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_transfers_destination FOREIGN KEY (destination_warehouse_id) REFERENCES warehouses (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_transfers_requested_by FOREIGN KEY (requested_by) REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_transfers_approved_by FOREIGN KEY (approved_by) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_transfers_dispatched_by FOREIGN KEY (dispatched_by) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_transfers_received_by FOREIGN KEY (received_by) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT chk_inventory_transfer_warehouses CHECK (source_warehouse_id <> destination_warehouse_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_warehouse_transfer_lines (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    transfer_id BIGINT UNSIGNED NOT NULL,
+    product_id BIGINT UNSIGNED NOT NULL,
+    source_location_id BIGINT UNSIGNED NOT NULL,
+    destination_location_id BIGINT UNSIGNED NOT NULL,
+    quantity_requested DECIMAL(15,4) NOT NULL,
+    quantity_dispatched DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    quantity_received DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    unit_cost DECIMAL(15,4) NOT NULL DEFAULT 0.0000,
+    notes VARCHAR(1000) NULL,
+    PRIMARY KEY (id),
+    KEY idx_inventory_transfer_lines_transfer (transfer_id),
+    KEY idx_inventory_transfer_lines_product (product_id),
+    CONSTRAINT fk_inventory_transfer_lines_transfer FOREIGN KEY (transfer_id) REFERENCES inventory_warehouse_transfers (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_transfer_lines_product FOREIGN KEY (product_id) REFERENCES inventory_products (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_transfer_lines_source FOREIGN KEY (source_location_id) REFERENCES warehouse_locations (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_transfer_lines_destination FOREIGN KEY (destination_location_id) REFERENCES warehouse_locations (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT chk_inventory_transfer_requested CHECK (quantity_requested > 0),
+    CONSTRAINT chk_inventory_transfer_dispatched CHECK (quantity_dispatched >= 0 AND quantity_dispatched <= quantity_requested),
+    CONSTRAINT chk_inventory_transfer_received CHECK (quantity_received >= 0 AND quantity_received <= quantity_dispatched)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_warehouse_transfer_assets (
+    transfer_line_id BIGINT UNSIGNED NOT NULL,
+    asset_id BIGINT UNSIGNED NOT NULL,
+    dispatched_at DATETIME NULL,
+    received_at DATETIME NULL,
+    PRIMARY KEY (transfer_line_id, asset_id),
+    KEY idx_inventory_transfer_assets_asset (asset_id),
+    CONSTRAINT fk_inventory_transfer_assets_line FOREIGN KEY (transfer_line_id) REFERENCES inventory_warehouse_transfer_lines (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_transfer_assets_asset FOREIGN KEY (asset_id) REFERENCES inventory_assets (id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_accounting_settings (
+    id TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    inventory_asset_account_id INT NULL,
+    inventory_clearing_account_id INT NULL,
+    cogs_account_id INT NULL,
+    adjustment_account_id INT NULL,
+    damage_scrap_account_id INT NULL,
+    costing_method ENUM('weighted_average') NOT NULL DEFAULT 'weighted_average',
+    updated_by BIGINT UNSIGNED NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_inventory_accounting_asset FOREIGN KEY (inventory_asset_account_id) REFERENCES chart_of_accounts (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_accounting_clearing FOREIGN KEY (inventory_clearing_account_id) REFERENCES chart_of_accounts (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_accounting_cogs FOREIGN KEY (cogs_account_id) REFERENCES chart_of_accounts (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_accounting_adjustment FOREIGN KEY (adjustment_account_id) REFERENCES chart_of_accounts (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_accounting_damage FOREIGN KEY (damage_scrap_account_id) REFERENCES chart_of_accounts (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_accounting_updated_by FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT chk_inventory_accounting_singleton CHECK (id = 1)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE inventory_finance_postings (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    movement_id BIGINT UNSIGNED NOT NULL,
+    journal_entry_id BIGINT NULL,
+    idempotency_key VARCHAR(100) NOT NULL,
+    status ENUM('pending', 'posted', 'failed', 'not_required') NOT NULL DEFAULT 'pending',
+    attempts SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    last_error VARCHAR(1000) NULL,
+    posted_at DATETIME NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_inventory_finance_movement (movement_id),
+    UNIQUE KEY uk_inventory_finance_idempotency (idempotency_key),
+    CONSTRAINT fk_inventory_finance_movement FOREIGN KEY (movement_id) REFERENCES inventory_stock_movements (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_inventory_finance_journal FOREIGN KEY (journal_entry_id) REFERENCES journal_entries (id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO inventory_units (code, name, symbol, decimal_places) VALUES
+('UNIT', 'Unit', 'unit', 0),
+('METER', 'Meter', 'm', 2),
+('ROLL', 'Roll', 'roll', 0),
+('BOX', 'Box', 'box', 0),
+('PAIR', 'Pair', 'pair', 0),
+('KIT', 'Kit', 'kit', 0)
+ON DUPLICATE KEY UPDATE name = VALUES(name), symbol = VALUES(symbol), decimal_places = VALUES(decimal_places);
+
+INSERT INTO inventory_categories (code, name, description) VALUES
+('ROUTER', 'Routers', 'Customer and network routers.'),
+('MIKROTIK', 'MikroTik Devices', 'MikroTik RouterOS equipment.'),
+('ACCESS_POINT', 'Access Points', 'Wireless access point equipment.'),
+('RADIO', 'Radios', 'Point-to-point and point-to-multipoint radios.'),
+('SWITCH', 'Switches', 'Managed and unmanaged network switches.'),
+('ONU', 'ONUs', 'Optical network units; feature placeholder.'),
+('OLT', 'OLTs', 'Optical line terminals; feature placeholder.'),
+('ANTENNA', 'Antennas', 'Sector, dish, and customer antennas.'),
+('FIBER', 'Fiber Equipment', 'Fiber distribution and termination equipment.'),
+('CABLE', 'Cables', 'Fiber, Ethernet, and power cable.'),
+('POWER_SUPPLY', 'Power Supplies', 'Power adapters and supplies.'),
+('UPS', 'UPS', 'Uninterruptible power supplies.'),
+('BATTERY', 'Batteries', 'Network and site batteries.'),
+('CPE', 'Customer CPE', 'Customer-premises equipment.'),
+('INSTALLATION_KIT', 'Installation Kits', 'Bundled installation materials.'),
+('TOOL', 'Tools', 'Technician and warehouse tools.')
+ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description);
+
+INSERT INTO inventory_accounting_settings (id) VALUES (1)
+ON DUPLICATE KEY UPDATE id = VALUES(id);
+
+INSERT INTO permissions (name, description) VALUES
+('inventory.view', 'View inventory dashboards, catalog, assets, warehouses, stock, and movements.'),
+('inventory.create', 'Create inventory products, assets, warehouses, and catalog records.'),
+('inventory.update', 'Update inventory catalog, assets, warehouses, and locations.'),
+('inventory.delete', 'Soft-delete eligible inventory records.'),
+('inventory.transfer', 'Assign assets and manage warehouse transfers.'),
+('inventory.audit', 'Post opening balances, adjustments, returns, damage, scrap, and reversals.'),
+('inventory.manage', 'Manage inventory status, stock operations, approvals, and accounting integration.')
+ON DUPLICATE KEY UPDATE description = VALUES(description);
