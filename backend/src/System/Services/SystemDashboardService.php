@@ -1,0 +1,4 @@
+<?php declare(strict_types=1);
+namespace SkyFi\System\Services;
+use SkyFi\System\Repositories\PdoSystemSettingsRepository;
+final class SystemDashboardService { public function __construct(private readonly PdoSystemSettingsRepository $repo, private readonly SystemConfigurationProvider $config){} public function payload(): array { $counts=$this->repo->dashboard(); $all=$this->config->all(); $missing=[]; foreach (['company','system','branding','localization','notifications'] as $k) if (empty($all[$k])) $missing[]=$k; return ['active_branches'=>$counts['active_branches'],'active_departments'=>$counts['active_departments'],'system_health'=>['status'=>'placeholder','label'=>'System health checks reserved for monitoring integration.'],'configuration_status'=>['complete'=>count($missing)===0,'missing'=>$missing,'message'=>count($missing)===0?'Core administration configuration is present.':'Some configuration groups need attention.']]; }}

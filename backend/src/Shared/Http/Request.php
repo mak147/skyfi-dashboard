@@ -24,7 +24,10 @@ final class Request
     /** @var array<string, mixed> */
     private array $query;
 
-    /** @param array<string, mixed> $server @param array<string, mixed> $cookies @param array<string, mixed> $attributes */
+    /** @var array<string, mixed> */
+    private array $files;
+
+    /** @param array<string, mixed> $server @param array<string, mixed> $cookies @param array<string, mixed> $attributes @param array<string, mixed> $files */
     public function __construct(
         private readonly string $method,
         private readonly string $path,
@@ -33,12 +36,14 @@ final class Request
         array $cookies = [],
         array $attributes = [],
         array $query = [],
+        array $files = [],
     ) {
         $this->server = $server;
         $this->cookies = $cookies;
         $this->attributes = $attributes;
         $this->headers = self::extractHeaders($server);
         $this->query = $query;
+        $this->files = $files;
         $decoded = json_decode($rawBody ?? '', true);
         $this->body = is_array($decoded) ? $decoded : [];
     }
@@ -58,6 +63,7 @@ final class Request
             $_COOKIE,
             [],
             $_GET,
+            $_FILES,
         );
     }
 
@@ -83,6 +89,12 @@ final class Request
     public function query(): array
     {
         return $this->query;
+    }
+
+    /** @return array<string, mixed> Uploaded files from multipart requests. */
+    public function files(): array
+    {
+        return $this->files;
     }
 
     /** @param string $name Header name. */

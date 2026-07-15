@@ -1,0 +1,10 @@
+import { useEffect, useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Alert } from '@/components/ui/alert';
+import { apiErrorMessage } from '@/lib/apiClient';
+import { CompanyProfileCard } from '../components/CompanyProfileCard';
+import { SettingsForm } from '../components/SettingsForm';
+import { SystemPageSkeleton } from '../components/SystemPageSkeleton';
+import { useCompanySettings, useUpdateCompanySettings } from '../api/useSystem';
+import type { CompanySettings } from '../types';
+export const CompanyProfilePage = () => { const q = useCompanySettings(); const save = useUpdateCompanySettings(); const [form, setForm] = useState<Partial<CompanySettings>>({}); useEffect(() => { if (q.data) setForm(q.data); }, [q.data]); if (q.isLoading) return <SystemPageSkeleton />; if (q.error || !q.data) return <Alert title="Company profile unavailable">{apiErrorMessage(q.error)}</Alert>; const set = (key: keyof CompanySettings, value: string) => setForm((current) => ({ ...current, [key]: value })); return <div className="space-y-6"><CompanyProfileCard company={q.data} /><SettingsForm onSubmit={() => save.mutate(form)} isSaving={save.isPending}><div className="grid gap-3 md:grid-cols-2">{(['company_name','legal_name','registration_number','tax_number','phone','email','website','city','country','timezone','currency_code','date_format','language_code'] as Array<keyof CompanySettings>).map((key) => <Input key={key} placeholder={key.replaceAll('_', ' ')} value={String(form[key] ?? '')} onChange={(e) => set(key, e.target.value)} />)}</div></SettingsForm></div>; };

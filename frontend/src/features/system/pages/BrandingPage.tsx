@@ -1,0 +1,11 @@
+import { useEffect, useState } from 'react';
+import { Alert } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { apiErrorMessage } from '@/lib/apiClient';
+import { LogoUploader } from '../components/LogoUploader';
+import { SettingsForm } from '../components/SettingsForm';
+import { SystemPageSkeleton } from '../components/SystemPageSkeleton';
+import { ThemeSelector } from '../components/ThemeSelector';
+import { useBrandingSettings, useUpdateBrandingSettings, useUploadBrandingAsset } from '../api/useSystem';
+import type { BrandingSettings } from '../types';
+export const BrandingPage = () => { const q = useBrandingSettings(); const save = useUpdateBrandingSettings(); const upload = useUploadBrandingAsset(); const [form, setForm] = useState<Partial<BrandingSettings>>({}); useEffect(() => { if (q.data) setForm(q.data); }, [q.data]); if (q.isLoading) return <SystemPageSkeleton />; if (q.error || !q.data) return <Alert title="Branding unavailable">{apiErrorMessage(q.error)}</Alert>; return <div className="space-y-6"><h1 className="text-2xl font-bold dark:text-white">Branding</h1><ThemeSelector value={form.theme ?? 'system'} onChange={(theme) => setForm({ ...form, theme })} /><SettingsForm onSubmit={() => save.mutate(form)} isSaving={save.isPending}><div className="grid gap-3 md:grid-cols-2"><Input placeholder="Primary color" value={form.primary_color ?? ''} onChange={(e) => setForm({ ...form, primary_color: e.target.value })} /><Input placeholder="Secondary color" value={form.secondary_color ?? ''} onChange={(e) => setForm({ ...form, secondary_color: e.target.value })} /><Input placeholder="Login headline" value={form.login_headline ?? ''} onChange={(e) => setForm({ ...form, login_headline: e.target.value })} /><Input placeholder="Footer text" value={form.footer_text ?? ''} onChange={(e) => setForm({ ...form, footer_text: e.target.value })} /></div></SettingsForm><div className="grid gap-4 md:grid-cols-3"><LogoUploader type="logo" isUploading={upload.isPending} onUpload={(file, type) => upload.mutate({ file, type })} /><LogoUploader type="favicon" isUploading={upload.isPending} onUpload={(file, type) => upload.mutate({ file, type })} /><LogoUploader type="login_background" isUploading={upload.isPending} onUpload={(file, type) => upload.mutate({ file, type })} /></div></div>; };

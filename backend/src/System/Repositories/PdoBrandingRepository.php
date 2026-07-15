@@ -1,0 +1,4 @@
+<?php declare(strict_types=1);
+namespace SkyFi\System\Repositories;
+use SkyFi\System\Contracts\BrandingRepositoryContract;
+final class PdoBrandingRepository extends PdoSystemRepository implements BrandingRepositoryContract { private array $allowed=['theme','primary_color','secondary_color','logo_path','favicon_path','login_background_path','login_headline','login_subheadline','footer_text','custom_css']; private array $json=['custom_css']; public function first(): array { return $this->singleton('branding_settings', self::defaults(), $this->json); } public function update(array $data, ?int $userId=null): array { return $this->updateSingleton('branding_settings',$data,self::defaults(),$this->allowed,$this->json,$userId); } public static function defaults(): array { return ['theme'=>'system','primary_color'=>'#4f46e5','secondary_color'=>'#10b981','footer_text'=>'SkyFi Networks ISP Management','custom_css'=>[]]; }}

@@ -1,0 +1,10 @@
+import { useEffect, useState } from 'react';
+import { Alert } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { apiErrorMessage } from '@/lib/apiClient';
+import { SettingGroups } from '../components/SettingGroups';
+import { SettingsForm } from '../components/SettingsForm';
+import { SystemPageSkeleton } from '../components/SystemPageSkeleton';
+import { useSystemSettings, useUpdateSystemSettings } from '../api/useSystem';
+import type { SystemSettings } from '../types';
+export const SystemSettingsPage = () => { const q = useSystemSettings(); const save = useUpdateSystemSettings(); const [form, setForm] = useState<Partial<SystemSettings>>({}); useEffect(() => { if (q.data) setForm(q.data); }, [q.data]); if (q.isLoading) return <SystemPageSkeleton />; if (q.error || !q.data) return <Alert title="System settings unavailable">{apiErrorMessage(q.error)}</Alert>; return <div className="space-y-6"><h1 className="text-2xl font-bold dark:text-white">System Settings</h1><SettingGroups title="Application" description="Runtime preferences and security policy placeholders."><SettingsForm onSubmit={() => save.mutate(form)} isSaving={save.isPending}><div className="grid gap-3 md:grid-cols-2"><Input placeholder="Application name" value={form.application_name ?? ''} onChange={(e) => setForm({ ...form, application_name: e.target.value })} /><Input placeholder="Environment" value={form.environment_name ?? ''} onChange={(e) => setForm({ ...form, environment_name: e.target.value })} /><Input type="number" placeholder="Session timeout minutes" value={form.session_timeout_minutes ?? 60} onChange={(e) => setForm({ ...form, session_timeout_minutes: Number(e.target.value) })} /><label className="flex items-center gap-2 rounded-md border px-3 py-2 dark:border-slate-700"><input type="checkbox" checked={Boolean(form.maintenance_mode)} onChange={(e) => setForm({ ...form, maintenance_mode: e.target.checked ? 1 : 0 })} /> Maintenance mode</label></div></SettingsForm></SettingGroups></div>; };

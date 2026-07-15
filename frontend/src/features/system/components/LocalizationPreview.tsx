@@ -1,0 +1,2 @@
+import type { LocalizationSettings } from '../types';
+export const LocalizationPreview = ({ data }: { data: LocalizationSettings }) => <div className="rounded-xl border bg-slate-50 p-4 text-sm dark:border-slate-700 dark:bg-slate-800"><p><strong>Currency:</strong> {data.default_currency} {Number(123456.78).toLocaleString()}</p><p><strong>Timezone:</strong> {data.default_timezone}</p><p><strong>Date format:</strong> {data.date_format}</p></div>;
