@@ -25,8 +25,10 @@ final class PdoAuditLogger implements AuditLoggerContract
     ): void {
         $stmt = $this->pdo->prepare('
             INSERT INTO audit_logs (
-                user_id, action, entity_type, entity_id, old_values, new_values, ip_address, user_agent
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                user_id, action, entity_type, entity_id, module, resource, severity,
+                correlation_id, old_values, new_values, ip_address, user_agent, url,
+                compliance_tags, is_immutable, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ');
         
         $stmt->execute([
@@ -34,10 +36,37 @@ final class PdoAuditLogger implements AuditLoggerContract
             $action,
             $entityType,
             $entityId,
+            $this->inferModule($action, $entityType),
+            $entityType,
+            $this->inferSeverity($action),
+            null,
             $oldValues !== null ? json_encode($oldValues, JSON_THROW_ON_ERROR) : null,
             $newValues !== null ? json_encode($newValues, JSON_THROW_ON_ERROR) : null,
             $ipAddress,
-            $userAgent
+            $userAgent,
+            null,
+            null,
+            1,
         ]);
+    }
+
+    private function inferModule(string $action, string $entityType): string
+    {
+        $prefix = explode('.', $action)[0];
+        if ($prefix !== $action) {
+            return $prefix;
+        }
+        return strtolower($entityType);
+    }
+
+    private function inferSeverity(string $action): string
+    {
+        if (str_contains($action, 'delete') || str_contains($action, 'failed')) {
+            return 'critical';
+        }
+        if (str_contains($action, 'changed') || str_contains($action, 'update') || str_contains($action, 'alert')) {
+            return 'warning';
+        }
+        return 'info';
     }
 }
