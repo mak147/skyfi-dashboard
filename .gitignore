@@ -19,3 +19,10 @@ backend/storage/logs/*
 .DS_Store
 .idea/
 .vscode/
+
+# Test reports
+frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+.phpunit.cache/
+
