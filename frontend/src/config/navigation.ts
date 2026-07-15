@@ -351,6 +351,13 @@ export const navigationGroups: NavigationGroup[] = [
     label: 'Administration',
     items: [
       {
+        label: 'Audit & Compliance',
+        path: '/audit',
+        icon: '🛡',
+        description: 'Audit trail, activity monitoring, compliance, and retention policies.',
+        requiredPermission: 'audit.view',
+      },
+      {
         label: 'System Administration',
         path: '/admin/system',
         icon: '⚙',

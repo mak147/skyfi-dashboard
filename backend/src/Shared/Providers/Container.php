@@ -58,6 +58,27 @@ use SkyFi\Rbac\Repositories\PdoAuditLogger;
 use SkyFi\Rbac\Services\RbacService;
 use SkyFi\Rbac\Middleware\RequirePermissionMiddleware;
 use SkyFi\Rbac\Controllers\RbacController;
+use SkyFi\Audit\Repositories\PdoAuditLogRepository;
+use SkyFi\Audit\Repositories\PdoActivityRepository;
+use SkyFi\Audit\Repositories\PdoComplianceRepository;
+use SkyFi\Audit\Repositories\PdoRetentionRepository;
+use SkyFi\Audit\Repositories\PdoAuditExportRepository;
+use SkyFi\Audit\Services\AuditService;
+use SkyFi\Audit\Services\AuditExportService;
+use SkyFi\Audit\Services\ComplianceService;
+use SkyFi\Audit\Services\AuditEventSubscriber;
+use SkyFi\Audit\Validators\AuditValidator;
+use SkyFi\Audit\Controllers\AuditLogController;
+use SkyFi\Audit\Controllers\ActivityController;
+use SkyFi\Audit\Controllers\AuditExportController;
+use SkyFi\Audit\Controllers\ComplianceController;
+use SkyFi\Audit\Contracts\AuditLogRepositoryContract;
+use SkyFi\Audit\Contracts\ActivityRepositoryContract;
+use SkyFi\Audit\Contracts\ComplianceRepositoryContract;
+use SkyFi\Audit\Contracts\RetentionRepositoryContract;
+use SkyFi\Audit\Contracts\AuditExportRepositoryContract;
+use SkyFi\Audit\Contracts\AuditServiceContract;
+use SkyFi\Audit\Contracts\ComplianceServiceContract;
 
 final class Container
 {
@@ -954,6 +975,58 @@ final class Container
         );
         $this->instances[\SkyFi\Notifications\EventSubscribers\DomainEventSubscriber::class]->register();
         // ─── End Notification Center Module ─────────────────────────────
+
+        // ─── Audit, Compliance & Activity Center Module ──────────────────
+        $this->instances[PdoAuditLogRepository::class] = new PdoAuditLogRepository($pdo);
+        $this->instances[AuditLogRepositoryContract::class] = $this->instances[PdoAuditLogRepository::class];
+        $this->instances[PdoActivityRepository::class] = new PdoActivityRepository($pdo);
+        $this->instances[ActivityRepositoryContract::class] = $this->instances[PdoActivityRepository::class];
+        $this->instances[PdoComplianceRepository::class] = new PdoComplianceRepository($pdo);
+        $this->instances[ComplianceRepositoryContract::class] = $this->instances[PdoComplianceRepository::class];
+        $this->instances[PdoRetentionRepository::class] = new PdoRetentionRepository($pdo);
+        $this->instances[RetentionRepositoryContract::class] = $this->instances[PdoRetentionRepository::class];
+        $this->instances[PdoAuditExportRepository::class] = new PdoAuditExportRepository($pdo);
+        $this->instances[AuditExportRepositoryContract::class] = $this->instances[PdoAuditExportRepository::class];
+        $this->instances[AuditValidator::class] = new AuditValidator();
+        $this->instances[AuditExportService::class] = new AuditExportService(
+            $this->instances[PdoAuditLogRepository::class],
+            $this->instances[PdoAuditExportRepository::class],
+            dirname(__DIR__, 3) . '/storage/exports',
+        );
+        $this->instances[AuditService::class] = new AuditService(
+            $this->instances[PdoAuditLogRepository::class],
+            $this->instances[PdoActivityRepository::class],
+            $this->instances[PdoAuditExportRepository::class],
+            $this->instances[AuditExportService::class],
+        );
+        $this->instances[AuditServiceContract::class] = $this->instances[AuditService::class];
+        $this->instances[ComplianceService::class] = new ComplianceService(
+            $this->instances[PdoComplianceRepository::class],
+            $this->instances[PdoRetentionRepository::class],
+        );
+        $this->instances[ComplianceServiceContract::class] = $this->instances[ComplianceService::class];
+        $this->instances[AuditLogController::class] = new AuditLogController(
+            $this->instances[AuditService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[ActivityController::class] = new ActivityController(
+            $this->instances[AuditService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[AuditExportController::class] = new AuditExportController(
+            $this->instances[AuditService::class],
+            $this->instances[AuditValidator::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[ComplianceController::class] = new ComplianceController(
+            $this->instances[ComplianceService::class],
+            $this->instances[AuditValidator::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        // Register audit event subscriber
+        $this->instances[AuditEventSubscriber::class] = new AuditEventSubscriber($this->instances[AuditService::class]);
+        $this->instances[AuditEventSubscriber::class]->register();
+        // ─── End Audit, Compliance & Activity Center Module ─────────────
 
         $this->instances[Router::class] = new Router();
 

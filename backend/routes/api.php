@@ -72,4 +72,7 @@ return static function (Router $router, Container $container): void {
 
     $registerNotificationRoutes = require dirname(__DIR__) . '/src/Notifications/Routes/notifications.php';
     $registerNotificationRoutes($router, $container);
+
+    $registerAuditRoutes = require dirname(__DIR__) . '/src/Audit/Routes/audit.php';
+    $registerAuditRoutes($router, $container);
 };
