@@ -78,6 +78,12 @@ final class ConnectionService implements ConnectionServiceContract
         ]);
 
         $this->auditLogger->log($authUserId, 'create', 'connection', $connection->id(), null, $connection->toArray(), $ip, $ua);
+        // In the current connection lifecycle, an authorized pending connection
+        // is the approved handoff to field operations.
+        \SkyFi\Shared\Events\EventDispatcher::dispatch('connection.approved', [
+            'connection' => $connection->toArray(),
+            'actor_id' => $authUserId,
+        ]);
 
         return $connection;
     }

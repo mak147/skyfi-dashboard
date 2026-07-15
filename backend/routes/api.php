@@ -59,4 +59,7 @@ return static function (Router $router, Container $container): void {
 
     $registerVendorRoutes = require dirname(__DIR__) . '/src/Vendors/Routes/vendors.php';
     $registerVendorRoutes($router, $container);
+
+    $registerFieldServiceRoutes = require dirname(__DIR__) . '/src/FieldService/Routes/field-service.php';
+    $registerFieldServiceRoutes($router, $container);
 };

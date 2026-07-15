@@ -153,6 +153,7 @@ final class Container
 
         $this->instances[PdoInvoiceRepository::class] = new PdoInvoiceRepository($pdo);
         $this->instances[PdoBillingScheduleRepository::class] = new PdoBillingScheduleRepository($pdo);
+        $this->instances[BillingScheduleRepositoryContract::class] = $this->instances[PdoBillingScheduleRepository::class];
         $this->instances[InvoiceService::class] = new InvoiceService(
             $this->instances[PdoInvoiceRepository::class],
             $this->instances[PdoBillingScheduleRepository::class],
@@ -782,6 +783,39 @@ final class Container
         $this->instances[\SkyFi\Vendors\Controllers\SupplierPerformanceController::class] = new \SkyFi\Vendors\Controllers\SupplierPerformanceController($this->instances[\SkyFi\Vendors\Services\SupplierPerformanceService::class], $permission);
         $this->instances[\SkyFi\Vendors\Controllers\VendorDashboardController::class] = new \SkyFi\Vendors\Controllers\VendorDashboardController($this->instances[\SkyFi\Vendors\Services\VendorDashboardService::class], $permission);
         // ─── End Vendor & Supplier Management Module ─────────────────────
+
+        // ─── Customer Installation & Field Service Module ────────────────
+        $this->instances[\SkyFi\FieldService\Repositories\PdoFieldServiceRepository::class] = new \SkyFi\FieldService\Repositories\PdoFieldServiceRepository($pdo);
+        $this->instances[\SkyFi\FieldService\Contracts\FieldServiceRepositoryContract::class] = $this->instances[\SkyFi\FieldService\Repositories\PdoFieldServiceRepository::class];
+        $this->instances[\SkyFi\FieldService\Validators\FieldServiceValidator::class] = new \SkyFi\FieldService\Validators\FieldServiceValidator();
+        $this->instances[\SkyFi\FieldService\Validators\FieldOperationValidator::class] = new \SkyFi\FieldService\Validators\FieldOperationValidator();
+        $this->instances[\SkyFi\FieldService\Services\InstallationRequestService::class] = new \SkyFi\FieldService\Services\InstallationRequestService(
+            $this->instances[\SkyFi\FieldService\Repositories\PdoFieldServiceRepository::class],
+            $this->instances[\SkyFi\FieldService\Validators\FieldServiceValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\FieldService\Services\WorkOrderService::class] = new \SkyFi\FieldService\Services\WorkOrderService(
+            $this->instances[\SkyFi\FieldService\Repositories\PdoFieldServiceRepository::class],
+            $this->instances[\SkyFi\FieldService\Validators\FieldServiceValidator::class],
+            $this->instances[\SkyFi\FieldService\Validators\FieldOperationValidator::class],
+            $this->instances[\SkyFi\Inventory\Services\StockService::class],
+            $this->instances[ConnectionService::class],
+            $this->instances[CustomerService::class],
+            $this->instances[BillingScheduleRepositoryContract::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\FieldService\Contracts\FieldServiceServiceContract::class] = $this->instances[\SkyFi\FieldService\Services\WorkOrderService::class];
+        $this->instances[\SkyFi\FieldService\Services\TechnicianService::class] = new \SkyFi\FieldService\Services\TechnicianService($this->instances[\SkyFi\FieldService\Repositories\PdoFieldServiceRepository::class], $this->instances[\SkyFi\FieldService\Validators\FieldServiceValidator::class], $this->instances[PdoAuditLogger::class]);
+        $this->instances[\SkyFi\FieldService\Services\SchedulerService::class] = new \SkyFi\FieldService\Services\SchedulerService($this->instances[\SkyFi\FieldService\Repositories\PdoFieldServiceRepository::class]);
+        $this->instances[\SkyFi\FieldService\Services\FieldServiceDashboardService::class] = new \SkyFi\FieldService\Services\FieldServiceDashboardService($this->instances[\SkyFi\FieldService\Repositories\PdoFieldServiceRepository::class]);
+        $this->instances[\SkyFi\FieldService\Services\FieldOperationService::class] = new \SkyFi\FieldService\Services\FieldOperationService($this->instances[\SkyFi\FieldService\Repositories\PdoFieldServiceRepository::class], $this->instances[\SkyFi\FieldService\Validators\FieldOperationValidator::class], $this->instances[\SkyFi\FieldService\Validators\FieldServiceValidator::class]);
+        $this->instances[\SkyFi\FieldService\Controllers\FieldServiceController::class] = new \SkyFi\FieldService\Controllers\FieldServiceController($this->instances[\SkyFi\FieldService\Services\InstallationRequestService::class], $this->instances[\SkyFi\FieldService\Services\WorkOrderService::class], $this->instances[\SkyFi\FieldService\Services\SchedulerService::class], $this->instances[\SkyFi\FieldService\Services\FieldServiceDashboardService::class], $permission);
+        $this->instances[\SkyFi\FieldService\Controllers\TechnicianController::class] = new \SkyFi\FieldService\Controllers\TechnicianController($this->instances[\SkyFi\FieldService\Services\TechnicianService::class], $this->instances[\SkyFi\FieldService\Repositories\PdoFieldServiceRepository::class], $permission);
+        $this->instances[\SkyFi\FieldService\Controllers\FieldOperationController::class] = new \SkyFi\FieldService\Controllers\FieldOperationController($this->instances[\SkyFi\FieldService\Services\FieldOperationService::class], $permission);
+        \SkyFi\Shared\Events\EventDispatcher::listen('connection.approved', function(array $payload): void {
+            $this->instances[\SkyFi\FieldService\Services\InstallationRequestService::class]->createFromApprovedConnection($payload['connection'], (int) $payload['actor_id']);
+        });
+        // ─── End Customer Installation & Field Service Module ────────────
 
         $this->instances[Router::class] = new Router();
 

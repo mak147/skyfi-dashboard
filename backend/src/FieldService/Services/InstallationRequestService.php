@@ -1,0 +1,22 @@
+<?php
+declare(strict_types=1);
+namespace SkyFi\FieldService\Services;
+use SkyFi\FieldService\Contracts\FieldServiceRepositoryContract;
+use SkyFi\FieldService\DTOs\{FieldServiceListFilters,InstallationRequestData};
+use SkyFi\FieldService\Validators\FieldServiceValidator;
+use SkyFi\Rbac\Contracts\AuditLoggerContract;
+use SkyFi\Shared\Events\EventDispatcher;
+use SkyFi\Shared\Exceptions\{NotFoundException,ValidationException};
+final class InstallationRequestService
+{
+    public function __construct(private readonly FieldServiceRepositoryContract $repo,private readonly FieldServiceValidator $validator,private readonly AuditLoggerContract $audit){}
+    public function list(FieldServiceListFilters $f):array{return$this->repo->listRequests($f);} public function get(int$id):array{return$this->repo->findRequest($id)??throw new NotFoundException('Installation request not found.');}
+    public function create(InstallationRequestData $d,int$actor):array{$this->validator->request($d);if($this->repo->findRequestByConnection($d->connectionId))throw new ValidationException([['code'=>'duplicate_installation_request','detail'=>'This connection already has an installation request.']]);$r=$this->repo->createRequest($d->toArray(),$actor);$this->audit->log($actor,'field.installation_request.created','installation_request',(int)$r['id'],null,$r);return$r;}
+    public function createFromApprovedConnection(array $connection,int$actor):array{$existing=$this->repo->findRequestByConnection((int)$connection['id']);if($existing)return$existing;$customer=$this->repo->customerContext((int)$connection['customer_id'])??throw new NotFoundException('Connection customer not found.');$address=implode(', ',array_filter([$customer['address'],$customer['area'],$customer['city']]));$data=InstallationRequestData::fromArray(['customer_id'=>$connection['customer_id'],'connection_id'=>$connection['id'],'priority'=>'normal','source'=>'connection_approval','service_address'=>$address,'notes'=>'Automatically created after connection approval.']);return$this->create($data,$actor);}
+    public function update(int$id,InstallationRequestData$d,int$actor):array{$this->validator->request($d);$old=$this->get($id);if(in_array($old['status'],['completed','cancelled'],true))throw new ValidationException([['code'=>'terminal_request','detail'=>'Completed or cancelled requests cannot be edited.']]);$r=$this->repo->updateRequest($id,$d->toArray(),$actor);$this->audit->log($actor,'field.installation_request.updated','installation_request',$id,$old,$r);return$r;}
+    public function assign(int$id,int$technician,int$actor):array{$old=$this->get($id);$r=$this->repo->updateRequest($id,['assigned_technician_id'=>$technician,'status'=>'assigned'],$actor);$this->audit->log($actor,'field.installation_request.assigned','installation_request',$id,$old,$r);return$r;}
+    public function schedule(int$id,array$d,int$actor):array{$old=$this->get($id);$tech=(int)($d['technician_id']??$old['assigned_technician_id']??0);$start=$d['scheduled_start_at']??null;$end=$d['scheduled_end_at']??null;$this->validator->schedule($tech,$start,$end);if($this->repo->hasScheduleConflict($tech,$start,$end))throw new ValidationException([['code'=>'schedule_conflict','detail'=>'The technician already has work scheduled during this period.']]);$r=$this->repo->updateRequest($id,['assigned_technician_id'=>$tech,'scheduled_start_at'=>$start,'scheduled_end_at'=>$end,'status'=>'scheduled'],$actor);$this->audit->log($actor,'field.installation_request.scheduled','installation_request',$id,$old,$r);return$r;}
+    public function cancel(int$id,string$reason,int$actor):array{if(trim($reason)==='')throw new ValidationException([['code'=>'reason_required','detail'=>'A cancellation reason is required.']]);$old=$this->get($id);$r=$this->repo->updateRequest($id,['status'=>'cancelled','cancellation_reason'=>$reason],$actor);$this->audit->log($actor,'field.installation_request.cancelled','installation_request',$id,$old,$r);return$r;}
+    public function complete(int$id,int$actor):array{$old=$this->get($id);$r=$this->repo->updateRequest($id,['status'=>'completed','completed_at'=>gmdate('Y-m-d H:i:s')],$actor);EventDispatcher::dispatch('field.installation_request.completed',$r);return$r;}
+    public function delete(int$id,int$actor):void{$old=$this->get($id);$this->repo->deleteRequest($id,$actor);$this->audit->log($actor,'field.installation_request.deleted','installation_request',$id,$old,null);}
+}

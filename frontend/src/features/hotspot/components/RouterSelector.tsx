@@ -12,8 +12,7 @@ export const RouterSelector = ({
   label = 'Router ID',
   placeholder = 'Enter or select a MikroTik router ID...',
   disabled = false,
-}: RouterSelectorProps) => {
-  return (
+}: RouterSelectorProps) => (
     <div>
       <label className="block text-sm font-semibold text-slate-700">{label}</label>
       <input
@@ -29,4 +28,3 @@ export const RouterSelector = ({
       </p>
     </div>
   );
-};

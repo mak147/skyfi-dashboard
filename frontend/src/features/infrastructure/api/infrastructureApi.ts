@@ -12,7 +12,7 @@ import type {
   InfrastructureDashboardPayload,
 } from '../types';
 
-const buildQueryString = (params: Record<string, unknown>): string => {
+const buildQueryString = (params: object): string => {
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
@@ -213,3 +213,13 @@ export const infrastructureApi = {
     return response.data.data.map((d) => d.attributes);
   },
 };
+
+// Backwards-compatible named exports used by the original list pages.
+export const getPopSites = infrastructureApi.getPopSites;
+export const createPopSite = infrastructureApi.createPopSite;
+export const deletePopSite = infrastructureApi.deletePopSite;
+export const changePopSiteStatus = infrastructureApi.changePopSiteStatus;
+export const getTowers = infrastructureApi.getTowers;
+export const createTower = infrastructureApi.createTower;
+export const deleteTower = infrastructureApi.deleteTower;
+export const changeTowerStatus = infrastructureApi.changeTowerStatus;

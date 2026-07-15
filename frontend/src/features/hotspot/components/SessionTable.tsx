@@ -16,8 +16,7 @@ const formatBytes = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-export const SessionTable = ({ sessions, isLoading, canDisconnect, onDisconnect, onForceLogout }: SessionTableProps) => {
-  return (
+export const SessionTable = ({ sessions, isLoading, canDisconnect, onDisconnect, onForceLogout }: SessionTableProps) => (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200">
@@ -100,4 +99,3 @@ export const SessionTable = ({ sessions, isLoading, canDisconnect, onDisconnect,
       </div>
     </div>
   );
-};

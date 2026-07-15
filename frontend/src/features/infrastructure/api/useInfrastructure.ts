@@ -9,42 +9,33 @@ import type {
   TowerListFilters,
   SectorListFilters,
   NetworkDeviceListFilters,
-  InfrastructureDashboardPayload,
 } from '../types';
 
-export const usePopSites = (filters: PopSiteListFilters = {}) => {
-  return useQuery({
+export const usePopSites = (filters: PopSiteListFilters = {}) => useQuery({
     queryKey: ['popSites', filters],
     queryFn: () => infrastructureApi.getPopSites(filters),
     staleTime: 30_000,
   });
-};
 
-export const usePopSite = (id: number | null) => {
-  return useQuery({
+export const usePopSite = (id: number | null) => useQuery({
     queryKey: ['popSite', id],
     queryFn: () => infrastructureApi.getPopSite(id!),
     enabled: id !== null,
     staleTime: 30_000,
   });
-};
 
-export const usePopSiteTowers = (popSiteId: number | null) => {
-  return useQuery({
+export const usePopSiteTowers = (popSiteId: number | null) => useQuery({
     queryKey: ['popSiteTowers', popSiteId],
     queryFn: () => infrastructureApi.getPopSiteTowers(popSiteId!),
     enabled: popSiteId !== null,
     staleTime: 30_000,
   });
-};
 
-export const usePopSiteMapPoints = () => {
-  return useQuery({
+export const usePopSiteMapPoints = () => useQuery({
     queryKey: ['popSiteMapPoints'],
     queryFn: infrastructureApi.getPopSiteMapPoints,
     staleTime: 60_000,
   });
-};
 
 export const useCreatePopSite = () => {
   const queryClient = useQueryClient();
@@ -87,57 +78,45 @@ export const useChangePopSiteStatus = () => {
 };
 
 // Towers
-export const useTowers = (filters: TowerListFilters = {}) => {
-  return useQuery({
+export const useTowers = (filters: TowerListFilters = {}) => useQuery({
     queryKey: ['towers', filters],
     queryFn: () => infrastructureApi.getTowers(filters),
     staleTime: 30_000,
   });
-};
 
-export const useTower = (id: number | null) => {
-  return useQuery({
+export const useTower = (id: number | null) => useQuery({
     queryKey: ['tower', id],
     queryFn: () => infrastructureApi.getTower(id!),
     enabled: id !== null,
     staleTime: 30_000,
   });
-};
 
-export const useTowerSectors = (towerId: number | null) => {
-  return useQuery({
+export const useTowerSectors = (towerId: number | null) => useQuery({
     queryKey: ['towerSectors', towerId],
     queryFn: () => infrastructureApi.getTowerSectors(towerId!),
     enabled: towerId !== null,
     staleTime: 30_000,
   });
-};
 
-export const useTowerDevices = (towerId: number | null) => {
-  return useQuery({
+export const useTowerDevices = (towerId: number | null) => useQuery({
     queryKey: ['towerDevices', towerId],
     queryFn: () => infrastructureApi.getTowerDevices(towerId!),
     enabled: towerId !== null,
     staleTime: 30_000,
   });
-};
 
-export const useTowerMapPoints = () => {
-  return useQuery({
+export const useTowerMapPoints = () => useQuery({
     queryKey: ['towerMapPoints'],
     queryFn: infrastructureApi.getTowerMapPoints,
     staleTime: 60_000,
   });
-};
 
-export const useTowersByPopSite = (popSiteId: number | null) => {
-  return useQuery({
+export const useTowersByPopSite = (popSiteId: number | null) => useQuery({
     queryKey: ['towersByPopSite', popSiteId],
     queryFn: () => infrastructureApi.getTowersByPopSite(popSiteId!),
     enabled: popSiteId !== null,
     staleTime: 30_000,
   });
-};
 
 export const useCreateTower = () => {
   const queryClient = useQueryClient();
@@ -180,48 +159,38 @@ export const useChangeTowerStatus = () => {
 };
 
 // Sectors
-export const useSectors = (filters: SectorListFilters = {}) => {
-  return useQuery({
+export const useSectors = (filters: SectorListFilters = {}) => useQuery({
     queryKey: ['sectors', filters],
     queryFn: () => infrastructureApi.getSectors(filters),
     staleTime: 30_000,
   });
-};
 
-export const useSector = (id: number | null) => {
-  return useQuery({
+export const useSector = (id: number | null) => useQuery({
     queryKey: ['sector', id],
     queryFn: () => infrastructureApi.getSector(id!),
     enabled: id !== null,
     staleTime: 30_000,
   });
-};
 
-export const useSectorConnections = (sectorId: number | null) => {
-  return useQuery({
+export const useSectorConnections = (sectorId: number | null) => useQuery({
     queryKey: ['sectorConnections', sectorId],
     queryFn: () => infrastructureApi.getSectorConnections(sectorId!),
     enabled: sectorId !== null,
     staleTime: 30_000,
   });
-};
 
-export const useCoverageData = () => {
-  return useQuery({
+export const useCoverageData = () => useQuery({
     queryKey: ['coverageData'],
     queryFn: infrastructureApi.getCoverageData,
     staleTime: 60_000,
   });
-};
 
-export const useSectorsByTower = (towerId: number | null) => {
-  return useQuery({
+export const useSectorsByTower = (towerId: number | null) => useQuery({
     queryKey: ['sectorsByTower', towerId],
     queryFn: () => infrastructureApi.getSectorsByTower(towerId!),
     enabled: towerId !== null,
     staleTime: 30_000,
   });
-};
 
 export const useCreateSector = () => {
   const queryClient = useQueryClient();
@@ -264,49 +233,39 @@ export const useChangeSectorStatus = () => {
 };
 
 // Network Devices
-export const useDevices = (filters: NetworkDeviceListFilters = {}) => {
-  return useQuery({
+export const useDevices = (filters: NetworkDeviceListFilters = {}) => useQuery({
     queryKey: ['devices', filters],
     queryFn: () => infrastructureApi.getDevices(filters),
     staleTime: 30_000,
   });
-};
 
-export const useDevice = (id: number | null) => {
-  return useQuery({
+export const useDevice = (id: number | null) => useQuery({
     queryKey: ['device', id],
     queryFn: () => infrastructureApi.getDevice(id!),
     enabled: id !== null,
     staleTime: 30_000,
   });
-};
 
-export const useDevicesByType = (type: string | null) => {
-  return useQuery({
+export const useDevicesByType = (type: string | null) => useQuery({
     queryKey: ['devicesByType', type],
     queryFn: () => infrastructureApi.getDevicesByType(type!),
     enabled: type !== null,
     staleTime: 30_000,
   });
-};
 
-export const useDevicesByPopSite = (popSiteId: number | null) => {
-  return useQuery({
+export const useDevicesByPopSite = (popSiteId: number | null) => useQuery({
     queryKey: ['devicesByPopSite', popSiteId],
     queryFn: () => infrastructureApi.getDevicesByPopSite(popSiteId!),
     enabled: popSiteId !== null,
     staleTime: 30_000,
   });
-};
 
-export const useDevicesByTower = (towerId: number | null) => {
-  return useQuery({
+export const useDevicesByTower = (towerId: number | null) => useQuery({
     queryKey: ['devicesByTower', towerId],
     queryFn: () => infrastructureApi.getDevicesByTower(towerId!),
     enabled: towerId !== null,
     staleTime: 30_000,
   });
-};
 
 export const useCreateDevice = () => {
   const queryClient = useQueryClient();
@@ -349,10 +308,8 @@ export const useChangeDeviceStatus = () => {
 };
 
 // Dashboard
-export const useInfrastructureDashboard = () => {
-  return useQuery({
+export const useInfrastructureDashboard = () => useQuery({
     queryKey: ['infrastructureDashboard'],
     queryFn: infrastructureApi.getDashboard,
     staleTime: 30_000,
   });
-};

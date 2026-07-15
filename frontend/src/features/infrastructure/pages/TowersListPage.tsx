@@ -5,9 +5,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { apiErrorMessage } from '@/lib/apiClient';
-import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 
-import { createTower, deleteTower, getTowers, changeTowerStatus } from '../api/infrastructureApi';
+import { deleteTower, getTowers } from '../api/infrastructureApi';
 import { TowerTable } from '../components/TowerTable';
 import type { Tower, TowerListFilters } from '../types';
 
@@ -15,13 +15,13 @@ export const TowersListPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { can } = usePermissions();
 
   const page = Math.max(1, Number(searchParams.get('page') ?? '1'));
   const perPage = 15;
   const sort = searchParams.get('sort') ?? '-created_at';
 
-  const [filters, setFilters] = useState<TowerListFilters>({
+  const [filters] = useState<TowerListFilters>({
     status: (searchParams.get('status') as TowerListFilters['status']) || undefined,
     tower_type: (searchParams.get('tower_type') as TowerListFilters['tower_type']) || undefined,
     pop_site_id: searchParams.get('pop_site_id') ? Number(searchParams.get('pop_site_id')) : undefined,
@@ -46,10 +46,6 @@ export const TowersListPage = () => {
     [setSearchParams],
   );
 
-  const handleFiltersChange = (newFilters: TowerListFilters) => {
-    setFilters(newFilters);
-    updateSearchParams(newFilters, 1, sort);
-  };
 
   const handleSortChange = (newSort: string) => {
     updateSearchParams(filters, page, newSort);
@@ -61,7 +57,7 @@ export const TowersListPage = () => {
 
   const towersQuery = useQuery({
     queryKey: ['towers', page, perPage, filters, sort],
-    queryFn: () => getTowers({ ...filters, page, perPage, sort }),
+    queryFn: () => getTowers({ ...filters, page, per_page: perPage, sort }),
     staleTime: 30_000,
   });
 
@@ -72,12 +68,6 @@ export const TowersListPage = () => {
     },
   });
 
-  const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => changeTowerStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['towers'] });
-    },
-  });
 
   const handleDelete = (tower: Tower) => {
     if (confirm(`Are you sure you want to delete ${tower.name}?`)) {
@@ -85,10 +75,9 @@ export const TowersListPage = () => {
     }
   };
 
-  const canCreate = user?.roles.includes('Super Administrator') || user?.permissions?.includes('infrastructure.create') || false;
-  const canUpdate = user?.roles.includes('Super Administrator') || user?.permissions?.includes('infrastructure.update') || false;
-  const canDelete = user?.roles.includes('Super Administrator') || user?.permissions?.includes('infrastructure.delete') || false;
-  const canManage = user?.roles.includes('Super Administrator') || user?.permissions?.includes('infrastructure.manage') || false;
+  const canCreate = can('infrastructure.create');
+  const canUpdate = can('infrastructure.update');
+  const canDelete = can('infrastructure.delete');
 
   const towers = towersQuery.data?.data.map((d) => d.attributes) ?? [];
   const meta = towersQuery.data?.meta;
