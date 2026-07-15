@@ -61,7 +61,7 @@ describe('ProtectedRoute component', () => {
     vi.mocked(useAuth).mockReturnValue({
       isAuthenticated: true,
       isInitialized: true,
-      user: { id: 1, name: 'Alice', email: 'alice@skyfi.com', roles: [] },
+      user: { id: '1', name: 'Alice', email: 'alice@skyfi.com', roles: [] },
       accessToken: 'token',
       signOut: vi.fn(),
     });

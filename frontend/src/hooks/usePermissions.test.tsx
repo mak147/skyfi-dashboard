@@ -32,7 +32,7 @@ const createWrapper = () => {
 describe('usePermissions hook', () => {
   test('should return permissions and can function', async () => {
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: 1, name: 'Alice', email: 'alice@skyfi.com', roles: [] },
+      user: { id: '1', name: 'Alice', email: 'alice@skyfi.com', roles: [] },
       accessToken: 'token',
       isAuthenticated: true,
       isInitialized: true,
@@ -57,7 +57,7 @@ describe('usePermissions hook', () => {
 
   test('should allow all permissions if super user wildcard exists', async () => {
     vi.mocked(useAuth).mockReturnValue({
-      user: { id: 1, name: 'Alice', email: 'alice@skyfi.com', roles: [] },
+      user: { id: '1', name: 'Alice', email: 'alice@skyfi.com', roles: [] },
       accessToken: 'token',
       isAuthenticated: true,
       isInitialized: true,

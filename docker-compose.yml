@@ -1,0 +1,158 @@
+name: skyfi
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    ports:
+      - "${SKYFI_HTTP_PORT:-8080}:80"
+    volumes:
+      - ./docker/nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - skyfi
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/healthz >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: development
+      args:
+        APP_ENV: local
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:${SKYFI_HTTP_PORT:-8080}
+      APP_ISSUER: http://localhost:${SKYFI_HTTP_PORT:-8080}
+      APP_AUDIENCE: http://localhost:${SKYFI_HTTP_PORT:-8080}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-change-me-please-32chars}
+      DB_DSN: mysql:host=mariadb;port=3306;dbname=${MARIADB_DATABASE:-skyfi};charset=utf8mb4
+      DB_USERNAME: ${MARIADB_USER:-skyfi}
+      DB_PASSWORD: ${MARIADB_PASSWORD:-skyfi_secret}
+      CORS_ALLOWED_ORIGINS: http://localhost:${SKYFI_HTTP_PORT:-8080},http://localhost:${SKYFI_FRONTEND_PORT:-5173}
+      REFRESH_COOKIE_SECURE: "false"
+      LOG_PATH: storage/logs/app.log
+      MIKROTIK_CREDENTIAL_ENCRYPTION_KEY: ${MIKROTIK_CREDENTIAL_ENCRYPTION_KEY:-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/var/www/backend/src
+      - ./backend/config:/var/www/backend/config
+      - ./backend/routes:/var/www/backend/routes
+      - ./backend/database:/var/www/backend/database
+      - ./backend/public:/var/www/backend/public
+      - ./backend/autoload.php:/var/www/backend/autoload.php
+      - ./backend/composer.json:/var/www/backend/composer.json
+      - backend-storage:/var/www/backend/storage
+    networks:
+      - skyfi
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(is_file(\"/var/www/backend/public/index.php\") ? 0 : 1);'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: development
+    environment:
+      VITE_API_BASE_URL: /api/v1
+    ports:
+      - "${SKYFI_FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+    networks:
+      - skyfi
+
+  supervisor:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: supervisor
+      args:
+        APP_ENV: local
+    environment:
+      APP_ENV: local
+      SKYFI_WORKER_INTERVAL_SECONDS: 300
+      DB_DSN: mysql:host=mariadb;port=3306;dbname=${MARIADB_DATABASE:-skyfi};charset=utf8mb4
+      DB_USERNAME: ${MARIADB_USER:-skyfi}
+      DB_PASSWORD: ${MARIADB_PASSWORD:-skyfi_secret}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-change-me-please-32chars}
+      MIKROTIK_CREDENTIAL_ENCRYPTION_KEY: ${MIKROTIK_CREDENTIAL_ENCRYPTION_KEY:-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/var/www/backend/src
+      - ./backend/config:/var/www/backend/config
+      - ./backend/database:/var/www/backend/database
+      - backend-storage:/var/www/backend/storage
+    networks:
+      - skyfi
+
+  mariadb:
+    image: mariadb:11.4
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=256M
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-skyfi}
+      MARIADB_USER: ${MARIADB_USER:-skyfi}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-skyfi_secret}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root_secret}
+    ports:
+      - "${SKYFI_DB_PORT:-3306}:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    networks:
+      - skyfi
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -uroot -p$${MARIADB_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${SKYFI_REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - skyfi
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  backend-storage:
+  frontend-node-modules:
+  mariadb-data:
+  redis-data:
+
+networks:
+  skyfi:
+    driver: bridge

@@ -20,7 +20,7 @@ describe('authSlice reducer', () => {
   });
 
   test('should handle sessionStarted', () => {
-    const user = { id: 1, name: 'Alice', email: 'alice@skyfi.com', roles: ['Administrator'] };
+    const user = { id: '1', name: 'Alice', email: 'alice@skyfi.com', roles: ['Administrator'] };
     const session = { user, accessToken: 'dummy-token', refreshToken: 'dummy-refresh' };
     const nextState = authReducer(initialState, sessionStarted(session));
 
@@ -32,7 +32,7 @@ describe('authSlice reducer', () => {
 
   test('should handle sessionEnded', () => {
     const loggedInState: AuthState = {
-      user: { id: 1, name: 'Alice', email: 'alice@skyfi.com', roles: ['Administrator'] },
+      user: { id: '1', name: 'Alice', email: 'alice@skyfi.com', roles: ['Administrator'] },
       accessToken: 'dummy-token',
       isAuthenticated: true,
       isInitialized: true,

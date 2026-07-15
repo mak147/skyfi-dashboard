@@ -13,7 +13,11 @@ frontend/.env
 
 # Runtime data
 backend/storage/logs/*
+backend/storage/cache/*
+backend/storage/uploads/*
 !backend/storage/logs/.gitkeep
+!backend/storage/cache/.gitkeep
+!backend/storage/uploads/.gitkeep
 
 # IDE and OS files
 .DS_Store
