@@ -1,0 +1,20 @@
+parameters:
+    level: 6
+    paths:
+        - src/
+        - routes/
+        - config/
+        - database/
+        - public/index.php
+    excludePaths:
+        - vendor/
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        # PDO::query() return type varies by PHP version
+        - '#Call to an undefined method PDO::#'
+        # The custom autoloader is intentionally bootstrapped in index.php
+        - '#Class .+ not found#'
+        # Container uses dynamic property access for service instances
+        - '#Access to an undefined property .+::\$instances#'

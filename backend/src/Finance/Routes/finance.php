@@ -5,6 +5,7 @@ declare(strict_types=1);
 use SkyFi\Finance\Controllers\FinanceController;
 use SkyFi\Rbac\Middleware\RequirePermissionMiddleware;
 use SkyFi\Shared\Http\Middleware\JwtAuthMiddleware;
+use SkyFi\Shared\Http\Middleware\ProtectRoute;
 use SkyFi\Shared\Http\Request;
 use SkyFi\Shared\Http\Response;
 use SkyFi\Shared\Http\Router;
@@ -14,14 +15,17 @@ return static function (Router $router, Container $container): void {
     $controller = $container->get(FinanceController::class);
     $auth = $container->get(JwtAuthMiddleware::class);
     $permissions = $container->get(RequirePermissionMiddleware::class);
+    $actor = static fn(Request $request): int => (int) ($request->attributes()['claims']['sub'] ?? 0);
+
     $protect = static fn(string $permission, callable $handler): callable => static function (Request $request) use ($auth, $permissions, $permission, $handler): Response {
         $claims = $auth->authenticate($request);
-        $permissions->authorize((int) ($claims['sub'] ?? 0), $permission);
         $attributes = $request->attributes();
         $attributes['claims'] = $claims;
-        return $handler($request->withAttributes($attributes));
+        $request = $request->withAttributes($attributes);
+        $userId = (int) ($claims['sub'] ?? 0);
+        $permissions->authorize($userId, $permission);
+        return $handler($request);
     };
-    $actor = static fn(Request $request): int => (int) ($request->attributes()['claims']['sub'] ?? 0);
 
     $router->add('GET', '/api/v1/finance/dashboard', $protect('finance.view', static fn(): Response => new Response(200, ['data' => $controller->dashboard()])));
     $router->add('GET', '/api/v1/finance/chart-of-accounts', $protect('finance.view', static fn(): Response => new Response(200, ['data' => $controller->getChartOfAccounts()])));

@@ -122,9 +122,9 @@ INSERT INTO permissions (name, description) VALUES
 ON DUPLICATE KEY UPDATE description = VALUES(description);
 
 -- Assign permissions to admin role (assuming role_id = 1 is superadmin/admin)
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT 1, id FROM permissions WHERE name IN (
+INSERT INTO permission_role (permission_id, role_id)
+SELECT id, 1 FROM permissions WHERE name IN (
     'finance.view', 'finance.create', 'finance.update', 'finance.delete',
     'finance.manage', 'finance.reports', 'expenses.manage', 'revenue.manage', 'accounts.manage'
-) ON DUPLICATE KEY UPDATE permission_id = VALUES(permission_id);
+) ON DUPLICATE KEY UPDATE role_id = VALUES(role_id);
 

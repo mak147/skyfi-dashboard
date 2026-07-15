@@ -1,32 +1,39 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { AuthenticationRoutes } from '@/features/authentication/routes';
-import { ConnectionRoutes } from '@/features/connections/routes';
-import { CustomerRoutes } from '@/features/customers/routes';
-import { DashboardRoutes } from '@/features/dashboard/routes';
-import { BillingRoutes } from '@/features/billing/routes';
-import { PackageRoutes } from '@/features/packages/routes';
-import { PaymentRoutes } from '@/features/payments/routes';
-import { FinanceRoutes } from '@/features/finance/routes';
-import { RbacRoutes } from '@/features/rbac/routes';
-import { MikrotikRoutes } from '@/features/mikrotik/routes';
-import { PppoeRoutes } from '@/features/pppoe/routes';
-import { HotspotRoutes } from '@/features/hotspot/routes';
-import { SupportRoutes } from '@/features/support/routes';
-import { InventoryRoutes } from '@/features/inventory/routes';
-import { PurchasingRoutes } from '@/features/purchasing/routes';
-import { VendorRoutes } from '@/features/vendors/routes';
-import { FieldServiceRoutes } from '@/features/field-service/routes';
-import { ReportRoutes } from '@/features/reports/routes';
-import { SystemRoutes } from '@/features/system/routes';
-import { NotificationRoutes } from '@/features/notifications/routes';
-import { AuditRoutes } from '@/features/audit/routes';
-import { backupRoutes } from '@/features/backup/routes';
-import { IntegrationRoutes } from '@/features/integration/routes';
-import { WorkflowRoutes } from '@/features/workflow/routes';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
-import { PortalRoutes } from '@/portal/routes';
+
+const LoginPage = lazy(() => import('@/features/authentication/routes/LoginPage').then((m) => ({ default: m.LoginPage })));
+const CustomerRoutesLazy = lazy(() => import('@/features/customers/routes'));
+const ConnectionRoutesLazy = lazy(() => import('@/features/connections/routes'));
+const DashboardPage = lazy(() => import('@/features/dashboard/routes/DashboardPage').then((m) => ({ default: m.DashboardPage })));
+const BillingRoutesLazy = lazy(() => import('@/features/billing/routes'));
+const PackageRoutesLazy = lazy(() => import('@/features/packages/routes'));
+const PaymentRoutesLazy = lazy(() => import('@/features/payments/routes'));
+const FinanceRoutesLazy = lazy(() => import('@/features/finance/routes'));
+const RbacRoutesLazy = lazy(() => import('@/features/rbac/routes'));
+const MikrotikRoutesLazy = lazy(() => import('@/features/mikrotik/routes'));
+const PppoeRoutesLazy = lazy(() => import('@/features/pppoe/routes'));
+const HotspotRoutesLazy = lazy(() => import('@/features/hotspot/routes'));
+const SupportRoutesLazy = lazy(() => import('@/features/support/routes'));
+const InventoryRoutesLazy = lazy(() => import('@/features/inventory/routes'));
+const PurchasingRoutesLazy = lazy(() => import('@/features/purchasing/routes'));
+const VendorRoutesLazy = lazy(() => import('@/features/vendors/routes'));
+const FieldServiceRoutesLazy = lazy(() => import('@/features/field-service/routes'));
+const ReportRoutesLazy = lazy(() => import('@/features/reports/routes'));
+const SystemRoutesLazy = lazy(() => import('@/features/system/routes'));
+const NotificationRoutesLazy = lazy(() => import('@/features/notifications/routes'));
+const AuditRoutesLazy = lazy(() => import('@/features/audit/routes'));
+const IntegrationRoutesLazy = lazy(() => import('@/features/integration/routes'));
+const WorkflowRoutesLazy = lazy(() => import('@/features/workflow/routes'));
+const PortalRoutesLazy = lazy(() => import('@/portal/routes'));
+
+const PageLoadingFallback = () => (
+  <div className="flex min-h-[60vh] items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+  </div>
+);
 
 const NotFound = () => (
   <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
@@ -38,39 +45,38 @@ const NotFound = () => (
 );
 
 export const AppRoutes = () => (
-  <Routes>
-    <Route path="/login" element={<AuthenticationRoutes.login />} />
-    <Route element={<ProtectedRoute />}>
-      <Route element={<AppLayout />}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<DashboardRoutes.page />} />
-        <Route path="/customers/*" element={<CustomerRoutes />} />
-        <Route path="/connections/*" element={<ConnectionRoutes />} />
-        <Route path="/packages/*" element={<PackageRoutes />} />
-        <Route path="/billing/*" element={<BillingRoutes />} />
-        <Route path="/payments/*" element={<PaymentRoutes />} />
-        <Route path="/finance/*" element={<FinanceRoutes />} />
-        <Route path="/network/routers/*" element={<MikrotikRoutes />} />
-        <Route path="/network/pppoe/*" element={<PppoeRoutes />} />
-        <Route path="/hotspot/*" element={<HotspotRoutes />} />
-        <Route path="/support/*" element={<SupportRoutes />} />
-        <Route path="/inventory/*" element={<InventoryRoutes />} />
-        <Route path="/purchasing/*" element={<PurchasingRoutes />} />
-        <Route path="/vendors/*" element={<VendorRoutes />} />
-        <Route path="/field-service/*" element={<FieldServiceRoutes />} />
-        <Route path="/reports/*" element={<ReportRoutes />} />
-        <Route path="/admin/system/*" element={<SystemRoutes />} />
-        <Route path="/admin/roles/*" element={<RbacRoutes />} />
-        <Route path="/notifications/*" element={<NotificationRoutes />} />
-        <Route path="/audit/*" element={<AuditRoutes />} />
-        <Route path="/integration/*" element={<IntegrationRoutes />} />
-        <Route path="/workflows/*" element={<WorkflowRoutes />} />
-        {backupRoutes.map((route) => (
-          <Route key={route.path} path={route.path} element={route.element} />
-        ))}
+  <Suspense fallback={<PageLoadingFallback />}>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/customers/*" element={<CustomerRoutesLazy />} />
+          <Route path="/connections/*" element={<ConnectionRoutesLazy />} />
+          <Route path="/packages/*" element={<PackageRoutesLazy />} />
+          <Route path="/billing/*" element={<BillingRoutesLazy />} />
+          <Route path="/payments/*" element={<PaymentRoutesLazy />} />
+          <Route path="/finance/*" element={<FinanceRoutesLazy />} />
+          <Route path="/network/routers/*" element={<MikrotikRoutesLazy />} />
+          <Route path="/network/pppoe/*" element={<PppoeRoutesLazy />} />
+          <Route path="/hotspot/*" element={<HotspotRoutesLazy />} />
+          <Route path="/support/*" element={<SupportRoutesLazy />} />
+          <Route path="/inventory/*" element={<InventoryRoutesLazy />} />
+          <Route path="/purchasing/*" element={<PurchasingRoutesLazy />} />
+          <Route path="/vendors/*" element={<VendorRoutesLazy />} />
+          <Route path="/field-service/*" element={<FieldServiceRoutesLazy />} />
+          <Route path="/reports/*" element={<ReportRoutesLazy />} />
+          <Route path="/admin/system/*" element={<SystemRoutesLazy />} />
+          <Route path="/admin/roles/*" element={<RbacRoutesLazy />} />
+          <Route path="/notifications/*" element={<NotificationRoutesLazy />} />
+          <Route path="/audit/*" element={<AuditRoutesLazy />} />
+          <Route path="/integration/*" element={<IntegrationRoutesLazy />} />
+          <Route path="/workflows/*" element={<WorkflowRoutesLazy />} />
+        </Route>
       </Route>
-    </Route>
-    <Route path="/portal/*" element={<PortalRoutes />} />
-    <Route path="*" element={<NotFound />} />
-  </Routes>
+      <Route path="/portal/*" element={<PortalRoutesLazy />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  </Suspense>
 );

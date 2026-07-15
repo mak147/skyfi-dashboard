@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use SkyFi\Shared\Http\Middleware\JwtAuthMiddleware;
+use SkyFi\Shared\Http\Middleware\ProtectRoute;
 use SkyFi\Shared\Http\Request;
 use SkyFi\Shared\Http\Router;
 use SkyFi\Shared\Providers\Container;
@@ -25,33 +26,26 @@ return static function (Router $router, Container $container): void {
     $lookups = $container->get(SupportLookupController::class);
     $config = $container->get(SupportConfigurationController::class);
     $auth = $container->get(JwtAuthMiddleware::class);
-    $protect = static fn(callable $handler): callable => static function (
-        Request $request,
-    ) use ($auth, $handler) {
-        $attributes = $request->attributes();
-        $attributes["claims"] = $auth->authenticate($request);
-        return $handler($request->withAttributes($attributes));
-    };
 
     $router->add(
         "GET",
         "/api/v1/support/dashboard",
-        $protect($dashboard->dashboard(...)),
+        ProtectRoute::wrap($auth, $dashboard->dashboard(...)),
     );
     $router->add(
         "GET",
         "/api/v1/support/sla/dashboard",
-        $protect($dashboard->sla(...)),
+        ProtectRoute::wrap($auth, $dashboard->sla(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/sla/process",
-        $protect($dashboard->process(...)),
+        ProtectRoute::wrap($auth, $dashboard->process(...)),
     );
     $router->add(
         "GET",
         "/api/v1/support/lookups/{resource}",
-        $protect($lookups->lookup(...)),
+        ProtectRoute::wrap($auth, $lookups->lookup(...)),
     );
     $withResource = static fn(
         string $resource,
@@ -71,148 +65,148 @@ return static function (Router $router, Container $container): void {
         $router->add(
             "GET",
             "/api/v1/support/" . $resource,
-            $protect($withResource($resource, $config->index(...))),
+            ProtectRoute::wrap($auth, $withResource($resource, $config->index(...))),
         );
         $router->add(
             "POST",
             "/api/v1/support/" . $resource,
-            $protect($withResource($resource, $config->store(...))),
+            ProtectRoute::wrap($auth, $withResource($resource, $config->store(...))),
         );
         $router->add(
             "PUT",
             "/api/v1/support/" . $resource . "/{configId}",
-            $protect($withResource($resource, $config->update(...))),
+            ProtectRoute::wrap($auth, $withResource($resource, $config->update(...))),
         );
         $router->add(
             "DELETE",
             "/api/v1/support/" . $resource . "/{configId}",
-            $protect($withResource($resource, $config->destroy(...))),
+            ProtectRoute::wrap($auth, $withResource($resource, $config->destroy(...))),
         );
     }
     $router->add(
         "GET",
         "/api/v1/support/config/{resource}",
-        $protect($config->index(...)),
+        ProtectRoute::wrap($auth, $config->index(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/config/{resource}",
-        $protect($config->store(...)),
+        ProtectRoute::wrap($auth, $config->store(...)),
     );
     $router->add(
         "PUT",
         "/api/v1/support/config/{resource}/{configId}",
-        $protect($config->update(...)),
+        ProtectRoute::wrap($auth, $config->update(...)),
     );
     $router->add(
         "DELETE",
         "/api/v1/support/config/{resource}/{configId}",
-        $protect($config->destroy(...)),
+        ProtectRoute::wrap($auth, $config->destroy(...)),
     );
 
     $router->add(
         "GET",
         "/api/v1/support/tickets",
-        $protect($tickets->index(...)),
+        ProtectRoute::wrap($auth, $tickets->index(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets",
-        $protect($tickets->store(...)),
+        ProtectRoute::wrap($auth, $tickets->store(...)),
     );
     $router->add(
         "GET",
         "/api/v1/support/tickets/{id}",
-        $protect($tickets->show(...)),
+        ProtectRoute::wrap($auth, $tickets->show(...)),
     );
     $router->add(
         "PUT",
         "/api/v1/support/tickets/{id}",
-        $protect($tickets->update(...)),
+        ProtectRoute::wrap($auth, $tickets->update(...)),
     );
     $router->add(
         "DELETE",
         "/api/v1/support/tickets/{id}",
-        $protect($tickets->destroy(...)),
+        ProtectRoute::wrap($auth, $tickets->destroy(...)),
     );
     $router->add(
         "PATCH",
         "/api/v1/support/tickets/{id}/status",
-        $protect($actions->status(...)),
+        ProtectRoute::wrap($auth, $actions->status(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets/{id}/assign",
-        $protect($actions->assign(...)),
+        ProtectRoute::wrap($auth, $actions->assign(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets/{id}/reassign",
-        $protect($actions->assign(...)),
+        ProtectRoute::wrap($auth, $actions->assign(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets/{id}/resolve",
-        $protect($actions->resolve(...)),
+        ProtectRoute::wrap($auth, $actions->resolve(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets/{id}/close",
-        $protect($actions->close(...)),
+        ProtectRoute::wrap($auth, $actions->close(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets/{id}/reopen",
-        $protect($actions->reopen(...)),
+        ProtectRoute::wrap($auth, $actions->reopen(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets/{id}/cancel",
-        $protect($actions->cancel(...)),
+        ProtectRoute::wrap($auth, $actions->cancel(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets/{id}/escalate",
-        $protect($actions->escalate(...)),
+        ProtectRoute::wrap($auth, $actions->escalate(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets/{id}/merge",
-        $protect($actions->merge(...)),
+        ProtectRoute::wrap($auth, $actions->merge(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets/{id}/split",
-        $protect($actions->split(...)),
+        ProtectRoute::wrap($auth, $actions->split(...)),
     );
     $router->add(
         "GET",
         "/api/v1/support/tickets/{id}/comments",
-        $protect($comments->index(...)),
+        ProtectRoute::wrap($auth, $comments->index(...)),
     );
     $router->add(
         "POST",
         "/api/v1/support/tickets/{id}/comments",
-        $protect($comments->store(...)),
+        ProtectRoute::wrap($auth, $comments->store(...)),
     );
     $router->add(
         "PUT",
         "/api/v1/support/tickets/{id}/comments/{commentId}",
-        $protect($comments->update(...)),
+        ProtectRoute::wrap($auth, $comments->update(...)),
     );
     $router->add(
         "DELETE",
         "/api/v1/support/tickets/{id}/comments/{commentId}",
-        $protect($comments->destroy(...)),
+        ProtectRoute::wrap($auth, $comments->destroy(...)),
     );
     $router->add(
         "GET",
         "/api/v1/support/tickets/{id}/timeline",
-        $protect($timeline->timeline(...)),
+        ProtectRoute::wrap($auth, $timeline->timeline(...)),
     );
     $router->add(
         "GET",
         "/api/v1/support/tickets/{id}/assignments",
-        $protect($timeline->assignments(...)),
+        ProtectRoute::wrap($auth, $timeline->assignments(...)),
     );
 };

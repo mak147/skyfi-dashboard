@@ -36,6 +36,7 @@ use SkyFi\Shared\Auth\Services\JwtTokenService;
 use SkyFi\Shared\Http\Router;
 use SkyFi\Shared\Logging\JsonLogger;
 use SkyFi\Shared\Http\Middleware\JwtAuthMiddleware;
+use SkyFi\Shared\Http\Middleware\RateLimitMiddleware;
 use SkyFi\Infrastructure\Repositories\PdoPopSiteRepository;
 use SkyFi\Infrastructure\Repositories\PdoTowerRepository;
 use SkyFi\Infrastructure\Repositories\PdoSectorRepository;
@@ -119,6 +120,7 @@ final class Container
             $this->instances[PdoRefreshTokenRepository::class],
             $this->instances[PdoPasswordResetRepository::class],
             $this->instances[JwtTokenService::class],
+            $pdo,
             (int) $config['jwt_refresh_ttl'],
             (int) $config['jwt_session_refresh_ttl'],
         );
@@ -129,6 +131,7 @@ final class Container
             (bool) $config['refresh_cookie_secure'],
         );
         $this->instances[JwtAuthMiddleware::class] = new JwtAuthMiddleware($this->instances[JwtTokenService::class]);
+        $this->instances[RateLimitMiddleware::class] = new RateLimitMiddleware($pdo, 20, 60);
         
         $this->instances[PdoRbacRepository::class] = new PdoRbacRepository($pdo);
         $this->instances[PdoAuditLogger::class] = new PdoAuditLogger($pdo);
