@@ -1,0 +1,2 @@
+import { Button } from '@/components/ui/button';
+export const LogoUploader = ({ type, onUpload, isUploading }: { type: string; onUpload: (file: File, type: string) => void; isUploading?: boolean }) => <div className="rounded-lg border border-dashed border-slate-300 p-4"><input type="file" accept="image/*,.ico" onChange={(event) => { const file = event.target.files?.[0]; if (file) onUpload(file, type); }} /><Button type="button" variant="secondary" size="sm" isLoading={isUploading} className="mt-3">Upload {type.replace('_', ' ')}</Button></div>;

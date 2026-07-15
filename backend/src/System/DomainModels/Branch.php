@@ -1,0 +1,3 @@
+<?php declare(strict_types=1);
+namespace SkyFi\System\DomainModels;
+final class Branch { public function __construct(public readonly array $attributes){} public static function fromRow(array $row): self { return new self(self::decode($row)); } public function toArray(): array { return $this->attributes; } private static function decode(array $row): array { foreach ($row as $k=>$v) if (is_string($v) && in_array($k,['password_policy','mfa_policy','file_upload_limits','email_settings','sms_provider_settings','cache_settings','logging_settings','custom_css','supported_languages','supported_timezones','supported_currencies','number_format','alert_preferences','reminder_preferences','sms_provider_placeholder'],true)) $row[$k]=json_decode($v,true) ?: []; return $row; }}

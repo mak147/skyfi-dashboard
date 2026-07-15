@@ -117,6 +117,43 @@ final class Container
             $this->instances[RequirePermissionMiddleware::class]
         );
 
+        $this->instances[\SkyFi\System\Repositories\PdoCompanyRepository::class] = new \SkyFi\System\Repositories\PdoCompanyRepository($pdo);
+        $this->instances[\SkyFi\System\Repositories\PdoBranchRepository::class] = new \SkyFi\System\Repositories\PdoBranchRepository($pdo);
+        $this->instances[\SkyFi\System\Repositories\PdoDepartmentRepository::class] = new \SkyFi\System\Repositories\PdoDepartmentRepository($pdo);
+        $this->instances[\SkyFi\System\Repositories\PdoSystemSettingsRepository::class] = new \SkyFi\System\Repositories\PdoSystemSettingsRepository($pdo);
+        $this->instances[\SkyFi\System\Repositories\PdoBrandingRepository::class] = new \SkyFi\System\Repositories\PdoBrandingRepository($pdo);
+        $this->instances[\SkyFi\System\Repositories\PdoLocalizationRepository::class] = new \SkyFi\System\Repositories\PdoLocalizationRepository($pdo);
+        $this->instances[\SkyFi\System\Repositories\PdoNotificationPreferenceRepository::class] = new \SkyFi\System\Repositories\PdoNotificationPreferenceRepository($pdo);
+        $this->instances[\SkyFi\System\Validators\SystemValidator::class] = new \SkyFi\System\Validators\SystemValidator();
+        $this->instances[\SkyFi\System\Services\SystemAdministrationService::class] = new \SkyFi\System\Services\SystemAdministrationService(
+            $this->instances[\SkyFi\System\Repositories\PdoCompanyRepository::class],
+            $this->instances[\SkyFi\System\Repositories\PdoBranchRepository::class],
+            $this->instances[\SkyFi\System\Repositories\PdoDepartmentRepository::class],
+            $this->instances[\SkyFi\System\Repositories\PdoSystemSettingsRepository::class],
+            $this->instances[\SkyFi\System\Repositories\PdoBrandingRepository::class],
+            $this->instances[\SkyFi\System\Repositories\PdoLocalizationRepository::class],
+            $this->instances[\SkyFi\System\Repositories\PdoNotificationPreferenceRepository::class],
+            $this->instances[\SkyFi\System\Validators\SystemValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\System\Services\SystemConfigurationProvider::class] = new \SkyFi\System\Services\SystemConfigurationProvider(
+            $this->instances[\SkyFi\System\Repositories\PdoCompanyRepository::class],
+            $this->instances[\SkyFi\System\Repositories\PdoSystemSettingsRepository::class],
+            $this->instances[\SkyFi\System\Repositories\PdoBrandingRepository::class],
+            $this->instances[\SkyFi\System\Repositories\PdoLocalizationRepository::class],
+            $this->instances[\SkyFi\System\Repositories\PdoNotificationPreferenceRepository::class],
+        );
+        $this->instances[\SkyFi\System\Services\BrandingAssetService::class] = new \SkyFi\System\Services\BrandingAssetService();
+        $this->instances[\SkyFi\System\Services\SystemDashboardService::class] = new \SkyFi\System\Services\SystemDashboardService($this->instances[\SkyFi\System\Repositories\PdoSystemSettingsRepository::class], $this->instances[\SkyFi\System\Services\SystemConfigurationProvider::class]);
+        $this->instances[\SkyFi\System\Controllers\CompanySettingsController::class] = new \SkyFi\System\Controllers\CompanySettingsController($this->instances[\SkyFi\System\Services\SystemAdministrationService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\System\Controllers\BranchController::class] = new \SkyFi\System\Controllers\BranchController($this->instances[\SkyFi\System\Services\SystemAdministrationService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\System\Controllers\DepartmentController::class] = new \SkyFi\System\Controllers\DepartmentController($this->instances[\SkyFi\System\Services\SystemAdministrationService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\System\Controllers\SystemSettingsController::class] = new \SkyFi\System\Controllers\SystemSettingsController($this->instances[\SkyFi\System\Services\SystemAdministrationService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\System\Controllers\BrandingController::class] = new \SkyFi\System\Controllers\BrandingController($this->instances[\SkyFi\System\Services\SystemAdministrationService::class], $this->instances[\SkyFi\System\Services\BrandingAssetService::class], $this->instances[\SkyFi\System\Services\SystemConfigurationProvider::class], $this->instances[\SkyFi\System\Validators\SystemValidator::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\System\Controllers\LocalizationController::class] = new \SkyFi\System\Controllers\LocalizationController($this->instances[\SkyFi\System\Services\SystemAdministrationService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\System\Controllers\NotificationSettingsController::class] = new \SkyFi\System\Controllers\NotificationSettingsController($this->instances[\SkyFi\System\Services\SystemAdministrationService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\System\Controllers\SystemDashboardController::class] = new \SkyFi\System\Controllers\SystemDashboardController($this->instances[\SkyFi\System\Services\SystemDashboardService::class], $this->instances[\SkyFi\System\Services\SystemConfigurationProvider::class], $this->instances[RequirePermissionMiddleware::class]);
+
         $this->instances[PdoPaymentRepository::class] = new PdoPaymentRepository($pdo);
         $this->instances[DashboardService::class] = new DashboardService($this->instances[PdoPaymentRepository::class]);
         $this->instances[DashboardController::class] = new DashboardController($this->instances[DashboardService::class]);

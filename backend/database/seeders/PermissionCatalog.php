@@ -154,6 +154,9 @@ final class PermissionCatalog
             'manage:user' => 'Manage users.',
             'manage:role' => 'Manage roles.',
             'manage:settings' => 'Manage system settings.',
+            'system.view' => 'View company and system administration settings.',
+            'system.update' => 'Update company, branding, localization, notification, and operational settings.',
+            'system.manage' => 'Manage branches, departments, maintenance toggles, and administrative operations.',
             'update:user:role' => 'Update user roles within scope.',
             'manage:ticket:own' => 'Manage the signed-in customer tickets.',
         ];

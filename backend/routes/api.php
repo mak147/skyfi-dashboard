@@ -65,4 +65,8 @@ return static function (Router $router, Container $container): void {
 
     $registerReportRoutes = require dirname(__DIR__) . '/src/Reports/Routes/reports.php';
     $registerReportRoutes($router, $container);
+
+
+    $registerSystemRoutes = require dirname(__DIR__) . '/src/System/Routes/system.php';
+    $registerSystemRoutes($router, $container);
 };

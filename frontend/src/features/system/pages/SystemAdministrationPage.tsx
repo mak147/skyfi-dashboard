@@ -1,0 +1,8 @@
+import { Link } from 'react-router-dom';
+import { Alert } from '@/components/ui/alert';
+import { apiErrorMessage } from '@/lib/apiClient';
+import { SystemDashboardWidgets } from '../components/SystemDashboardWidgets';
+import { SystemPageSkeleton } from '../components/SystemPageSkeleton';
+import { useSystemDashboard } from '../api/useSystem';
+const links = [['Company Profile', 'company'], ['Branches', 'branches'], ['Departments', 'departments'], ['System Settings', 'settings'], ['Branding', 'branding'], ['Localization', 'localization'], ['Notification Settings', 'notifications']];
+export const SystemAdministrationPage = () => { const dashboard = useSystemDashboard(); if (dashboard.isLoading) return <SystemPageSkeleton />; if (dashboard.error || !dashboard.data) return <Alert title="System administration unavailable">{apiErrorMessage(dashboard.error)}</Alert>; return <div className="space-y-6"><header><p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600">Administration</p><h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">Company & System Administration</h1><p className="text-sm text-slate-500">Centralized organization, application, localization, branding, and notification preferences.</p></header><SystemDashboardWidgets data={dashboard.data} /><div className="grid gap-4 md:grid-cols-3">{links.map(([label, path]) => <Link key={path} to={`/admin/system/${path}`} className="rounded-xl border bg-white p-5 font-semibold shadow-sm hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900">{label}<span className="mt-1 block text-sm font-normal text-slate-500">Configure {label.toLowerCase()}.</span></Link>)}</div></div>; };

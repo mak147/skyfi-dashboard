@@ -1,0 +1,1 @@
+export const SystemPageSkeleton = () => <div className="space-y-4">{Array.from({ length: 3 }).map((_, index) => <div key={index} className="h-28 animate-pulse rounded-xl bg-slate-200 dark:bg-slate-800" />)}</div>;

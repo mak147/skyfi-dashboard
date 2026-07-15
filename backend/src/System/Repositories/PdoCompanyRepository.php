@@ -1,0 +1,4 @@
+<?php declare(strict_types=1);
+namespace SkyFi\System\Repositories;
+use SkyFi\System\Contracts\CompanyRepositoryContract;
+final class PdoCompanyRepository extends PdoSystemRepository implements CompanyRepositoryContract { private array $allowed=['company_name','legal_name','registration_number','tax_number','address_line_1','address_line_2','city','state','postal_code','country','phone','email','website','logo_path','favicon_path','timezone','currency_code','date_format','language_code','status']; public function first(): array { return $this->singleton('companies', self::defaults()); } public function update(array $data, ?int $userId=null): array { return $this->updateSingleton('companies',$data,self::defaults(),$this->allowed,[], $userId); } public static function defaults(): array { return ['company_name'=>'SkyFi Networks','timezone'=>'Asia/Karachi','currency_code'=>'PKR','date_format'=>'YYYY-MM-DD','language_code'=>'en','status'=>'active']; }}

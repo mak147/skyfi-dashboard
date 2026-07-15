@@ -1,0 +1,10 @@
+import { useEffect, useState } from 'react';
+import { Alert } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { apiErrorMessage } from '@/lib/apiClient';
+import { LocalizationPreview } from '../components/LocalizationPreview';
+import { SettingsForm } from '../components/SettingsForm';
+import { SystemPageSkeleton } from '../components/SystemPageSkeleton';
+import { useLocalizationOptions, useLocalizationSettings, useUpdateLocalizationSettings } from '../api/useSystem';
+import type { LocalizationSettings } from '../types';
+export const LocalizationPage = () => { const q = useLocalizationSettings(); useLocalizationOptions(); const save = useUpdateLocalizationSettings(); const [form, setForm] = useState<Partial<LocalizationSettings>>({}); useEffect(() => { if (q.data) setForm(q.data); }, [q.data]); if (q.isLoading) return <SystemPageSkeleton />; if (q.error || !q.data) return <Alert title="Localization unavailable">{apiErrorMessage(q.error)}</Alert>; const preview = { ...q.data, ...form } as LocalizationSettings; return <div className="space-y-6"><h1 className="text-2xl font-bold dark:text-white">Localization</h1><LocalizationPreview data={preview} /><SettingsForm onSubmit={() => save.mutate(form)} isSaving={save.isPending}><div className="grid gap-3 md:grid-cols-2"><Input placeholder="Default language" value={form.default_language ?? ''} onChange={(e) => setForm({ ...form, default_language: e.target.value })} /><Input placeholder="Default timezone" value={form.default_timezone ?? ''} onChange={(e) => setForm({ ...form, default_timezone: e.target.value })} /><Input placeholder="Default currency" value={form.default_currency ?? ''} onChange={(e) => setForm({ ...form, default_currency: e.target.value })} /><Input placeholder="Date format" value={form.date_format ?? ''} onChange={(e) => setForm({ ...form, date_format: e.target.value })} /><Input placeholder="Time format" value={form.time_format ?? ''} onChange={(e) => setForm({ ...form, time_format: e.target.value })} /></div></SettingsForm></div>; };

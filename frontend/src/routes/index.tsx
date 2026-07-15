@@ -18,6 +18,7 @@ import { PurchasingRoutes } from '@/features/purchasing/routes';
 import { VendorRoutes } from '@/features/vendors/routes';
 import { FieldServiceRoutes } from '@/features/field-service/routes';
 import { ReportRoutes } from '@/features/reports/routes';
+import { SystemRoutes } from '@/features/system/routes';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
 
@@ -52,6 +53,7 @@ export const AppRoutes = () => (
         <Route path="/vendors/*" element={<VendorRoutes />} />
         <Route path="/field-service/*" element={<FieldServiceRoutes />} />
         <Route path="/reports/*" element={<ReportRoutes />} />
+        <Route path="/admin/system/*" element={<SystemRoutes />} />
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
       </Route>
     </Route>

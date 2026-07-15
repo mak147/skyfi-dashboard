@@ -318,6 +318,13 @@ export const navigationGroups: NavigationGroup[] = [
     label: 'Administration',
     items: [
       {
+        label: 'System Administration',
+        path: '/admin/system',
+        icon: '⚙',
+        description: 'Manage company profile, branches, branding, localization, and settings.',
+        requiredPermission: 'system.view',
+      },
+      {
         label: 'Role Management',
         path: '/admin/roles',
         icon: '◇',

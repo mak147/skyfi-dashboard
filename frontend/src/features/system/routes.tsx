@@ -1,0 +1,13 @@
+import type { ReactNode } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { usePermissions } from '@/hooks/usePermissions';
+import { BrandingPage } from './pages/BrandingPage';
+import { BranchesPage } from './pages/BranchesPage';
+import { CompanyProfilePage } from './pages/CompanyProfilePage';
+import { DepartmentsPage } from './pages/DepartmentsPage';
+import { LocalizationPage } from './pages/LocalizationPage';
+import { NotificationSettingsPage } from './pages/NotificationSettingsPage';
+import { SystemAdministrationPage } from './pages/SystemAdministrationPage';
+import { SystemSettingsPage } from './pages/SystemSettingsPage';
+const Gate = ({ permission, children }: { permission: string; children: ReactNode }) => { const { can, isLoading } = usePermissions(); if (isLoading) return <div className="h-72 animate-pulse rounded-xl bg-slate-200" />; return can(permission) ? <>{children}</> : <Navigate to="/dashboard" replace />; };
+export const SystemRoutes = () => <Routes><Route index element={<Gate permission="system.view"><SystemAdministrationPage /></Gate>} /><Route path="company" element={<Gate permission="system.view"><CompanyProfilePage /></Gate>} /><Route path="branches" element={<Gate permission="system.view"><BranchesPage /></Gate>} /><Route path="departments" element={<Gate permission="system.view"><DepartmentsPage /></Gate>} /><Route path="settings" element={<Gate permission="system.view"><SystemSettingsPage /></Gate>} /><Route path="branding" element={<Gate permission="system.view"><BrandingPage /></Gate>} /><Route path="localization" element={<Gate permission="system.view"><LocalizationPage /></Gate>} /><Route path="notifications" element={<Gate permission="system.view"><NotificationSettingsPage /></Gate>} /><Route path="*" element={<Navigate to="/admin/system" replace />} /></Routes>;
