@@ -17,7 +17,7 @@ final class PdoUserRepository implements UserRepositoryContract
     public function findByEmail(string $email): ?User
     {
         $statement = $this->connection->prepare(
-            'SELECT id, name, email, password, deleted_at FROM users WHERE email = :email AND deleted_at IS NULL LIMIT 1',
+            'SELECT id, name, email, customer_id, password, deleted_at FROM users WHERE email = :email AND deleted_at IS NULL LIMIT 1',
         );
         $statement->execute(['email' => strtolower($email)]);
         $row = $statement->fetch(PDO::FETCH_ASSOC);
@@ -28,12 +28,27 @@ final class PdoUserRepository implements UserRepositoryContract
     public function findById(int $id): ?User
     {
         $statement = $this->connection->prepare(
-            'SELECT id, name, email, password, deleted_at FROM users WHERE id = :id AND deleted_at IS NULL LIMIT 1',
+            'SELECT id, name, email, customer_id, password, deleted_at FROM users WHERE id = :id AND deleted_at IS NULL LIMIT 1',
         );
         $statement->execute(['id' => $id]);
         $row = $statement->fetch(PDO::FETCH_ASSOC);
 
         return is_array($row) ? $this->hydrate($row, true) : null;
+    }
+
+    public function findCustomerIdByUserId(int $id): ?int
+    {
+        $statement = $this->connection->prepare(
+            'SELECT customer_id FROM users WHERE id = :id AND deleted_at IS NULL LIMIT 1',
+        );
+        $statement->execute(['id' => $id]);
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if ($row === false || $row['customer_id'] === null) {
+            return null;
+        }
+
+        return (int) $row['customer_id'];
     }
 
     /** @param array<string, mixed> $row */
@@ -55,6 +70,7 @@ final class PdoUserRepository implements UserRepositoryContract
             (int) $row['id'],
             (string) $row['name'],
             (string) $row['email'],
+            isset($row['customer_id']) ? (int) $row['customer_id'] : null,
             (string) $row['password'],
             $roles,
         );

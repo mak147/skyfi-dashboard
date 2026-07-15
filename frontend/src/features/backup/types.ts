@@ -18,7 +18,7 @@ export interface BackupFile {
   file_path: string;
   file_size: number;
   checksum: string;
-  metadata: any;
+  metadata: Record<string, unknown>;
   verified_at: string | null;
   expires_at: string | null;
   created_at: string;
@@ -45,7 +45,7 @@ export interface StorageProvider {
   id: number;
   name: string;
   type: 'local' | 's3' | 'ftp' | 'sftp' | 'nas';
-  config: any;
+  config: Record<string, unknown>;
   is_active: boolean;
   is_default: boolean;
 }

@@ -1,11 +1,13 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactElement, ReactNode } from 'react';
 
+import { Children, cloneElement, isValidElement } from 'react';
 import { clsx } from 'clsx';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'link';
   size?: 'sm' | 'md' | 'lg' | 'icon';
   isLoading?: boolean;
+  asChild?: boolean;
   children: ReactNode;
 }
 
@@ -28,24 +30,41 @@ export const Button = ({
   variant = 'primary',
   size = 'md',
   isLoading = false,
+  asChild = false,
   disabled,
   children,
   className,
   ...props
-}: ButtonProps) => (
-  <button
-    className={clsx(
-      'inline-flex items-center justify-center gap-2 rounded-md font-semibold transition duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100',
-      variantClasses[variant],
-      sizeClasses[size],
-      className,
-    )}
-    disabled={disabled || isLoading}
-    {...props}
-  >
-    {isLoading ? (
-      <span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-    ) : null}
-    {children}
-  </button>
-);
+}: ButtonProps) => {
+  const classes = clsx(
+    'inline-flex items-center justify-center gap-2 rounded-md font-semibold transition duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100',
+    variantClasses[variant],
+    sizeClasses[size],
+    className,
+  );
+
+  if (asChild) {
+    const child = Children.only(children);
+    if (!isValidElement(child)) {
+      return null;
+    }
+
+    return cloneElement(child as ReactElement<{ className?: string; disabled?: boolean }>, {
+      className: clsx(classes, (child.props as { className?: string }).className),
+      disabled: disabled || isLoading,
+    });
+  }
+
+  return (
+    <button
+      className={classes}
+      disabled={disabled || isLoading}
+      {...props}
+    >
+      {isLoading ? (
+        <span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+      ) : null}
+      {children}
+    </button>
+  );
+};

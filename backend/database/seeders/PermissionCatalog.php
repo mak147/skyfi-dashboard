@@ -11,6 +11,7 @@ final class PermissionCatalog
     {
         return [
             '*' => 'Unrestricted access to all permissions.',
+            'portal.access' => 'Access the customer self-service portal.',
             'view:dashboard' => 'View a dashboard.',
             'view:dashboard:company' => 'View the company dashboard.',
             'view:dashboard:regional' => 'View a regional dashboard.',

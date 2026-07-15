@@ -6,18 +6,24 @@ namespace SkyFi\Shared\Auth\Services;
 
 use SkyFi\Shared\Auth\Contracts\AuthServiceContract;
 use SkyFi\Shared\Auth\Contracts\JwtServiceContract;
+use SkyFi\Shared\Auth\Contracts\PasswordResetRepositoryContract;
 use SkyFi\Shared\Auth\Contracts\RefreshTokenRepositoryContract;
 use SkyFi\Shared\Auth\Contracts\UserRepositoryContract;
 use SkyFi\Shared\Auth\Data\AuthSession;
 use SkyFi\Shared\Auth\Data\LoginData;
 use SkyFi\Shared\Auth\Models\User;
 use SkyFi\Shared\Exceptions\AuthenticationException;
+use SkyFi\Shared\Exceptions\NotFoundException;
+use SkyFi\Shared\Exceptions\ValidationException;
 
 final class AuthService implements AuthServiceContract
 {
+    private const RESET_TOKEN_TTL_SECONDS = 3600;
+
     public function __construct(
         private readonly UserRepositoryContract $users,
         private readonly RefreshTokenRepositoryContract $refreshTokens,
+        private readonly PasswordResetRepositoryContract $passwordResets,
         private readonly JwtServiceContract $jwt,
         private readonly int $refreshTtl,
         private readonly int $sessionRefreshTtl,
@@ -92,5 +98,84 @@ final class AuthService implements AuthServiceContract
     private static function generateRefreshToken(): string
     {
         return rtrim(strtr(base64_encode(random_bytes(64)), '+/', '-_'), '=');
+    }
+
+    public function forgotPassword(string $email): string
+    {
+        $user = $this->users->findByEmail($email);
+        if ($user === null) {
+            // Do not reveal whether the email exists.
+            return '';
+        }
+
+        $this->passwordResets->revokeForUser($user->id);
+
+        $token = self::generateResetToken();
+        $expiresAt = gmdate('Y-m-d H:i:s', time() + self::RESET_TOKEN_TTL_SECONDS);
+        $this->passwordResets->create($user->id, hash('sha256', $token), $expiresAt);
+
+        return $token;
+    }
+
+    public function resetPassword(string $rawToken, string $newPassword): void
+    {
+        if (strlen($newPassword) < 8) {
+            throw new ValidationException([
+                ['code' => 'min_length', 'detail' => 'Password must be at least 8 characters long.', 'source' => ['pointer' => '/data/attributes/password']],
+            ]);
+        }
+
+        $userId = $this->passwordResets->findValidUserId(hash('sha256', $rawToken));
+        if ($userId === null) {
+            throw new ValidationException([
+                ['code' => 'invalid_token', 'detail' => 'The reset token is invalid or expired.', 'source' => ['pointer' => '/data/attributes/token']],
+            ]);
+        }
+
+        $this->updatePassword($userId, $newPassword);
+        $this->passwordResets->revokeForUser($userId);
+    }
+
+    public function changePassword(int $userId, string $currentPassword, string $newPassword): void
+    {
+        $user = $this->users->findById($userId);
+        if ($user === null || !password_verify($currentPassword, $user->passwordHash)) {
+            throw new AuthenticationException('The current password is incorrect.', 'invalid_credentials');
+        }
+
+        if (strlen($newPassword) < 8) {
+            throw new ValidationException([
+                ['code' => 'min_length', 'detail' => 'Password must be at least 8 characters long.', 'source' => ['pointer' => '/data/attributes/new_password']],
+            ]);
+        }
+
+        $this->updatePassword($userId, $newPassword);
+    }
+
+    private function updatePassword(int $userId, string $newPassword): void
+    {
+        $statement = $this->getPdo()->prepare(
+            'UPDATE users SET password = :password, updated_at = CURRENT_TIMESTAMP WHERE id = :id',
+        );
+        $statement->execute([
+            'id' => $userId,
+            'password' => password_hash($newPassword, PASSWORD_ARGON2ID),
+        ]);
+    }
+
+    /** @return \PDO */
+    private function getPdo(): \PDO
+    {
+        $reflection = new \ReflectionClass($this->users);
+        $property = $reflection->getProperty('connection');
+        $property->setAccessible(true);
+        /** @var \PDO $pdo */
+        $pdo = $property->getValue($this->users);
+        return $pdo;
+    }
+
+    private static function generateResetToken(): string
+    {
+        return rtrim(strtr(base64_encode(random_bytes(48)), '+/', '-_'), '=');
     }
 }

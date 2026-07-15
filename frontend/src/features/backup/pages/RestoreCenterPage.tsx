@@ -6,7 +6,7 @@ import type { BackupFile, RestoreHistory } from '../types';
 export const RestoreCenterPage = () => {
   const [files, setFiles] = useState<BackupFile[]>([]);
   const [history, setHistory] = useState<RestoreHistory[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
@@ -24,7 +24,7 @@ export const RestoreCenterPage = () => {
     try {
       await backupApi.executeRestore({ backup_file_id: fileId, target_environment: 'production' });
       alert('Restoration process started.');
-    } catch (error) {
+    } catch {
       alert('Failed to start restoration.');
     }
   };

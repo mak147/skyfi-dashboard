@@ -5,10 +5,10 @@ import type { BackupSchedule } from '../types';
 
 export const SchedulesPage = () => {
   const [schedules, setSchedules] = useState<BackupSchedule[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
-    backupApi.getSchedules().then((res) => {
+    backupApi.getSchedules().then((res: { data: BackupSchedule[] }) => {
       setSchedules(res.data);
       setLoading(false);
     });
@@ -19,7 +19,7 @@ export const SchedulesPage = () => {
     try {
       await backupApi.deleteSchedule(id);
       setSchedules(schedules.filter(s => s.id !== id));
-    } catch (error) {
+    } catch {
       alert('Failed to delete schedule');
     }
   };

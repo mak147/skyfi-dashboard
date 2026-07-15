@@ -17,4 +17,13 @@ interface AuthServiceContract
 
     /** Revokes a refresh token when present. */
     public function logout(?string $rawRefreshToken): void;
+
+    /** Creates a password reset token for the user matching the email. */
+    public function forgotPassword(string $email): string;
+
+    /** Resets the user's password using a valid reset token. */
+    public function resetPassword(string $rawToken, string $newPassword): void;
+
+    /** Changes the authenticated user's password after verifying the current one. */
+    public function changePassword(int $userId, string $currentPassword, string $newPassword): void;
 }

@@ -5,10 +5,10 @@ import type { DrPlan } from '../types';
 
 export const DisasterRecoveryPage = () => {
   const [plans, setPlans] = useState<DrPlan[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
-    backupApi.getDrPlans().then((res) => {
+    backupApi.getDrPlans().then((res: { data: DrPlan[] }) => {
       setPlans(res.data);
       setLoading(false);
     });
