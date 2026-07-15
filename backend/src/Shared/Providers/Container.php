@@ -817,6 +817,24 @@ final class Container
         });
         // ─── End Customer Installation & Field Service Module ────────────
 
+        // ─── Reports & Business Intelligence Module ─────────────────────
+        $this->instances[\SkyFi\Reports\Services\ReportCatalog::class] = new \SkyFi\Reports\Services\ReportCatalog();
+        $this->instances[\SkyFi\Reports\QueryBuilders\ReportQueryBuilder::class] = new \SkyFi\Reports\QueryBuilders\ReportQueryBuilder();
+        $this->instances[\SkyFi\Reports\Contracts\ReportQueryBuilderContract::class] = $this->instances[\SkyFi\Reports\QueryBuilders\ReportQueryBuilder::class];
+        $this->instances[\SkyFi\Reports\Repositories\PdoReportRepository::class] = new \SkyFi\Reports\Repositories\PdoReportRepository($pdo, $this->instances[\SkyFi\Reports\QueryBuilders\ReportQueryBuilder::class]);
+        $this->instances[\SkyFi\Reports\Contracts\ReportRepositoryContract::class] = $this->instances[\SkyFi\Reports\Repositories\PdoReportRepository::class];
+        $this->instances[\SkyFi\Reports\Validators\ReportRequestValidator::class] = new \SkyFi\Reports\Validators\ReportRequestValidator($this->instances[\SkyFi\Reports\Services\ReportCatalog::class]);
+        $this->instances[\SkyFi\Reports\Services\ReportService::class] = new \SkyFi\Reports\Services\ReportService($this->instances[\SkyFi\Reports\Repositories\PdoReportRepository::class], $this->instances[\SkyFi\Reports\Services\ReportCatalog::class], $this->instances[\SkyFi\Reports\Validators\ReportRequestValidator::class]);
+        $this->instances[\SkyFi\Reports\Contracts\ReportServiceContract::class] = $this->instances[\SkyFi\Reports\Services\ReportService::class];
+        $this->instances[\SkyFi\Reports\Services\ReportDashboardService::class] = new \SkyFi\Reports\Services\ReportDashboardService($this->instances[\SkyFi\Reports\Services\ReportService::class]);
+        $this->instances[\SkyFi\Reports\Repositories\PdoReportConfigurationRepository::class] = new \SkyFi\Reports\Repositories\PdoReportConfigurationRepository($pdo);
+        $this->instances[\SkyFi\Reports\Services\ReportConfigurationService::class] = new \SkyFi\Reports\Services\ReportConfigurationService($this->instances[\SkyFi\Reports\Repositories\PdoReportConfigurationRepository::class], $this->instances[\SkyFi\Reports\Services\ReportCatalog::class]);
+        $this->instances[\SkyFi\Reports\ExportServices\ReportExportService::class] = new \SkyFi\Reports\ExportServices\ReportExportService($this->instances[\SkyFi\Reports\Services\ReportService::class], $this->instances[\SkyFi\Reports\Repositories\PdoReportConfigurationRepository::class], dirname(__DIR__, 3) . '/storage/exports');
+        $this->instances[\SkyFi\Reports\Controllers\ReportController::class] = new \SkyFi\Reports\Controllers\ReportController($this->instances[\SkyFi\Reports\Services\ReportService::class], $this->instances[\SkyFi\Reports\Services\ReportDashboardService::class], $this->instances[\SkyFi\Reports\Services\ReportCatalog::class], $this->instances[\SkyFi\Reports\Repositories\PdoReportRepository::class], $permission);
+        $this->instances[\SkyFi\Reports\Controllers\ReportConfigurationController::class] = new \SkyFi\Reports\Controllers\ReportConfigurationController($this->instances[\SkyFi\Reports\Services\ReportConfigurationService::class], $this->instances[\SkyFi\Reports\Services\ReportService::class], $permission);
+        $this->instances[\SkyFi\Reports\Controllers\ReportExportController::class] = new \SkyFi\Reports\Controllers\ReportExportController($this->instances[\SkyFi\Reports\ExportServices\ReportExportService::class], $permission);
+        // ─── End Reports & Business Intelligence Module ──────────────────
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners

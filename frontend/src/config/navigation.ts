@@ -275,6 +275,46 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Reports & BI',
+    items: [
+      {
+        label: 'Analytics Dashboard',
+        path: '/reports',
+        icon: '◫',
+        description: 'Executive, finance, operations, network, support, and sales intelligence.',
+        requiredPermission: 'analytics.view',
+      },
+      {
+        label: 'Report Builder',
+        path: '/reports/builder',
+        icon: '▥',
+        description: 'Generate reusable reports with shared dimensions and filters.',
+        requiredPermission: 'reports.view',
+      },
+      {
+        label: 'Saved Reports',
+        path: '/reports/saved',
+        icon: '☆',
+        description: 'Run personal and shared report configurations.',
+        requiredPermission: 'reports.view',
+      },
+      {
+        label: 'Scheduled Reports',
+        path: '/reports/scheduled',
+        icon: '◷',
+        description: 'Schedule-ready report definitions for future automation.',
+        requiredPermission: 'reports.manage',
+      },
+      {
+        label: 'Export Center',
+        path: '/reports/exports',
+        icon: '⇩',
+        description: 'Download and review PDF, Excel, and CSV exports.',
+        requiredPermission: 'reports.export',
+      },
+    ],
+  },
+  {
     label: 'Administration',
     items: [
       {
