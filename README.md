@@ -57,6 +57,21 @@ docker/      Nginx, PHP, Supervisor, env templates
 docs/        Product, developer, deployment, and readiness docs
 ```
 
-## License / status
+## Release status
 
-Internal enterprise platform. Functional modules are complete; production-readiness work proceeds in phased PRs (architecture → tests → deployment → developer docs → operations docs → v1.0 release).
+**Current version: v1.0.0** (2026-07-15) — General Availability
+
+All functional modules are complete. Six production-readiness phases have been applied:
+
+1. ✅ Architecture review & refactoring
+2. ✅ Comprehensive automated testing
+3. ✅ Deployment toolkit (Docker, CI/CD)
+4. ✅ Developer documentation
+5. ✅ Operations documentation
+6. ✅ Version 1.0 release preparation
+
+Release artifacts: [RELEASE_NOTES.md](RELEASE_NOTES.md) · [CHANGELOG.md](CHANGELOG.md) · [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) · [UPGRADE_GUIDE.md](UPGRADE_GUIDE.md) · [KNOWN_ISSUES.md](KNOWN_ISSUES.md) · [ACCEPTANCE_CHECKLIST.md](ACCEPTANCE_CHECKLIST.md) · [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) · [RELEASE.md](RELEASE.md)
+
+## License
+
+Internal enterprise platform.

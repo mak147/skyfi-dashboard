@@ -46,6 +46,7 @@ http_response_code($ready ? 200 : 503);
 echo json_encode([
     'status' => $ready ? 'ready' : 'not_ready',
     'service' => 'skyfi-api',
+    'version' => '1.0.0',
     'checks' => $checks,
     'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
     'timestamp' => gmdate(DATE_ATOM),
