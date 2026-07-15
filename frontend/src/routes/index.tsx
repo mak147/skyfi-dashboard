@@ -15,6 +15,7 @@ import { HotspotRoutes } from '@/features/hotspot/routes';
 import { SupportRoutes } from '@/features/support/routes';
 import { InventoryRoutes } from '@/features/inventory/routes';
 import { PurchasingRoutes } from '@/features/purchasing/routes';
+import { VendorRoutes } from '@/features/vendors/routes';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
 
@@ -46,6 +47,7 @@ export const AppRoutes = () => (
         <Route path="/support/*" element={<SupportRoutes />} />
         <Route path="/inventory/*" element={<InventoryRoutes />} />
         <Route path="/purchasing/*" element={<PurchasingRoutes />} />
+        <Route path="/vendors/*" element={<VendorRoutes />} />
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
       </Route>
     </Route>

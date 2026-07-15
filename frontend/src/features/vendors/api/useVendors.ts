@@ -1,0 +1,16 @@
+import { useMutation,useQuery,useQueryClient } from '@tanstack/react-query';import { vendorApi } from './vendorApi';import type { ContactFormValues,ContractFormValues,QuotationFormValues,RatingFormValues,SupplierFormValues } from '../types';
+export const useVendorDashboard=()=>useQuery({queryKey:['vendors','dashboard'],queryFn:vendorApi.dashboard});
+export const useSuppliers=(filters:Record<string,unknown>={})=>useQuery({queryKey:['vendors','list',filters],queryFn:()=>vendorApi.suppliers(filters)});
+export const useSupplier=(id:number)=>useQuery({queryKey:['vendors',id],queryFn:()=>vendorApi.supplier(id),enabled:id>0});
+export const useVendorCategories=()=>useQuery({queryKey:['vendors','categories'],queryFn:()=>vendorApi.categories()});
+export const useVendorContacts=(filters:Record<string,unknown>={})=>useQuery({queryKey:['vendors','contacts',filters],queryFn:()=>vendorApi.contacts(filters)});
+export const useVendorContracts=(filters:Record<string,unknown>={})=>useQuery({queryKey:['vendors','contracts',filters],queryFn:()=>vendorApi.contracts(filters)});
+export const useVendorQuotations=(filters:Record<string,unknown>={})=>useQuery({queryKey:['vendors','quotations',filters],queryFn:()=>vendorApi.quotations(filters)});
+export const useSupplierPerformance=(id:number)=>useQuery({queryKey:['vendors',id,'performance'],queryFn:()=>vendorApi.performance(id),enabled:id>0});
+const mutation=<T,>(fn:(data:T)=>Promise<unknown>)=>{const client=useQueryClient();return useMutation({mutationFn:fn,onSuccess:()=>void client.invalidateQueries({queryKey:['vendors']})});};
+export const useSaveSupplier=(id?:number)=>mutation<SupplierFormValues>(data=>id?vendorApi.updateSupplier(id,data):vendorApi.createSupplier(data));
+export const useArchiveSupplier=()=>mutation<number>(vendorApi.archiveSupplier);export const useActivateSupplier=()=>mutation<number>(vendorApi.activateSupplier);
+export const useSaveContact=(vendorId:number,id?:number)=>mutation<ContactFormValues>(data=>id?vendorApi.updateContact(vendorId,id,data):vendorApi.createContact(vendorId,data));
+export const useSaveContract=(vendorId:number,id?:number)=>mutation<ContractFormValues>(data=>id?vendorApi.updateContract(vendorId,id,data):vendorApi.createContract(vendorId,data));
+export const useSaveQuotation=(vendorId:number,id?:number)=>mutation<QuotationFormValues>(data=>id?vendorApi.updateQuotation(vendorId,id,data):vendorApi.createQuotation(vendorId,data));
+export const useCreateRating=(vendorId:number)=>mutation<RatingFormValues>(data=>vendorApi.createRating(vendorId,data));

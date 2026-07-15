@@ -184,13 +184,13 @@ final class PdoTowerRepository implements TowerRepositoryContract
         ]);
 
         $id = (int) $this->pdo->lastInsertId();
-        return $this->findActive($id)!;
+        return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
     }
 
     public function update(int $id, array $data): Tower
     {
         if (empty($data)) {
-            return $this->findActive($id)!;
+            return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
         }
 
         $fields = [];
@@ -206,7 +206,7 @@ final class PdoTowerRepository implements TowerRepositoryContract
         $sql = 'UPDATE towers SET ' . implode(', ', $fields) . ' WHERE id = ?';
         $this->pdo->prepare($sql)->execute($params);
 
-        return $this->findActive($id)!;
+        return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
     }
 
     public function softDelete(int $id): void

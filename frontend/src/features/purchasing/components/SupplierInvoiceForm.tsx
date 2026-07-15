@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSuppliers } from '@/features/vendors/api/useVendors';
 import type { SupplierInvoiceFormValues } from '../types';
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export const SupplierInvoiceForm = ({ onSubmit, isLoading }: Props) => {
+  const suppliers = useSuppliers({ status: 'active', per_page: 100, sort: 'company_name' });
   const [form, setForm] = useState<SupplierInvoiceFormValues>({
     invoice_number: '',
     vendor_id: 0,
@@ -33,8 +35,11 @@ export const SupplierInvoiceForm = ({ onSubmit, isLoading }: Props) => {
           <input value={form.invoice_number} onChange={(e) => setForm({ ...form, invoice_number: e.target.value })} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-semibold text-slate-700">Supplier (Vendor ID)</label>
-          <input type="number" min={1} value={form.vendor_id || ''} onChange={(e) => setForm({ ...form, vendor_id: parseInt(e.target.value) || 0 })} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required />
+          <label className="mb-1 block text-sm font-semibold text-slate-700">Supplier</label>
+          <select value={form.vendor_id || ''} onChange={(e) => setForm({ ...form, vendor_id: parseInt(e.target.value) || 0 })} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" required>
+            <option value="">Select an active supplier</option>
+            {suppliers.data?.data.map(({ attributes: supplier }) => <option key={supplier.id} value={supplier.id}>{supplier.company_name} ({supplier.supplier_code})</option>)}
+          </select>
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold text-slate-700">Purchase Order ID</label>

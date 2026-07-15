@@ -219,13 +219,13 @@ final class PdoNetworkDeviceRepository implements NetworkDeviceRepositoryContrac
         ]);
 
         $id = (int) $this->pdo->lastInsertId();
-        return $this->findActive($id)!;
+        return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
     }
 
     public function update(int $id, array $data): NetworkDevice
     {
         if (empty($data)) {
-            return $this->findActive($id)!;
+            return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
         }
 
         $fields = [];
@@ -241,7 +241,7 @@ final class PdoNetworkDeviceRepository implements NetworkDeviceRepositoryContrac
         $sql = 'UPDATE network_devices SET ' . implode(', ', $fields) . ' WHERE id = ?';
         $this->pdo->prepare($sql)->execute($params);
 
-        return $this->findActive($id)!;
+        return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
     }
 
     public function softDelete(int $id): void

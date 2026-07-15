@@ -20,28 +20,32 @@ final class CatalogController
 
     public function index(Request $request): Response
     {
-        $this->can($request, 'inventory.view');
-        return new Response(200, ['data' => $this->service->list($this->resource($request), filter_var($request->query()['active_only'] ?? false, FILTER_VALIDATE_BOOLEAN))]);
+        $resource = $this->resource($request);
+        $this->can($request, $resource === 'vendors' ? 'vendors.view' : 'inventory.view');
+        return new Response(200, ['data' => $this->service->list($resource, filter_var($request->query()['active_only'] ?? false, FILTER_VALIDATE_BOOLEAN))]);
     }
 
     public function store(Request $request): Response
     {
-        $actor = $this->can($request, 'inventory.create');
-        $item = $this->service->create($this->resource($request), $request->body(), $actor, $request->ipAddress(), $request->userAgent());
+        $resource = $this->resource($request);
+        $actor = $this->can($request, $resource === 'vendors' ? 'vendors.create' : 'inventory.create');
+        $item = $this->service->create($resource, $request->body(), $actor, $request->ipAddress(), $request->userAgent());
         return new Response(201, ['data' => $item]);
     }
 
     public function update(Request $request): Response
     {
-        $actor = $this->can($request, 'inventory.update');
-        $item = $this->service->update($this->resource($request), $this->id($request), $request->body(), $actor, $request->ipAddress(), $request->userAgent());
+        $resource = $this->resource($request);
+        $actor = $this->can($request, $resource === 'vendors' ? 'vendors.update' : 'inventory.update');
+        $item = $this->service->update($resource, $this->id($request), $request->body(), $actor, $request->ipAddress(), $request->userAgent());
         return new Response(200, ['data' => $item]);
     }
 
     public function destroy(Request $request): Response
     {
-        $actor = $this->can($request, 'inventory.delete');
-        $this->service->delete($this->resource($request), $this->id($request), $actor, $request->ipAddress(), $request->userAgent());
+        $resource = $this->resource($request);
+        $actor = $this->can($request, $resource === 'vendors' ? 'vendors.delete' : 'inventory.delete');
+        $this->service->delete($resource, $this->id($request), $actor, $request->ipAddress(), $request->userAgent());
         return ApiResponse::noContent();
     }
 

@@ -654,73 +654,134 @@ final class Container
         // ─── End Inventory & Asset Management Module ─────────────────────
 
         // ─── Purchasing & Procurement Module ─────────────────────────────
-        $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoPurchaseRequestRepository::class] = new \\SkyFi\\Purchasing\\Repositories\\PdoPurchaseRequestRepository($pdo);
-        $this->instances[\\SkyFi\\Purchasing\\Contracts\\PurchaseRequestRepositoryContract::class] = $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoPurchaseRequestRepository::class];
-        $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoPurchaseOrderRepository::class] = new \\SkyFi\\Purchasing\\Repositories\\PdoPurchaseOrderRepository($pdo);
-        $this->instances[\\SkyFi\\Purchasing\\Contracts\\PurchaseOrderRepositoryContract::class] = $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoPurchaseOrderRepository::class];
-        $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoGoodsReceiptRepository::class] = new \\SkyFi\\Purchasing\\Repositories\\PdoGoodsReceiptRepository($pdo);
-        $this->instances[\\SkyFi\\Purchasing\\Contracts\\GoodsReceiptRepositoryContract::class] = $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoGoodsReceiptRepository::class];
-        $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoSupplierInvoiceRepository::class] = new \\SkyFi\\Purchasing\\Repositories\\PdoSupplierInvoiceRepository($pdo);
-        $this->instances[\\SkyFi\\Purchasing\\Contracts\\SupplierInvoiceRepositoryContract::class] = $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoSupplierInvoiceRepository::class];
+        $this->instances[\SkyFi\Purchasing\Repositories\PdoPurchaseRequestRepository::class] = new \SkyFi\Purchasing\Repositories\PdoPurchaseRequestRepository($pdo);
+        $this->instances[\SkyFi\Purchasing\Contracts\PurchaseRequestRepositoryContract::class] = $this->instances[\SkyFi\Purchasing\Repositories\PdoPurchaseRequestRepository::class];
+        $this->instances[\SkyFi\Purchasing\Repositories\PdoPurchaseOrderRepository::class] = new \SkyFi\Purchasing\Repositories\PdoPurchaseOrderRepository($pdo);
+        $this->instances[\SkyFi\Purchasing\Contracts\PurchaseOrderRepositoryContract::class] = $this->instances[\SkyFi\Purchasing\Repositories\PdoPurchaseOrderRepository::class];
+        $this->instances[\SkyFi\Purchasing\Repositories\PdoGoodsReceiptRepository::class] = new \SkyFi\Purchasing\Repositories\PdoGoodsReceiptRepository($pdo);
+        $this->instances[\SkyFi\Purchasing\Contracts\GoodsReceiptRepositoryContract::class] = $this->instances[\SkyFi\Purchasing\Repositories\PdoGoodsReceiptRepository::class];
+        $this->instances[\SkyFi\Purchasing\Repositories\PdoSupplierInvoiceRepository::class] = new \SkyFi\Purchasing\Repositories\PdoSupplierInvoiceRepository($pdo);
+        $this->instances[\SkyFi\Purchasing\Contracts\SupplierInvoiceRepositoryContract::class] = $this->instances[\SkyFi\Purchasing\Repositories\PdoSupplierInvoiceRepository::class];
 
-        $this->instances[\\SkyFi\\Purchasing\\Validators\\PurchaseRequestValidator::class] = new \\SkyFi\\Purchasing\\Validators\\PurchaseRequestValidator();
-        $this->instances[\\SkyFi\\Purchasing\\Validators\\PurchaseOrderValidator::class] = new \\SkyFi\\Purchasing\\Validators\\PurchaseOrderValidator();
-        $this->instances[\\SkyFi\\Purchasing\\Validators\\GoodsReceiptValidator::class] = new \\SkyFi\\Purchasing\\Validators\\GoodsReceiptValidator();
-        $this->instances[\\SkyFi\\Purchasing\\Validators\\SupplierInvoiceValidator::class] = new \\SkyFi\\Purchasing\\Validators\\SupplierInvoiceValidator();
+        $this->instances[\SkyFi\Purchasing\Validators\PurchaseRequestValidator::class] = new \SkyFi\Purchasing\Validators\PurchaseRequestValidator();
+        $this->instances[\SkyFi\Purchasing\Validators\PurchaseOrderValidator::class] = new \SkyFi\Purchasing\Validators\PurchaseOrderValidator();
+        $this->instances[\SkyFi\Purchasing\Validators\GoodsReceiptValidator::class] = new \SkyFi\Purchasing\Validators\GoodsReceiptValidator();
+        $this->instances[\SkyFi\Purchasing\Validators\SupplierInvoiceValidator::class] = new \SkyFi\Purchasing\Validators\SupplierInvoiceValidator();
 
-        $this->instances[\\SkyFi\\Purchasing\\Services\\PurchasingFinanceIntegrationService::class] = new \\SkyFi\\Purchasing\\Services\\PurchasingFinanceIntegrationService(
+        $this->instances[\SkyFi\Purchasing\Services\PurchasingFinanceIntegrationService::class] = new \SkyFi\Purchasing\Services\PurchasingFinanceIntegrationService(
             $pdo,
-            $this->instances[\\SkyFi\\Finance\\Services\\FinanceService::class],
+            $this->instances[\SkyFi\Finance\Services\FinanceService::class],
         );
 
-        $this->instances[\\SkyFi\\Purchasing\\Services\\PurchaseRequestService::class] = new \\SkyFi\\Purchasing\\Services\\PurchaseRequestService(
-            $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoPurchaseRequestRepository::class],
-            $this->instances[\\SkyFi\\Purchasing\\Validators\\PurchaseRequestValidator::class],
+        $this->instances[\SkyFi\Purchasing\Services\PurchaseRequestService::class] = new \SkyFi\Purchasing\Services\PurchaseRequestService(
+            $this->instances[\SkyFi\Purchasing\Repositories\PdoPurchaseRequestRepository::class],
+            $this->instances[\SkyFi\Purchasing\Validators\PurchaseRequestValidator::class],
             $this->instances[PdoAuditLogger::class],
         );
-        $this->instances[\\SkyFi\\Purchasing\\Services\\PurchaseOrderService::class] = new \\SkyFi\\Purchasing\\Services\\PurchaseOrderService(
-            $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoPurchaseOrderRepository::class],
-            $this->instances[\\SkyFi\\Purchasing\\Validators\\PurchaseOrderValidator::class],
+        $this->instances[\SkyFi\Purchasing\Services\PurchaseOrderService::class] = new \SkyFi\Purchasing\Services\PurchaseOrderService(
+            $this->instances[\SkyFi\Purchasing\Repositories\PdoPurchaseOrderRepository::class],
+            $this->instances[\SkyFi\Purchasing\Validators\PurchaseOrderValidator::class],
             $this->instances[PdoAuditLogger::class],
-            $this->instances[\\SkyFi\\Purchasing\\Services\\PurchasingFinanceIntegrationService::class],
+            $this->instances[\SkyFi\Purchasing\Services\PurchasingFinanceIntegrationService::class],
         );
-        $this->instances[\\SkyFi\\Purchasing\\Services\\GoodsReceiptService::class] = new \\SkyFi\\Purchasing\\Services\\GoodsReceiptService(
-            $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoGoodsReceiptRepository::class],
-            $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoPurchaseOrderRepository::class],
-            $this->instances[\\SkyFi\\Purchasing\\Validators\\GoodsReceiptValidator::class],
+        $this->instances[\SkyFi\Purchasing\Services\GoodsReceiptService::class] = new \SkyFi\Purchasing\Services\GoodsReceiptService(
+            $this->instances[\SkyFi\Purchasing\Repositories\PdoGoodsReceiptRepository::class],
+            $this->instances[\SkyFi\Purchasing\Repositories\PdoPurchaseOrderRepository::class],
+            $this->instances[\SkyFi\Purchasing\Validators\GoodsReceiptValidator::class],
             $this->instances[PdoAuditLogger::class],
             $pdo,
-            $this->instances[\\SkyFi\\Purchasing\\Services\\PurchasingFinanceIntegrationService::class],
+            $this->instances[\SkyFi\Purchasing\Services\PurchasingFinanceIntegrationService::class],
         );
-        $this->instances[\\SkyFi\\Purchasing\\Services\\SupplierInvoiceService::class] = new \\SkyFi\\Purchasing\\Services\\SupplierInvoiceService(
-            $this->instances[\\SkyFi\\Purchasing\\Repositories\\PdoSupplierInvoiceRepository::class],
-            $this->instances[\\SkyFi\\Purchasing\\Validators\\SupplierInvoiceValidator::class],
+        $this->instances[\SkyFi\Purchasing\Services\SupplierInvoiceService::class] = new \SkyFi\Purchasing\Services\SupplierInvoiceService(
+            $this->instances[\SkyFi\Purchasing\Repositories\PdoSupplierInvoiceRepository::class],
+            $this->instances[\SkyFi\Purchasing\Validators\SupplierInvoiceValidator::class],
             $this->instances[PdoAuditLogger::class],
         );
-        $this->instances[\\SkyFi\\Purchasing\\Services\\PurchasingDashboardService::class] = new \\SkyFi\\Purchasing\\Services\\PurchasingDashboardService($pdo);
+        $this->instances[\SkyFi\Purchasing\Services\PurchasingDashboardService::class] = new \SkyFi\Purchasing\Services\PurchasingDashboardService($pdo);
 
-        $this->instances[\\SkyFi\\Purchasing\\Controllers\\PurchaseRequestController::class] = new \\SkyFi\\Purchasing\\Controllers\\PurchaseRequestController(
-            $this->instances[\\SkyFi\\Purchasing\\Services\\PurchaseRequestService::class],
+        $this->instances[\SkyFi\Purchasing\Controllers\PurchaseRequestController::class] = new \SkyFi\Purchasing\Controllers\PurchaseRequestController(
+            $this->instances[\SkyFi\Purchasing\Services\PurchaseRequestService::class],
             $this->instances[RequirePermissionMiddleware::class],
         );
-        $this->instances[\\SkyFi\\Purchasing\\Controllers\\PurchaseOrderController::class] = new \\SkyFi\\Purchasing\\Controllers\\PurchaseOrderController(
-            $this->instances[\\SkyFi\\Purchasing\\Services\\PurchaseOrderService::class],
+        $this->instances[\SkyFi\Purchasing\Controllers\PurchaseOrderController::class] = new \SkyFi\Purchasing\Controllers\PurchaseOrderController(
+            $this->instances[\SkyFi\Purchasing\Services\PurchaseOrderService::class],
             $this->instances[RequirePermissionMiddleware::class],
         );
-        $this->instances[\\SkyFi\\Purchasing\\Controllers\\GoodsReceiptController::class] = new \\SkyFi\\Purchasing\\Controllers\\GoodsReceiptController(
-            $this->instances[\\SkyFi\\Purchasing\\Services\\GoodsReceiptService::class],
+        $this->instances[\SkyFi\Purchasing\Controllers\GoodsReceiptController::class] = new \SkyFi\Purchasing\Controllers\GoodsReceiptController(
+            $this->instances[\SkyFi\Purchasing\Services\GoodsReceiptService::class],
             $this->instances[RequirePermissionMiddleware::class],
         );
-        $this->instances[\\SkyFi\\Purchasing\\Controllers\\SupplierInvoiceController::class] = new \\SkyFi\\Purchasing\\Controllers\\SupplierInvoiceController(
-            $this->instances[\\SkyFi\\Purchasing\\Services\\SupplierInvoiceService::class],
+        $this->instances[\SkyFi\Purchasing\Controllers\SupplierInvoiceController::class] = new \SkyFi\Purchasing\Controllers\SupplierInvoiceController(
+            $this->instances[\SkyFi\Purchasing\Services\SupplierInvoiceService::class],
             $this->instances[RequirePermissionMiddleware::class],
         );
-        $this->instances[\\SkyFi\\Purchasing\\Controllers\\PurchasingDashboardController::class] = new \\SkyFi\\Purchasing\\Controllers\\PurchasingDashboardController(
-            $this->instances[\\SkyFi\\Purchasing\\Services\\PurchasingDashboardService::class],
-            $this->instances[\\SkyFi\\Purchasing\\Services\\PurchasingFinanceIntegrationService::class],
+        $this->instances[\SkyFi\Purchasing\Controllers\PurchasingDashboardController::class] = new \SkyFi\Purchasing\Controllers\PurchasingDashboardController(
+            $this->instances[\SkyFi\Purchasing\Services\PurchasingDashboardService::class],
+            $this->instances[\SkyFi\Purchasing\Services\PurchasingFinanceIntegrationService::class],
             $this->instances[RequirePermissionMiddleware::class],
         );
         // ─── End Purchasing & Procurement Module ─────────────────────────
+
+        // ─── Vendor & Supplier Management Module ─────────────────────────
+        $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierRepository::class] = new \SkyFi\Vendors\Repositories\PdoSupplierRepository($pdo);
+        $this->instances[\SkyFi\Vendors\Contracts\SupplierRepositoryContract::class] = $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierRepository::class];
+        $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierContactRepository::class] = new \SkyFi\Vendors\Repositories\PdoSupplierContactRepository($pdo);
+        $this->instances[\SkyFi\Vendors\Contracts\SupplierContactRepositoryContract::class] = $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierContactRepository::class];
+        $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierContractRepository::class] = new \SkyFi\Vendors\Repositories\PdoSupplierContractRepository($pdo);
+        $this->instances[\SkyFi\Vendors\Contracts\SupplierContractRepositoryContract::class] = $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierContractRepository::class];
+        $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierQuotationRepository::class] = new \SkyFi\Vendors\Repositories\PdoSupplierQuotationRepository($pdo);
+        $this->instances[\SkyFi\Vendors\Contracts\SupplierQuotationRepositoryContract::class] = $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierQuotationRepository::class];
+        $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierRatingRepository::class] = new \SkyFi\Vendors\Repositories\PdoSupplierRatingRepository($pdo);
+        $this->instances[\SkyFi\Vendors\Contracts\SupplierRatingRepositoryContract::class] = $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierRatingRepository::class];
+
+        $this->instances[\SkyFi\Vendors\Validators\SupplierValidator::class] = new \SkyFi\Vendors\Validators\SupplierValidator();
+        $this->instances[\SkyFi\Vendors\Validators\ContactValidator::class] = new \SkyFi\Vendors\Validators\ContactValidator();
+        $this->instances[\SkyFi\Vendors\Validators\ContractValidator::class] = new \SkyFi\Vendors\Validators\ContractValidator();
+        $this->instances[\SkyFi\Vendors\Validators\QuotationValidator::class] = new \SkyFi\Vendors\Validators\QuotationValidator();
+        $this->instances[\SkyFi\Vendors\Validators\RatingValidator::class] = new \SkyFi\Vendors\Validators\RatingValidator();
+
+        $this->instances[\SkyFi\Vendors\Services\SupplierService::class] = new \SkyFi\Vendors\Services\SupplierService(
+            $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierRepository::class],
+            $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierContactRepository::class],
+            $this->instances[\SkyFi\Vendors\Validators\SupplierValidator::class],
+            $this->instances[PdoAuditLogger::class],
+            $pdo,
+        );
+        $this->instances[\SkyFi\Vendors\Services\SupplierContactService::class] = new \SkyFi\Vendors\Services\SupplierContactService(
+            $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierContactRepository::class],
+            $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierRepository::class],
+            $this->instances[\SkyFi\Vendors\Validators\ContactValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Vendors\Services\SupplierContractService::class] = new \SkyFi\Vendors\Services\SupplierContractService(
+            $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierContractRepository::class],
+            $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierRepository::class],
+            $this->instances[\SkyFi\Vendors\Validators\ContractValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Vendors\Services\SupplierQuotationService::class] = new \SkyFi\Vendors\Services\SupplierQuotationService(
+            $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierQuotationRepository::class],
+            $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierRepository::class],
+            $this->instances[\SkyFi\Vendors\Validators\QuotationValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Vendors\Services\SupplierPerformanceService::class] = new \SkyFi\Vendors\Services\SupplierPerformanceService(
+            $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierRatingRepository::class],
+            $this->instances[\SkyFi\Vendors\Repositories\PdoSupplierRepository::class],
+            $this->instances[\SkyFi\Vendors\Validators\RatingValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Vendors\Services\VendorDashboardService::class] = new \SkyFi\Vendors\Services\VendorDashboardService($pdo);
+
+        $permission = $this->instances[RequirePermissionMiddleware::class];
+        $this->instances[\SkyFi\Vendors\Controllers\SupplierController::class] = new \SkyFi\Vendors\Controllers\SupplierController($this->instances[\SkyFi\Vendors\Services\SupplierService::class], $permission);
+        $this->instances[\SkyFi\Vendors\Controllers\SupplierCategoryController::class] = new \SkyFi\Vendors\Controllers\SupplierCategoryController($this->instances[\SkyFi\Vendors\Services\SupplierService::class], $permission);
+        $this->instances[\SkyFi\Vendors\Controllers\SupplierContactController::class] = new \SkyFi\Vendors\Controllers\SupplierContactController($this->instances[\SkyFi\Vendors\Services\SupplierContactService::class], $permission);
+        $this->instances[\SkyFi\Vendors\Controllers\SupplierContractController::class] = new \SkyFi\Vendors\Controllers\SupplierContractController($this->instances[\SkyFi\Vendors\Services\SupplierContractService::class], $permission);
+        $this->instances[\SkyFi\Vendors\Controllers\SupplierQuotationController::class] = new \SkyFi\Vendors\Controllers\SupplierQuotationController($this->instances[\SkyFi\Vendors\Services\SupplierQuotationService::class], $permission);
+        $this->instances[\SkyFi\Vendors\Controllers\SupplierPerformanceController::class] = new \SkyFi\Vendors\Controllers\SupplierPerformanceController($this->instances[\SkyFi\Vendors\Services\SupplierPerformanceService::class], $permission);
+        $this->instances[\SkyFi\Vendors\Controllers\VendorDashboardController::class] = new \SkyFi\Vendors\Controllers\VendorDashboardController($this->instances[\SkyFi\Vendors\Services\VendorDashboardService::class], $permission);
+        // ─── End Vendor & Supplier Management Module ─────────────────────
 
         $this->instances[Router::class] = new Router();
 

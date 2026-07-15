@@ -173,7 +173,7 @@ export const DeviceTable = ({
               </tr>
             ))}
           </tbody>
-        </table
+        </table>
       </div>
     </div>
   );
