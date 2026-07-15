@@ -50,4 +50,7 @@ return static function (Router $router, Container $container): void {
 
     $registerSupportRoutes = require dirname(__DIR__) . '/src/Support/Routes/support.php';
     $registerSupportRoutes($router, $container);
+
+    $registerInventoryRoutes = require dirname(__DIR__) . '/src/Inventory/Routes/inventory.php';
+    $registerInventoryRoutes($router, $container);
 };

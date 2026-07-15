@@ -587,6 +587,72 @@ final class Container
         $this->instances[\SkyFi\Support\Controllers\SupportConfigurationController::class] = new \SkyFi\Support\Controllers\SupportConfigurationController($this->instances[\SkyFi\Support\Repositories\PdoTicketRepository::class],$this->instances[RequirePermissionMiddleware::class]);
         // ─── End Support Ticket & Helpdesk Module ────────────────────────
 
+        // ─── Inventory & Asset Management Module ─────────────────────────
+        $this->instances[\SkyFi\Inventory\Repositories\PdoCatalogRepository::class] = new \SkyFi\Inventory\Repositories\PdoCatalogRepository($pdo);
+        $this->instances[\SkyFi\Inventory\Contracts\CatalogRepositoryContract::class] = $this->instances[\SkyFi\Inventory\Repositories\PdoCatalogRepository::class];
+        $this->instances[\SkyFi\Inventory\Repositories\PdoProductRepository::class] = new \SkyFi\Inventory\Repositories\PdoProductRepository($pdo);
+        $this->instances[\SkyFi\Inventory\Contracts\ProductRepositoryContract::class] = $this->instances[\SkyFi\Inventory\Repositories\PdoProductRepository::class];
+        $this->instances[\SkyFi\Inventory\Repositories\PdoWarehouseRepository::class] = new \SkyFi\Inventory\Repositories\PdoWarehouseRepository($pdo);
+        $this->instances[\SkyFi\Inventory\Contracts\WarehouseRepositoryContract::class] = $this->instances[\SkyFi\Inventory\Repositories\PdoWarehouseRepository::class];
+        $this->instances[\SkyFi\Inventory\Repositories\PdoAssetRepository::class] = new \SkyFi\Inventory\Repositories\PdoAssetRepository($pdo);
+        $this->instances[\SkyFi\Inventory\Contracts\AssetRepositoryContract::class] = $this->instances[\SkyFi\Inventory\Repositories\PdoAssetRepository::class];
+        $this->instances[\SkyFi\Inventory\Repositories\PdoStockRepository::class] = new \SkyFi\Inventory\Repositories\PdoStockRepository($pdo);
+        $this->instances[\SkyFi\Inventory\Contracts\StockRepositoryContract::class] = $this->instances[\SkyFi\Inventory\Repositories\PdoStockRepository::class];
+        $this->instances[\SkyFi\Inventory\Repositories\PdoTransferRepository::class] = new \SkyFi\Inventory\Repositories\PdoTransferRepository($pdo);
+        $this->instances[\SkyFi\Inventory\Contracts\TransferRepositoryContract::class] = $this->instances[\SkyFi\Inventory\Repositories\PdoTransferRepository::class];
+
+        $this->instances[\SkyFi\Inventory\Validators\ProductValidator::class] = new \SkyFi\Inventory\Validators\ProductValidator();
+        $this->instances[\SkyFi\Inventory\Validators\WarehouseValidator::class] = new \SkyFi\Inventory\Validators\WarehouseValidator();
+        $this->instances[\SkyFi\Inventory\Validators\AssetValidator::class] = new \SkyFi\Inventory\Validators\AssetValidator();
+        $this->instances[\SkyFi\Inventory\Validators\StockValidator::class] = new \SkyFi\Inventory\Validators\StockValidator();
+        $this->instances[\SkyFi\Inventory\Validators\TransferValidator::class] = new \SkyFi\Inventory\Validators\TransferValidator();
+
+        $this->instances[\SkyFi\Inventory\Services\CatalogService::class] = new \SkyFi\Inventory\Services\CatalogService(
+            $this->instances[\SkyFi\Inventory\Repositories\PdoCatalogRepository::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Inventory\Services\ProductService::class] = new \SkyFi\Inventory\Services\ProductService(
+            $this->instances[\SkyFi\Inventory\Repositories\PdoProductRepository::class],
+            $this->instances[\SkyFi\Inventory\Validators\ProductValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Inventory\Services\WarehouseService::class] = new \SkyFi\Inventory\Services\WarehouseService(
+            $this->instances[\SkyFi\Inventory\Repositories\PdoWarehouseRepository::class],
+            $this->instances[\SkyFi\Inventory\Validators\WarehouseValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Inventory\Services\AssetService::class] = new \SkyFi\Inventory\Services\AssetService(
+            $this->instances[\SkyFi\Inventory\Repositories\PdoAssetRepository::class],
+            $this->instances[\SkyFi\Inventory\Repositories\PdoProductRepository::class],
+            $this->instances[\SkyFi\Inventory\Validators\AssetValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+        $this->instances[\SkyFi\Inventory\Services\InventoryFinanceIntegrationService::class] = new \SkyFi\Inventory\Services\InventoryFinanceIntegrationService(
+            $pdo,
+            $this->instances[\SkyFi\Finance\Services\FinanceService::class],
+        );
+        $this->instances[\SkyFi\Inventory\Services\StockService::class] = new \SkyFi\Inventory\Services\StockService(
+            $this->instances[\SkyFi\Inventory\Repositories\PdoStockRepository::class],
+            $this->instances[\SkyFi\Inventory\Validators\StockValidator::class],
+            $this->instances[PdoAuditLogger::class],
+            $this->instances[\SkyFi\Inventory\Services\InventoryFinanceIntegrationService::class],
+        );
+        $this->instances[\SkyFi\Inventory\Services\TransferService::class] = new \SkyFi\Inventory\Services\TransferService(
+            $this->instances[\SkyFi\Inventory\Repositories\PdoTransferRepository::class],
+            $this->instances[\SkyFi\Inventory\Repositories\PdoStockRepository::class],
+            $this->instances[\SkyFi\Inventory\Validators\TransferValidator::class],
+            $this->instances[PdoAuditLogger::class],
+        );
+
+        $this->instances[\SkyFi\Inventory\Controllers\ProductController::class] = new \SkyFi\Inventory\Controllers\ProductController($this->instances[\SkyFi\Inventory\Services\ProductService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Inventory\Controllers\CatalogController::class] = new \SkyFi\Inventory\Controllers\CatalogController($this->instances[\SkyFi\Inventory\Services\CatalogService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Inventory\Controllers\WarehouseController::class] = new \SkyFi\Inventory\Controllers\WarehouseController($this->instances[\SkyFi\Inventory\Services\WarehouseService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Inventory\Controllers\AssetController::class] = new \SkyFi\Inventory\Controllers\AssetController($this->instances[\SkyFi\Inventory\Services\AssetService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Inventory\Controllers\StockController::class] = new \SkyFi\Inventory\Controllers\StockController($this->instances[\SkyFi\Inventory\Services\StockService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Inventory\Controllers\TransferController::class] = new \SkyFi\Inventory\Controllers\TransferController($this->instances[\SkyFi\Inventory\Services\TransferService::class], $this->instances[RequirePermissionMiddleware::class]);
+        $this->instances[\SkyFi\Inventory\Controllers\InventoryLookupController::class] = new \SkyFi\Inventory\Controllers\InventoryLookupController($this->instances[\SkyFi\Inventory\Services\CatalogService::class], $this->instances[RequirePermissionMiddleware::class]);
+        // ─── End Inventory & Asset Management Module ─────────────────────
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners
