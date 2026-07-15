@@ -34,7 +34,7 @@ export interface PopSite {
 
 export interface Tower {
   id: number;
-  pop_site_id: number;
+  pop_site_id: number | null;
   pop_site_name: string | null;
   name: string;
   code: string | null;
@@ -57,7 +57,7 @@ export interface Tower {
 
 export interface Sector {
   id: number;
-  tower_id: number;
+  tower_id: number | null;
   tower_name: string | null;
   pop_site_name: string | null;
   name: string;
@@ -98,6 +98,7 @@ export interface NetworkDevice {
   location_description: string | null;
   management_vlan: number | null;
   management_username: string | null;
+  management_password?: string | null;
   status: DeviceStatus;
   notes: string | null;
   mikrotik_router_id: number | null;

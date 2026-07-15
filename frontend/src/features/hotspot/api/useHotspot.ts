@@ -77,11 +77,11 @@ export const bulkImportHotspotUsers = async (data: Record<string, unknown>): Pro
 
 // ─── Hotspot Profiles ─────────────────────────────────────────────────────────
 
-export const getHotspotProfiles = async (page = 1, perPage = 15, search?: string, routerId?: number): Promise<{ data: Array<{ attributes: HotspotProfile }>; meta: { total: number; last_page: number } }> => {
+export const getHotspotProfiles = async (page = 1, perPage = 15, search?: string, routerId?: number): Promise<{ data: Array<{ attributes: HotspotProfile }>; meta: { total: number; last_page: number; current_page: number } }> => {
   const params = new URLSearchParams({ 'page[number]': String(page), 'page[size]': String(perPage) });
   if (search) params.set('filter[search]', search);
   if (routerId) params.set('filter[router_id]', String(routerId));
-  const res = await apiClient.get<{ data: Array<{ attributes: HotspotProfile }>; meta: { total: number; last_page: number } }>(`/hotspot/profiles?${params.toString()}`);
+  const res = await apiClient.get<{ data: Array<{ attributes: HotspotProfile }>; meta: { total: number; last_page: number; current_page: number } }>(`/hotspot/profiles?${params.toString()}`);
   return res.data;
 };
 
@@ -100,18 +100,18 @@ export const deleteHotspotProfile = async (id: number): Promise<void> => {
 
 // ─── Vouchers ─────────────────────────────────────────────────────────────────
 
-export const getVouchers = async (page = 1, perPage = 15, status?: string, batchId?: number, search?: string): Promise<{ data: Array<{ attributes: Voucher }>; meta: { total: number; last_page: number } }> => {
+export const getVouchers = async (page = 1, perPage = 15, status?: string, batchId?: number, search?: string): Promise<{ data: Array<{ attributes: Voucher }>; meta: { total: number; last_page: number; current_page: number } }> => {
   const params = new URLSearchParams({ 'page[number]': String(page), 'page[size]': String(perPage) });
   if (status) params.set('filter[status]', status);
   if (batchId) params.set('filter[batch_id]', String(batchId));
   if (search) params.set('filter[search]', search);
-  const res = await apiClient.get<{ data: Array<{ attributes: Voucher }>; meta: { total: number; last_page: number } }>(`/hotspot/vouchers?${params.toString()}`);
+  const res = await apiClient.get<{ data: Array<{ attributes: Voucher }>; meta: { total: number; last_page: number; current_page: number } }>(`/hotspot/vouchers?${params.toString()}`);
   return res.data;
 };
 
-export const getVoucherBatches = async (page = 1, perPage = 15): Promise<{ data: Array<{ attributes: VoucherBatch }>; meta: { total: number; last_page: number } }> => {
+export const getVoucherBatches = async (page = 1, perPage = 15): Promise<{ data: Array<{ attributes: VoucherBatch }>; meta: { total: number; last_page: number; current_page: number } }> => {
   const params = new URLSearchParams({ 'page[number]': String(page), 'page[size]': String(perPage) });
-  const res = await apiClient.get<{ data: Array<{ attributes: VoucherBatch }>; meta: { total: number; last_page: number } }>(`/hotspot/vouchers/batches?${params.toString()}`);
+  const res = await apiClient.get<{ data: Array<{ attributes: VoucherBatch }>; meta: { total: number; last_page: number; current_page: number } }>(`/hotspot/vouchers/batches?${params.toString()}`);
   return res.data;
 };
 
@@ -125,7 +125,7 @@ export const getVoucherStats = async (): Promise<VoucherStats> =>
   resource((await apiClient.get<Resource<VoucherStats>>('/hotspot/vouchers/stats')).data);
 
 export const printVoucherBatch = async (batchId: number): Promise<{ batch: VoucherBatch; vouchers: Array<{ code: string; status: string; time_limit: string | null; data_limit_mb: number | null; price: number | null; expires_at: string | null; qr_placeholder: string }> }> =>
-  resource((await apiClient.get<Resource<{ batch: VoucherBatch; vouchers: Array<{ code: string; status: string }> }>>(`/hotspot/vouchers/batch/${batchId}/print`)).data);
+  resource((await apiClient.get<Resource<{ batch: VoucherBatch; vouchers: Array<{ code: string; status: string; time_limit: string | null; data_limit_mb: number | null; price: number | null; expires_at: string | null; qr_placeholder: string }> }>>(`/hotspot/vouchers/batch/${batchId}/print`)).data);
 
 // ─── Active Sessions ──────────────────────────────────────────────────────────
 
@@ -150,7 +150,7 @@ export const getSessionHistory = async (page = 1, perPage = 15, userId?: number,
   if (routerId) params.set('filter[router_id]', String(routerId));
   if (username) params.set('filter[username]', username);
 
-  const res = await apiClient.get<{ data: Array<{ attributes: HotspotSessionHistory }>; meta: { total: number; last_page: number } }>(`/hotspot/sessions/history?${params.toString()}`);
+  const res = await apiClient.get<{ data: Array<{ attributes: HotspotSessionHistory }>; meta: { total: number; last_page: number; current_page: number } }>(`/hotspot/sessions/history?${params.toString()}`);
   return {
     items: res.data.data.map((item) => item.attributes),
     total: res.data.meta.total,

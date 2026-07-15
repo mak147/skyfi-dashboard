@@ -13,13 +13,6 @@ interface CapacityCardsProps {
   maintenanceDevices: number;
 }
 
-const cards = [
-  { label: 'POP Sites', value: 0, active: 0, color: 'indigo', icon: '📍' },
-  { label: 'Towers', value: 0, active: 0, color: 'blue', icon: '🗼' },
-  { label: 'Sectors', value: 0, active: 0, color: 'emerald', icon: '📡' },
-  { label: 'Devices', value: 0, active: 0, color: 'purple', icon: '🖧' },
-] as const;
-
 export const CapacityCards = ({
   totalPopSites,
   activePopSites,

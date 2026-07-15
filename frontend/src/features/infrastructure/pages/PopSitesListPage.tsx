@@ -5,9 +5,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { apiErrorMessage } from '@/lib/apiClient';
-import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 
-import { createPopSite, deletePopSite, getPopSites, changePopSiteStatus } from '../api/infrastructureApi';
+import { deletePopSite, getPopSites } from '../api/infrastructureApi';
 import { PopSiteTable } from '../components/PopSiteTable';
 import type { PopSite, PopSiteListFilters } from '../types';
 
@@ -15,13 +15,13 @@ export const PopSitesListPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { can } = usePermissions();
 
   const page = Math.max(1, Number(searchParams.get('page') ?? '1'));
   const perPage = 15;
   const sort = searchParams.get('sort') ?? '-created_at';
 
-  const [filters, setFilters] = useState<PopSiteListFilters>({
+  const [filters] = useState<PopSiteListFilters>({
     status: (searchParams.get('status') as PopSiteListFilters['status']) || undefined,
     city: searchParams.get('city') || undefined,
     region: searchParams.get('region') || undefined,
@@ -44,10 +44,6 @@ export const PopSitesListPage = () => {
     [setSearchParams],
   );
 
-  const handleFiltersChange = (newFilters: PopSiteListFilters) => {
-    setFilters(newFilters);
-    updateSearchParams(newFilters, 1, sort);
-  };
 
   const handleSortChange = (newSort: string) => {
     updateSearchParams(filters, page, newSort);
@@ -59,7 +55,7 @@ export const PopSitesListPage = () => {
 
   const popSitesQuery = useQuery({
     queryKey: ['popSites', page, perPage, filters, sort],
-    queryFn: () => getPopSites({ ...filters, page, perPage, sort }),
+    queryFn: () => getPopSites({ ...filters, page, per_page: perPage, sort }),
     staleTime: 30_000,
   });
 
@@ -70,12 +66,6 @@ export const PopSitesListPage = () => {
     },
   });
 
-  const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => changePopSiteStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['popSites'] });
-    },
-  });
 
   const handleDelete = (popSite: PopSite) => {
     if (confirm(`Are you sure you want to delete ${popSite.name}?`)) {
@@ -83,14 +73,10 @@ export const PopSitesListPage = () => {
     }
   };
 
-  const handleStatusChange = (popSite: PopSite, newStatus: string) => {
-    statusMutation.mutate({ id: popSite.id, status: newStatus });
-  };
 
-  const canCreate = user?.roles.includes('Super Administrator') || user?.permissions?.includes('infrastructure.create') || false;
-  const canUpdate = user?.roles.includes('Super Administrator') || user?.permissions?.includes('infrastructure.update') || false;
-  const canDelete = user?.roles.includes('Super Administrator') || user?.permissions?.includes('infrastructure.delete') || false;
-  const canManage = user?.roles.includes('Super Administrator') || user?.permissions?.includes('infrastructure.manage') || false;
+  const canCreate = can('infrastructure.create');
+  const canUpdate = can('infrastructure.update');
+  const canDelete = can('infrastructure.delete');
 
   const popSites = popSitesQuery.data?.data.map((d) => d.attributes) ?? [];
   const meta = popSitesQuery.data?.meta;
