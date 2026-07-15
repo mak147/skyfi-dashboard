@@ -1,45 +1,52 @@
-# SkyFi API — Authentication Slice
+# SkyFi API
 
-This directory contains the PHP REST API for the SkyFi Networks ISP Management System. The current implementation intentionally contains **only the Shared Authentication/RBAC slice**. No Dashboard, Customers, Packages, Billing, Payments, Finance, Inventory, or Reports code is included yet.
+PHP modular monolith REST API for the SkyFi ISP Management System.
 
 ## Architecture
 
-- PHP 8.2+ modular monolith, with authentication in `src/Shared/Auth`.
-- Thin HTTP controller → authentication service → repository layers.
-- MySQL 8.x through PDO; all schema changes are versioned SQL migrations.
-- Stateless HS256 access JWTs (15 minutes by default).
-- Opaque, SHA-256-hashed, single-use refresh tokens in `refresh_tokens`.
-- Refresh tokens are rotated and delivered only in `HttpOnly; Secure; SameSite=Strict` cookies.
-- JSON:API-inspired resource and error envelopes.
-- JSON structured logging with sensitive-value scrubbing.
+- PHP 8.2+ namespaces under `SkyFi\` (`src/`)
+- Thin controllers → services → PDO repositories
+- Module folders: Customers, Billing, Payments, Finance, MikroTik, PPPoE, Hotspot, Infrastructure, Monitoring, Support, Inventory, Purchasing, Vendors, FieldService, Reports, System, Notifications, Audit, Backup, Integration, Workflow, Portal, Rbac, Dashboard, Shared
+- JSON:API-inspired envelopes via `Shared\Http\ApiResponse`
+- HS256 access JWTs + HttpOnly rotated refresh cookies
+- SQL migrations in `database/migrations/`
 
 ## Local setup
 
-1. Copy `.env.example` to `.env` and set a random `JWT_SECRET` of at least 32 characters.
-2. Create the MySQL database and run `database/migrations/20260714000000_create_authentication_tables.sql`.
-3. Install Composer dependencies: `composer install`.
-4. Run the RBAC seeder through the application's migration/seed runner. An initial administrator should be supplied through secret-managed environment variables rather than committed credentials.
-5. Serve the `public/` directory as the web root, for example: `php -S localhost:8080 -t public public/index.php`.
+Prefer the monorepo Docker Compose workflow documented in [`docs/developer/10-LOCAL_DEVELOPMENT.md`](../docs/developer/10-LOCAL_DEVELOPMENT.md).
 
-## Authentication endpoints
+Native (optional):
 
-- `POST /api/v1/auth/login` — JSON `{ "email": "...", "password": "...", "rememberMe": true }`.
-- `POST /api/v1/auth/refresh` — sends the HttpOnly refresh cookie and rotates it.
-- `POST /api/v1/auth/logout` — revokes the refresh cookie and returns `204 No Content`.
+```bash
+composer install
+cp ../.env.example .env   # configure DB_DSN, JWT_SECRET, etc.
+php database/migrate.php
+php database/seed.php
+php -S localhost:8080 -t public public/index.php
+```
 
-A successful login/refresh returns a JSON:API resource with `data.attributes.accessToken` and a safe `data.attributes.user` object. The refresh token is never returned in JSON.
+## Tests
 
-## MikroTik integration platform
+```bash
+composer test
+# or
+./vendor/bin/phpunit
+```
 
-The `src/Mikrotik` module provides secured router inventory, groups/tags, TLS RouterOS API testing, on-demand discovery, and health snapshots. It is intentionally read-only with respect to RouterOS: PPPoE, Hotspot, queues, firewall, and IP pool management are not implemented here.
+## Documentation
 
-- Use RouterOS `api-ssl` with a dedicated least-privilege API user and restrict router firewall access to SkyFi application-server IPs.
-- Set `MIKROTIK_CREDENTIAL_ENCRYPTION_KEY` to a secret, base64-encoded 32-byte key. Router passwords are encrypted using authenticated XChaCha20-Poly1305 encryption before persistence.
-- TLS peer verification is enabled by default. Supply the private CA path with `MIKROTIK_API_TLS_CA_FILE` when routers use an internal CA; do not disable verification in production.
-- The current stateless PHP runtime opens one bounded, authenticated session for each discovery/health batch. The connection-pool contract is intentionally reusable by a future long-lived monitoring worker.
+| Topic | Document |
+| --- | --- |
+| Architecture | [`docs/developer/01-ARCHITECTURE_GUIDE.md`](../docs/developer/01-ARCHITECTURE_GUIDE.md) |
+| API reference | [`docs/developer/02-API_REFERENCE.md`](../docs/developer/02-API_REFERENCE.md) |
+| Full route catalog | [`docs/developer/02-API_ROUTE_CATALOG.md`](../docs/developer/02-API_ROUTE_CATALOG.md) |
+| Database | [`docs/developer/03-DATABASE_DOCUMENTATION.md`](../docs/developer/03-DATABASE_DOCUMENTATION.md) |
+| Modules | [`docs/developer/05-MODULE_DOCUMENTATION.md`](../docs/developer/05-MODULE_DOCUMENTATION.md) |
+| Coding standards | [`docs/developer/07-CODING_STANDARDS.md`](../docs/developer/07-CODING_STANDARDS.md) |
+| Deployment | [`docs/deployment/DEPLOYMENT_GUIDE.md`](../docs/deployment/DEPLOYMENT_GUIDE.md) |
 
 ## Security notes
 
-- Never log passwords, RouterOS credentials, access tokens, refresh tokens, secrets, or raw payment data.
-- Use HTTPS and set `REFRESH_COOKIE_SECURE=true` outside local development.
-- The frontend keeps access tokens in memory only; the refresh token remains inaccessible to JavaScript.
+- Never log passwords, RouterOS credentials, access/refresh tokens, or raw payment secrets.
+- Use HTTPS and `REFRESH_COOKIE_SECURE=true` outside local development.
+- Encrypt MikroTik passwords with `MIKROTIK_CREDENTIAL_ENCRYPTION_KEY` (base64-encoded 32-byte key).
