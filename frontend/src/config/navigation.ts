@@ -204,6 +204,46 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Field Service',
+    items: [
+      {
+        label: 'Work Order Dashboard',
+        path: '/field-service',
+        icon: '⚒',
+        description: 'Installation pipeline, dispatch workload, and field-service KPIs.',
+        requiredPermission: 'field.view',
+      },
+      {
+        label: 'Installation Requests',
+        path: '/field-service/installation-requests',
+        icon: '⌂',
+        description: 'Customer installation handoffs, assignment, and scheduling.',
+        requiredPermission: 'field.view',
+      },
+      {
+        label: 'Work Orders',
+        path: '/field-service/work-orders',
+        icon: '▤',
+        description: 'Installations, repairs, maintenance, relocation, and surveys.',
+        requiredPermission: 'field.view',
+      },
+      {
+        label: 'Technician Schedule',
+        path: '/field-service/schedule',
+        icon: '◷',
+        description: 'Daily technician calendar and unscheduled work queue.',
+        requiredPermission: 'field.view',
+      },
+      {
+        label: 'Field Activity',
+        path: '/field-service/activity',
+        icon: '◎',
+        description: 'Mobile-first visits, logs, materials, and job completion.',
+        requiredPermission: 'field.view',
+      },
+    ],
+  },
+  {
     label: 'Support',
     items: [
       {
