@@ -1,0 +1,86 @@
+name: CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Image tag to publish
+        required: true
+        default: latest
+      publish_images:
+        description: Publish images to GitHub Container Registry
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  package:
+    name: Build deployment artifacts
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAMESPACE: ${{ github.repository }}
+      IMAGE_TAG: ${{ inputs.image_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        if: ${{ inputs.publish_images }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          target: php-fpm
+          push: ${{ inputs.publish_images }}
+          tags: ghcr.io/${{ github.repository }}/backend:${{ env.IMAGE_TAG }}
+
+      - name: Build supervisor image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          target: supervisor
+          push: ${{ inputs.publish_images }}
+          tags: ghcr.io/${{ github.repository }}/supervisor:${{ env.IMAGE_TAG }}
+
+      - name: Build nginx image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/nginx/Dockerfile
+          push: ${{ inputs.publish_images }}
+          tags: ghcr.io/${{ github.repository }}/nginx:${{ env.IMAGE_TAG }}
+
+      - name: Prepare deployment bundle
+        run: |
+          mkdir -p deployment-bundle/docker/env deployment-bundle/backups/mariadb
+          cp docker-compose.prod.yml deployment-bundle/
+          cp docker/env/production.env.example deployment-bundle/.env.example
+          cp docs/deployment/DEPLOYMENT_GUIDE.md deployment-bundle/
+          cp docs/deployment/CI_CD.md deployment-bundle/
+          cat > deployment-bundle/IMAGE_TAGS.txt <<TAGS
+          SKYFI_BACKEND_IMAGE=ghcr.io/${{ github.repository }}/backend:${{ env.IMAGE_TAG }}
+          SKYFI_SUPERVISOR_IMAGE=ghcr.io/${{ github.repository }}/supervisor:${{ env.IMAGE_TAG }}
+          SKYFI_NGINX_IMAGE=ghcr.io/${{ github.repository }}/nginx:${{ env.IMAGE_TAG }}
+          TAGS
+
+      - name: Upload deployment bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: skyfi-deployment-${{ env.IMAGE_TAG }}
+          path: deployment-bundle

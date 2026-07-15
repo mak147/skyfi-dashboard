@@ -16,7 +16,7 @@ describe('useAuth hook', () => {
   test('should return state and signOut method', async () => {
     const dispatchMock = vi.fn();
     const stateMock = {
-      user: { id: 1, name: 'Alice', email: 'alice@skyfi.com', roles: [] },
+      user: { id: '1', name: 'Alice', email: 'alice@skyfi.com', roles: [] },
       accessToken: 'token',
       isAuthenticated: true,
       isInitialized: true,
@@ -28,7 +28,7 @@ describe('useAuth hook', () => {
     const { result } = renderHook(() => useAuth());
 
     expect(result.current.isAuthenticated).toBe(true);
-    expect(result.current.user).toEqual({ id: 1, name: 'Alice', email: 'alice@skyfi.com', roles: [] });
+    expect(result.current.user).toEqual({ id: '1', name: 'Alice', email: 'alice@skyfi.com', roles: [] });
     expect(typeof result.current.signOut).toBe('function');
 
     await result.current.signOut();
