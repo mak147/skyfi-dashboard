@@ -164,6 +164,46 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Vendors',
+    items: [
+      {
+        label: 'Supplier Dashboard',
+        path: '/vendors',
+        icon: '◆',
+        description: 'Supplier performance, contracts, ratings, and spend.',
+        requiredPermission: 'vendors.view',
+      },
+      {
+        label: 'Suppliers',
+        path: '/vendors/suppliers',
+        icon: '▣',
+        description: 'Companies, categories, contacts, and purchasing relationships.',
+        requiredPermission: 'vendors.view',
+      },
+      {
+        label: 'Contacts',
+        path: '/vendors/contacts',
+        icon: '◎',
+        description: 'Primary, department, and emergency supplier contacts.',
+        requiredPermission: 'vendors.view',
+      },
+      {
+        label: 'Contracts',
+        path: '/vendors/contracts',
+        icon: '⌁',
+        description: 'Contract values, renewals, and expiry timelines.',
+        requiredPermission: 'vendors.view',
+      },
+      {
+        label: 'Quotations',
+        path: '/vendors/quotations',
+        icon: '≋',
+        description: 'RFQ references, quotation history, and price comparison.',
+        requiredPermission: 'vendors.view',
+      },
+    ],
+  },
+  {
     label: 'Support',
     items: [
       {

@@ -148,13 +148,13 @@ final class PdoSectorRepository implements SectorRepositoryContract
         ]);
 
         $id = (int) $this->pdo->lastInsertId();
-        return $this->findActive($id)!;
+        return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
     }
 
     public function update(int $id, array $data): Sector
     {
         if (empty($data)) {
-            return $this->findActive($id)!;
+            return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
         }
 
         $fields = [];
@@ -170,7 +170,7 @@ final class PdoSectorRepository implements SectorRepositoryContract
         $sql = 'UPDATE sectors SET ' . implode(', ', $fields) . ' WHERE id = ?';
         $this->pdo->prepare($sql)->execute($params);
 
-        return $this->findActive($id)!;
+        return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
     }
 
     public function softDelete(int $id): void

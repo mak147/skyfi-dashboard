@@ -167,13 +167,13 @@ final class PdoPopSiteRepository implements PopSiteRepositoryContract
         ]);
 
         $id = (int) $this->pdo->lastInsertId();
-        return $this->findActive($id)!;
+        return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
     }
 
     public function update(int $id, array $data): PopSite
     {
         if (empty($data)) {
-            return $this->findActive($id)!;
+            return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
         }
 
         $fields = [];
@@ -189,7 +189,7 @@ final class PdoPopSiteRepository implements PopSiteRepositoryContract
         $sql = 'UPDATE pop_sites SET ' . implode(', ', $fields) . ' WHERE id = ?';
         $this->pdo->prepare($sql)->execute($params);
 
-        return $this->findActive($id)!;
+        return $this->findActive($id) ?? throw new \RuntimeException('Entity could not be reloaded.');
     }
 
     public function softDelete(int $id): void

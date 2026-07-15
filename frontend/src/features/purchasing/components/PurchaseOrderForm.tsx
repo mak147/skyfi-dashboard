@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSuppliers } from '@/features/vendors/api/useVendors';
 import type { PurchaseOrderFormValues } from '../types';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export const PurchaseOrderForm = ({ initialData, onSubmit, isLoading }: Props) => {
+  const suppliers = useSuppliers({ status: 'active', per_page: 100, sort: 'company_name' });
   const [form, setForm] = useState<PurchaseOrderFormValues>(initialData ?? {
     vendor_id: 0,
     warehouse_id: null,
@@ -39,8 +41,11 @@ export const PurchaseOrderForm = ({ initialData, onSubmit, isLoading }: Props) =
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-4 md:grid-cols-3">
         <div>
-          <label className="mb-1 block text-sm font-semibold text-slate-700">Supplier (Vendor ID)</label>
-          <input type="number" min={1} value={form.vendor_id || ''} onChange={(e) => setForm({ ...form, vendor_id: parseInt(e.target.value) || 0 })} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required />
+          <label className="mb-1 block text-sm font-semibold text-slate-700">Supplier</label>
+          <select value={form.vendor_id || ''} onChange={(e) => setForm({ ...form, vendor_id: parseInt(e.target.value) || 0 })} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" required>
+            <option value="">Select an active supplier</option>
+            {suppliers.data?.data.map(({ attributes: supplier }) => <option key={supplier.id} value={supplier.id}>{supplier.company_name} ({supplier.supplier_code})</option>)}
+          </select>
         </div>
         <div>
           <label className="mb-1 block text-sm font-semibold text-slate-700">Warehouse ID</label>

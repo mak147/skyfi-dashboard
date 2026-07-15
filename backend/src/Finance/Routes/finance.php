@@ -2,78 +2,37 @@
 
 declare(strict_types=1);
 
+use SkyFi\Finance\Controllers\FinanceController;
+use SkyFi\Rbac\Middleware\RequirePermissionMiddleware;
+use SkyFi\Shared\Http\Middleware\JwtAuthMiddleware;
+use SkyFi\Shared\Http\Request;
+use SkyFi\Shared\Http\Response;
 use SkyFi\Shared\Http\Router;
 use SkyFi\Shared\Providers\Container;
-use SkyFi\Finance\Controllers\FinanceController;
-use SkyFi\Shared\Http\Request;
 
 return static function (Router $router, Container $container): void {
-    $router->group(['prefix' => '/api/finance', 'middleware' => ['auth']], static function (Router $router) use ($container) {
-        
-        $router->get('/dashboard', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('finance.view');
-            return $container->get(FinanceController::class)->dashboard();
-        });
+    $controller = $container->get(FinanceController::class);
+    $auth = $container->get(JwtAuthMiddleware::class);
+    $permissions = $container->get(RequirePermissionMiddleware::class);
+    $protect = static fn(string $permission, callable $handler): callable => static function (Request $request) use ($auth, $permissions, $permission, $handler): Response {
+        $claims = $auth->authenticate($request);
+        $permissions->authorize((int) ($claims['sub'] ?? 0), $permission);
+        $attributes = $request->attributes();
+        $attributes['claims'] = $claims;
+        return $handler($request->withAttributes($attributes));
+    };
+    $actor = static fn(Request $request): int => (int) ($request->attributes()['claims']['sub'] ?? 0);
 
-        // Chart of Accounts
-        $router->get('/chart-of-accounts', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('finance.view');
-            return $container->get(FinanceController::class)->getChartOfAccounts();
-        });
-        
-        $router->post('/chart-of-accounts', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('finance.manage');
-            return $container->get(FinanceController::class)->createChartOfAccount($req->json());
-        });
-
-        // Financial Accounts
-        $router->get('/accounts', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('finance.view');
-            return $container->get(FinanceController::class)->getFinancialAccounts();
-        });
-
-        $router->post('/accounts', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('accounts.manage');
-            return $container->get(FinanceController::class)->createFinancialAccount($req->json());
-        });
-
-        // General Ledger
-        $router->get('/ledger', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('finance.view');
-            return $container->get(FinanceController::class)->getLedger();
-        });
-
-        // Journal Entries
-        $router->get('/journal-entries', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('finance.view');
-            return $container->get(FinanceController::class)->getJournalEntries();
-        });
-
-        $router->post('/journal-entries', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('finance.create');
-            return $container->get(FinanceController::class)->createJournalEntry($req->json(), $req->user()->id());
-        });
-
-        // Expenses
-        $router->get('/expenses', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('finance.view');
-            return $container->get(FinanceController::class)->getExpenses();
-        });
-
-        $router->post('/expenses', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('expenses.manage');
-            return $container->get(FinanceController::class)->createExpense($req->json(), $req->user()->id());
-        });
-
-        // Revenue
-        $router->get('/revenue', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('finance.view');
-            return $container->get(FinanceController::class)->getRevenues();
-        });
-
-        $router->post('/revenue', static function (Request $req) use ($container) {
-            $req->user()->requirePermission('revenue.manage');
-            return $container->get(FinanceController::class)->createRevenue($req->json(), $req->user()->id());
-        });
-    });
+    $router->add('GET', '/api/v1/finance/dashboard', $protect('finance.view', static fn(): Response => new Response(200, ['data' => $controller->dashboard()])));
+    $router->add('GET', '/api/v1/finance/chart-of-accounts', $protect('finance.view', static fn(): Response => new Response(200, ['data' => $controller->getChartOfAccounts()])));
+    $router->add('POST', '/api/v1/finance/chart-of-accounts', $protect('finance.manage', static fn(Request $request): Response => new Response(201, ['data' => $controller->createChartOfAccount($request->body())])));
+    $router->add('GET', '/api/v1/finance/accounts', $protect('finance.view', static fn(): Response => new Response(200, ['data' => $controller->getFinancialAccounts()])));
+    $router->add('POST', '/api/v1/finance/accounts', $protect('accounts.manage', static fn(Request $request): Response => new Response(201, ['data' => $controller->createFinancialAccount($request->body())])));
+    $router->add('GET', '/api/v1/finance/ledger', $protect('finance.view', static fn(): Response => new Response(200, ['data' => $controller->getLedger()])));
+    $router->add('GET', '/api/v1/finance/journal-entries', $protect('finance.view', static fn(): Response => new Response(200, ['data' => $controller->getJournalEntries()])));
+    $router->add('POST', '/api/v1/finance/journal-entries', $protect('finance.create', static fn(Request $request): Response => new Response(201, ['data' => $controller->createJournalEntry($request->body(), $actor($request))])));
+    $router->add('GET', '/api/v1/finance/expenses', $protect('finance.view', static fn(): Response => new Response(200, ['data' => $controller->getExpenses()])));
+    $router->add('POST', '/api/v1/finance/expenses', $protect('expenses.manage', static fn(Request $request): Response => new Response(201, ['data' => $controller->createExpense($request->body(), $actor($request))])));
+    $router->add('GET', '/api/v1/finance/revenue', $protect('finance.view', static fn(): Response => new Response(200, ['data' => $controller->getRevenues()])));
+    $router->add('POST', '/api/v1/finance/revenue', $protect('revenue.manage', static fn(Request $request): Response => new Response(201, ['data' => $controller->createRevenue($request->body(), $actor($request))])));
 };

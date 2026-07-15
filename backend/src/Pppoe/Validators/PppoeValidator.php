@@ -23,7 +23,7 @@ final class PppoeValidator
         } elseif (!preg_match('/^[A-Za-z0-9._\-+@]+$/', $data->username)) {
             $errors[] = [
                 'code' => 'invalid_format',
-                'detail' => 'Username contains invalid characters. Use letters, numbers, dots, hyphens, plus, or '@'.',
+                'detail' => "Username contains invalid characters. Use letters, numbers, dots, hyphens, plus, or '@'.",
                 'source' => ['pointer' => '/data/attributes/username'],
             ];
         }

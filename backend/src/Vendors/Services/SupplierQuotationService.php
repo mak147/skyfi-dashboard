@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+namespace SkyFi\Vendors\Services;
+use SkyFi\Rbac\Contracts\AuditLoggerContract;use SkyFi\Shared\Exceptions\NotFoundException;use SkyFi\Shared\Exceptions\ValidationException;use SkyFi\Vendors\Contracts\SupplierQuotationRepositoryContract;use SkyFi\Vendors\Contracts\SupplierRepositoryContract;use SkyFi\Vendors\DomainModels\SupplierQuotation;use SkyFi\Vendors\DTOs\QuotationData;use SkyFi\Vendors\DTOs\QuotationListFilters;use SkyFi\Vendors\Validators\QuotationValidator;
+final class SupplierQuotationService
+{
+ public function __construct(private readonly SupplierQuotationRepositoryContract $repository,private readonly SupplierRepositoryContract $suppliers,private readonly QuotationValidator $validator,private readonly AuditLoggerContract $audit){}
+ public function list(QuotationListFilters $filters):array{return $this->repository->list($filters);}public function get(int $vendorId,int $id):SupplierQuotation{$item=$this->repository->find($id)??throw new NotFoundException('Supplier quotation not found.');if($item->vendorId()!==$vendorId)throw new NotFoundException('Supplier quotation not found.');return $item;}
+ public function create(int $vendorId,QuotationData $data,int $actor,?string $ip=null,?string $agent=null):SupplierQuotation{$this->supplier($vendorId);$this->validator->validate($data);$this->unique($vendorId,$data->quotationNumber);$item=$this->repository->create($vendorId,$data,$actor);$this->audit->log($actor,'vendors.quotation.created','supplier_quotation',$item->id(),null,$item->toArray(),$ip,$agent);return $item;}
+ public function update(int $vendorId,int $id,QuotationData $data,int $actor,?string $ip=null,?string $agent=null):SupplierQuotation{$old=$this->get($vendorId,$id);$this->validator->validate($data);$this->unique($vendorId,$data->quotationNumber,$id);$item=$this->repository->update($id,$data,$actor);$this->audit->log($actor,'vendors.quotation.updated','supplier_quotation',$id,$old->toArray(),$item->toArray(),$ip,$agent);return $item;}
+ public function delete(int $vendorId,int $id,int $actor,?string $ip=null,?string $agent=null):void{$old=$this->get($vendorId,$id);$this->repository->delete($id,$actor);$this->audit->log($actor,'vendors.quotation.archived','supplier_quotation',$id,$old->toArray(),null,$ip,$agent);}
+ public function compare(string $rfq,?int $productId=null):array{if(trim($rfq)==='')throw new ValidationException([['code'=>'rfq_required','detail'=>'RFQ reference is required for price comparison.']]);return $this->repository->compare(trim($rfq),$productId);}public function history(int $vendorId,int $id):array{$this->get($vendorId,$id);return $this->repository->history($id);}
+ private function supplier(int $id):void{if($this->suppliers->find($id)===null)throw new NotFoundException('Supplier not found.');}private function unique(int $vendor,string $number,?int $except=null):void{if($this->repository->numberExists($vendor,$number,$except))throw new ValidationException([['code'=>'duplicate_quotation_number','detail'=>'This supplier already has a quotation with that number.','source'=>['pointer'=>'/data/attributes/quotation_number']]]);}
+}
