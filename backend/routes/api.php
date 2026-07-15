@@ -75,4 +75,7 @@ return static function (Router $router, Container $container): void {
 
     $registerAuditRoutes = require dirname(__DIR__) . '/src/Audit/Routes/audit.php';
     $registerAuditRoutes($router, $container);
+
+    $registerBackupRoutes = require dirname(__DIR__) . '/src/Backup/Routes/backup.php';
+    $registerBackupRoutes($router, $container);
 };

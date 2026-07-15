@@ -1028,6 +1028,47 @@ final class Container
         $this->instances[AuditEventSubscriber::class]->register();
         // ─── End Audit, Compliance & Activity Center Module ─────────────
 
+        // ─── Backup, Restore & Disaster Recovery Module ──────────────────
+        $this->instances[\SkyFi\Backup\Contracts\BackupJobRepositoryContract::class] = new \SkyFi\Backup\Repositories\PdoBackupJobRepository($pdo);
+        $this->instances[\SkyFi\Backup\Contracts\BackupScheduleRepositoryContract::class] = new \SkyFi\Backup\Repositories\PdoBackupScheduleRepository($pdo);
+        $this->instances[\SkyFi\Backup\Contracts\BackupFileRepositoryContract::class] = new \SkyFi\Backup\Repositories\PdoBackupFileRepository($pdo);
+        $this->instances[\SkyFi\Backup\Repositories\PdoStorageProviderRepository::class] = new \SkyFi\Backup\Repositories\PdoStorageProviderRepository($pdo);
+        $this->instances[\SkyFi\Backup\Repositories\PdoDrPlanRepository::class] = new \SkyFi\Backup\Repositories\PdoDrPlanRepository($pdo);
+
+        $this->instances[\SkyFi\Backup\Services\BackupService::class] = new \SkyFi\Backup\Services\BackupService(
+            $this->instances[\SkyFi\Backup\Contracts\BackupJobRepositoryContract::class],
+            $this->instances[\SkyFi\Backup\Contracts\BackupFileRepositoryContract::class],
+            $this->instances[\SkyFi\Backup\Repositories\PdoStorageProviderRepository::class]
+        );
+        $this->instances[\SkyFi\Backup\Services\RestoreService::class] = new \SkyFi\Backup\Services\RestoreService(
+            $this->instances[\SkyFi\Backup\Contracts\BackupFileRepositoryContract::class],
+            $pdo
+        );
+        $this->instances[\SkyFi\Backup\Services\BackupScheduler::class] = new \SkyFi\Backup\Services\BackupScheduler(
+            $this->instances[\SkyFi\Backup\Contracts\BackupScheduleRepositoryContract::class],
+            $this->instances[\SkyFi\Backup\Services\BackupService::class],
+            $this->instances[\SkyFi\Backup\Contracts\BackupFileRepositoryContract::class]
+        );
+
+        $this->instances[\SkyFi\Backup\Controllers\BackupController::class] = new \SkyFi\Backup\Controllers\BackupController(
+            $this->instances[\SkyFi\Backup\Contracts\BackupJobRepositoryContract::class],
+            $this->instances[\SkyFi\Backup\Contracts\BackupFileRepositoryContract::class],
+            $this->instances[\SkyFi\Backup\Services\BackupService::class]
+        );
+        $this->instances[\SkyFi\Backup\Controllers\ScheduleController::class] = new \SkyFi\Backup\Controllers\ScheduleController(
+            $this->instances[\SkyFi\Backup\Contracts\BackupScheduleRepositoryContract::class]
+        );
+        $this->instances[\SkyFi\Backup\Controllers\RestoreController::class] = new \SkyFi\Backup\Controllers\RestoreController(
+            $this->instances[\SkyFi\Backup\Services\RestoreService::class]
+        );
+        $this->instances[\SkyFi\Backup\Controllers\StorageProviderController::class] = new \SkyFi\Backup\Controllers\StorageProviderController(
+            $this->instances[\SkyFi\Backup\Repositories\PdoStorageProviderRepository::class]
+        );
+        $this->instances[\SkyFi\Backup\Controllers\DrPlanController::class] = new \SkyFi\Backup\Controllers\DrPlanController(
+            $this->instances[\SkyFi\Backup\Repositories\PdoDrPlanRepository::class]
+        );
+        // ─── End Backup, Restore & Disaster Recovery Module ───────────────
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners
