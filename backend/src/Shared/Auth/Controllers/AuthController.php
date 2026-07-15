@@ -18,6 +18,7 @@ final class AuthController
         private readonly string $refreshCookieName,
         private readonly string $refreshCookiePath,
         private readonly bool $refreshCookieSecure,
+        private readonly bool $exposePasswordResetToken = false,
     ) {
     }
 
@@ -61,11 +62,13 @@ final class AuthController
         $email = (string) ($request->body()['email'] ?? '');
         $token = $this->auth->forgotPassword($email);
 
-        return ApiResponse::resource('password-reset-tokens', 'current', [
-            'requested' => true,
-            'token' => $token !== '' ? $token : null,
-            'note' => 'In production this token is delivered via email/SMS and must not be returned in the response.',
-        ]);
+        $attributes = ['requested' => true];
+        if ($this->exposePasswordResetToken) {
+            $attributes['token'] = $token !== '' ? $token : null;
+            $attributes['note'] = 'Development-only reset token. Production delivers this out of band.';
+        }
+
+        return ApiResponse::resource('password-reset-tokens', 'current', $attributes);
     }
 
     /** Handles POST /api/v1/auth/reset-password. */

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SkyFi\Connections\Data;
 
+use SkyFi\Shared\Http\PaginationInput;
+
 final class ConnectionListFilters
 {
     public function __construct(
@@ -21,8 +23,8 @@ final class ConnectionListFilters
     public static function fromQuery(array $query): self
     {
         return new self(
-            page: isset($query['page']['number']) ? (int) $query['page']['number'] : 1,
-            perPage: isset($query['page']['size']) ? (int) $query['page']['size'] : 15,
+            page: PaginationInput::page($query),
+            perPage: PaginationInput::perPage($query),
             status: $query['filter']['status'] ?? null,
             type: $query['filter']['type'] ?? null,
             customerId: isset($query['filter']['customer_id']) ? (int) $query['filter']['customer_id'] : null,

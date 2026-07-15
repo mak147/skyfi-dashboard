@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SkyFi\Monitoring\DTOs;
 
+use SkyFi\Shared\Http\PaginationInput;
+
 final class InterfaceMetricsFilters
 {
     public function __construct(
@@ -18,8 +20,8 @@ final class InterfaceMetricsFilters
     public static function fromRequest(array $params): self
     {
         return new self(
-            page: isset($params['page']) && (int) $params['page'] > 0 ? (int) $params['page'] : 1,
-            perPage: isset($params['per_page']) && (int) $params['per_page'] > 0 ? (int) $params['per_page'] : 25,
+            page: PaginationInput::page($params),
+            perPage: PaginationInput::perPage($params, 25),
             routerId: isset($params['router_id']) && (int) $params['router_id'] > 0 ? (int) $params['router_id'] : null,
             linkStatus: isset($params['link_status']) && is_string($params['link_status']) && $params['link_status'] !== '' ? $params['link_status'] : null,
         );
