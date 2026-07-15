@@ -1,4 +1,4 @@
-import { api } from '@/lib/api';
+import { apiClient as api } from '@/lib/apiClient';
 import type { 
   BackupJob, 
   BackupFile, 
@@ -12,21 +12,21 @@ import type {
 export const backupApi = {
   getStatistics: () => api.get<BackupStatistics>('/backup/statistics'),
   
-  getJobs: (params: any) => api.get<{ items: BackupJob[]; total: number }>('/backup/jobs', { params }),
+  getJobs: (params: Record<string, unknown>) => api.get<{ items: BackupJob[]; total: number }>('/backup/jobs', { params }),
   
   runManualBackup: (type: string) => api.post<BackupJob>('/backup/jobs/manual', { type }),
   
-  getFiles: (params: any) => api.get<{ items: BackupFile[]; total: number }>('/backup/files', { params }),
+  getFiles: (params: Record<string, unknown>) => api.get<{ items: BackupFile[]; total: number }>('/backup/files', { params }),
   
   verifyFile: (id: number) => api.post<{ status: string; details: string }>(`/backup/files/${id}/verify`),
   
-  getVerificationHistory: (id: number) => api.get<any[]>(`/backup/files/${id}/verification-history`),
+  getVerificationHistory: (id: number) => api.get<unknown[]>(`/backup/files/${id}/verification-history`),
   
   getSchedules: () => api.get<BackupSchedule[]>('/backup/schedules'),
   
-  createSchedule: (data: any) => api.post<BackupSchedule>('/backup/schedules', data),
+  createSchedule: (data: Record<string, unknown>) => api.post<BackupSchedule>('/backup/schedules', data),
   
-  updateSchedule: (id: number, data: any) => api.put<BackupSchedule>(`/backup/schedules/${id}`, data),
+  updateSchedule: (id: number, data: Record<string, unknown>) => api.put<BackupSchedule>(`/backup/schedules/${id}`, data),
   
   deleteSchedule: (id: number) => api.delete(`/backup/schedules/${id}`),
   
@@ -37,11 +37,11 @@ export const backupApi = {
   
   getStorageProviders: () => api.get<StorageProvider[]>('/backup/storage-providers'),
   
-  updateStorageProvider: (id: number, data: any) => api.put<StorageProvider>(`/backup/storage-providers/${id}`, data),
+  updateStorageProvider: (id: number, data: Record<string, unknown>) => api.put<StorageProvider>(`/backup/storage-providers/${id}`, data),
   
   getDrPlans: () => api.get<DrPlan[]>('/backup/dr-plans'),
   
   getDrPlan: (id: number) => api.get<DrPlan>(`/backup/dr-plans/${id}`),
   
-  updateDrPlan: (id: number, data: any) => api.put<DrPlan>(`/backup/dr-plans/${id}`, data),
+  updateDrPlan: (id: number, data: Record<string, unknown>) => api.put<DrPlan>(`/backup/dr-plans/${id}`, data),
 };

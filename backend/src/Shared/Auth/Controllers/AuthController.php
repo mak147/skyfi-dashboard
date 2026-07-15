@@ -55,6 +55,44 @@ final class AuthController
         );
     }
 
+    /** Handles POST /api/v1/auth/forgot-password. */
+    public function forgotPassword(Request $request): Response
+    {
+        $email = (string) ($request->body()['email'] ?? '');
+        $token = $this->auth->forgotPassword($email);
+
+        return ApiResponse::resource('password-reset-tokens', 'current', [
+            'requested' => true,
+            'token' => $token !== '' ? $token : null,
+            'note' => 'In production this token is delivered via email/SMS and must not be returned in the response.',
+        ]);
+    }
+
+    /** Handles POST /api/v1/auth/reset-password. */
+    public function resetPassword(Request $request): Response
+    {
+        $body = $request->body();
+        $token = (string) ($body['token'] ?? '');
+        $password = (string) ($body['password'] ?? '');
+
+        $this->auth->resetPassword($token, $password);
+
+        return ApiResponse::resource('password-resets', 'current', ['reset' => true]);
+    }
+
+    /** Handles POST /api/v1/auth/change-password. */
+    public function changePassword(Request $request): Response
+    {
+        $userId = (int) ($request->attributes()['claims']['sub'] ?? 0);
+        $body = $request->body();
+        $currentPassword = (string) ($body['current_password'] ?? '');
+        $newPassword = (string) ($body['new_password'] ?? '');
+
+        $this->auth->changePassword($userId, $currentPassword, $newPassword);
+
+        return ApiResponse::resource('password-changes', (string) $userId, ['changed' => true]);
+    }
+
     /** @param array<string, mixed> $attributes */
     private function sessionResponse(array $attributes, string $refreshToken, int $refreshExpiresAt): Response
     {

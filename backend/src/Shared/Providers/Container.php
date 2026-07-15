@@ -28,6 +28,7 @@ use SkyFi\Packages\Services\PackageService;
 use SkyFi\Dashboard\Controllers\DashboardController;
 use SkyFi\Dashboard\Services\DashboardService;
 use SkyFi\Shared\Auth\Controllers\AuthController;
+use SkyFi\Shared\Auth\Repositories\PdoPasswordResetRepository;
 use SkyFi\Shared\Auth\Repositories\PdoRefreshTokenRepository;
 use SkyFi\Shared\Auth\Repositories\PdoUserRepository;
 use SkyFi\Shared\Auth\Services\AuthService;
@@ -109,11 +110,14 @@ final class Container
             (string) $config['audience'],
             (int) $config['jwt_access_ttl'],
         );
+
         $this->instances[PdoUserRepository::class] = new PdoUserRepository($pdo);
         $this->instances[PdoRefreshTokenRepository::class] = new PdoRefreshTokenRepository($pdo);
+        $this->instances[PdoPasswordResetRepository::class] = new PdoPasswordResetRepository($pdo);
         $this->instances[AuthService::class] = new AuthService(
             $this->instances[PdoUserRepository::class],
             $this->instances[PdoRefreshTokenRepository::class],
+            $this->instances[PdoPasswordResetRepository::class],
             $this->instances[JwtTokenService::class],
             (int) $config['jwt_refresh_ttl'],
             (int) $config['jwt_session_refresh_ttl'],
@@ -1273,6 +1277,28 @@ final class Container
         );
         $this->instances[\SkyFi\Workflow\EventSubscribers\DomainEventSubscriber::class]->register();
         // ─── End Workflow Automation Engine Module ───────────────────────
+
+        // ─── Customer Self-Service Portal Module ────────────────────────
+        $this->instances[\SkyFi\Portal\Validators\PortalValidator::class] = new \SkyFi\Portal\Validators\PortalValidator();
+        $this->instances[\SkyFi\Portal\Services\PortalService::class] = new \SkyFi\Portal\Services\PortalService(
+            $this->instances[PdoUserRepository::class],
+            $this->instances[CustomerService::class],
+            $this->instances[ConnectionService::class],
+            $this->instances[InvoiceService::class],
+            $this->instances[PaymentService::class],
+            $this->instances[\SkyFi\Support\Services\TicketService::class],
+            $this->instances[\SkyFi\Notifications\Services\NotificationService::class],
+            $this->instances[\SkyFi\Notifications\Services\PreferenceService::class],
+            $this->instances[PackageService::class],
+            $this->instances[\SkyFi\Portal\Validators\PortalValidator::class],
+            $pdo,
+        );
+        $this->instances[\SkyFi\Portal\Contracts\PortalServiceContract::class] = $this->instances[\SkyFi\Portal\Services\PortalService::class];
+        $this->instances[\SkyFi\Portal\Controllers\PortalController::class] = new \SkyFi\Portal\Controllers\PortalController(
+            $this->instances[\SkyFi\Portal\Services\PortalService::class],
+            $permission,
+        );
+        // ─── End Customer Self-Service Portal Module ────────────────────
 
         $this->instances[Router::class] = new Router();
 

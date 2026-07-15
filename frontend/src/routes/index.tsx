@@ -26,6 +26,7 @@ import { IntegrationRoutes } from '@/features/integration/routes';
 import { WorkflowRoutes } from '@/features/workflow/routes';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
+import { PortalRoutes } from '@/portal/routes';
 
 const NotFound = () => (
   <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
@@ -69,6 +70,7 @@ export const AppRoutes = () => (
         ))}
       </Route>
     </Route>
+    <Route path="/portal/*" element={<PortalRoutes />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

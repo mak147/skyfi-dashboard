@@ -22,7 +22,11 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export const LoginForm = () => {
+interface LoginFormProps {
+  defaultRedirect?: string;
+}
+
+export const LoginForm = ({ defaultRedirect = '/' }: LoginFormProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,7 +39,7 @@ export const LoginForm = () => {
     mutationFn: (values: LoginPayload) => login(values),
     onSuccess: (session) => {
       dispatch(sessionStarted(session));
-      const destination = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/';
+      const destination = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? defaultRedirect;
       navigate(destination, { replace: true });
     },
   });

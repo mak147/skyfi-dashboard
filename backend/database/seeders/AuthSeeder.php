@@ -65,6 +65,7 @@ final class AuthSeeder
             'Installation Team / Field Technician' => 'Manages assigned installation and repair work.',
             'Network Engineer' => 'Manages network infrastructure and provisioning.',
             'Inventory Manager' => 'Manages physical inventory and purchasing.',
+            'Customer' => 'Self-service portal access to own account, billing, payments, and support.',
         ];
         $statement = $connection->prepare(
             'INSERT INTO roles (name, description, created_at, updated_at) VALUES (:name, :description, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)\n             ON DUPLICATE KEY UPDATE description = VALUES(description), updated_at = CURRENT_TIMESTAMP',
@@ -93,6 +94,7 @@ final class AuthSeeder
             'Installation Team / Field Technician' => ['reports.view', 'analytics.view', 'field.view', 'field.update', 'field.complete', 'view:work-order:own', 'update:work-order:own', 'view:customer:contact_and_address', 'view:inventory:own-vehicle', 'execute:site-survey', 'execute:service:diagnostics', 'customers.view', 'packages.view', 'pppoe.view', 'notifications.view', 'notifications.preferences'],
             'Network Engineer' => ['reports.view', 'reports.export', 'analytics.view', 'field.view', 'field.create', 'field.update', 'manage:tower', 'manage:mikrotik-router', 'mikrotik.view', 'mikrotik.create', 'mikrotik.update', 'mikrotik.delete', 'mikrotik.connect', 'view:ip-address-pool', 'execute:provisioning:manual', 'execute:config-backup', 'view:network-status:global', 'view:customer:network-details', 'view:report:network', 'customers.view', 'customers.manage', 'packages.view', 'packages.update', 'packages.manage', 'pppoe.view', 'pppoe.create', 'pppoe.update', 'pppoe.delete', 'pppoe.enable', 'pppoe.disable', 'pppoe.sync', 'pppoe.monitor', 'pppoe.manage', 'notifications.view', 'notifications.preferences'],
             'Inventory Manager' => ['reports.view', 'reports.export', 'analytics.view', 'field.view', 'manage:inventory-item', 'manage:warehouse', 'execute:stock-transfer', 'inventory.view', 'inventory.create', 'inventory.update', 'inventory.delete', 'inventory.transfer', 'inventory.audit', 'inventory.manage', 'manage:vendor', 'vendors.view', 'vendors.create', 'vendors.update', 'vendors.delete', 'vendors.contracts', 'vendors.manage', 'manage:purchase-order', 'view:report:inventory', 'customers.view', 'packages.view', 'notifications.view', 'notifications.preferences'],
+            'Customer' => ['portal.access', 'view:customer:own', 'update:customer:own', 'view:invoice:own', 'view:payment:own', 'view:service:own', 'view:ticket:own', 'support.create', 'manage:ticket:own', 'notifications.view', 'notifications.preferences'],
         ];
         $statement = $connection->prepare(
             'INSERT IGNORE INTO permission_role (permission_id, role_id) VALUES (:permission_id, :role_id)',

@@ -6,10 +6,10 @@ import type { StorageProvider } from '../types';
 
 export const StorageProvidersPage = () => {
   const [providers, setProviders] = useState<StorageProvider[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
-    backupApi.getStorageProviders().then((res) => {
+    backupApi.getStorageProviders().then((res: { data: StorageProvider[] }) => {
       setProviders(res.data);
       setLoading(false);
     });

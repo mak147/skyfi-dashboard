@@ -13,6 +13,7 @@ final class User
         public readonly int $id,
         public readonly string $name,
         public readonly string $email,
+        public readonly ?int $customerId,
         public readonly string $passwordHash,
         public readonly array $roles = [],
     ) {

@@ -18,8 +18,8 @@ export const BackupDashboard = () => {
       ]);
       setStats(statsRes.data);
       setRecentJobs(jobsRes.data.items);
-    } catch (error) {
-      console.error('Failed to load backup dashboard data', error);
+    } catch {
+      console.error('Failed to load backup dashboard data');
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,7 @@ export const BackupDashboard = () => {
     try {
       await backupApi.runManualBackup(type);
       loadData();
-    } catch (error) {
+    } catch {
       alert('Failed to trigger manual backup');
     }
   };

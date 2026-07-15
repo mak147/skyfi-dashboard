@@ -8,7 +8,7 @@ export const BackupJobsPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    backupApi.getJobs({ perPage: 50 }).then((res) => {
+    backupApi.getJobs({ perPage: 50 }).then((res: { data: { items: BackupJob[]; total: number } }) => {
       setJobs(res.data.items);
       setLoading(false);
     });
