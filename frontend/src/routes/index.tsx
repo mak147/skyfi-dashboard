@@ -19,6 +19,7 @@ import { VendorRoutes } from '@/features/vendors/routes';
 import { FieldServiceRoutes } from '@/features/field-service/routes';
 import { ReportRoutes } from '@/features/reports/routes';
 import { SystemRoutes } from '@/features/system/routes';
+import { NotificationRoutes } from '@/features/notifications/routes';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
 
@@ -55,6 +56,7 @@ export const AppRoutes = () => (
         <Route path="/reports/*" element={<ReportRoutes />} />
         <Route path="/admin/system/*" element={<SystemRoutes />} />
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
+        <Route path="/notifications/*" element={<NotificationRoutes />} />
       </Route>
     </Route>
     <Route path="*" element={<NotFound />} />

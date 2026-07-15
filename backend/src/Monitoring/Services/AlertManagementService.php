@@ -62,6 +62,8 @@ final class AlertManagementService implements AlertManagementServiceContract
             metadata: ['alert_id' => $alert->id, 'metric_value' => $data->metricValue, 'threshold_value' => $data->thresholdValue],
         ));
 
+        \SkyFi\Shared\Events\EventDispatcher::dispatch('monitoring.alert.triggered', $alert->toArray());
+
         return $alert;
     }
 

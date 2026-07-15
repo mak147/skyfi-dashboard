@@ -157,6 +157,10 @@ final class PermissionCatalog
             'system.view' => 'View company and system administration settings.',
             'system.update' => 'Update company, branding, localization, notification, and operational settings.',
             'system.manage' => 'Manage branches, departments, maintenance toggles, and administrative operations.',
+            'notifications.view' => 'View notification center inbox and unread counts.',
+            'notifications.manage' => 'Manage delivery history, events, and manual notification dispatch.',
+            'notifications.templates' => 'Manage notification templates across channels.',
+            'notifications.preferences' => 'Manage personal notification delivery preferences.',
             'update:user:role' => 'Update user roles within scope.',
             'manage:ticket:own' => 'Manage the signed-in customer tickets.',
         ];
