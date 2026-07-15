@@ -81,4 +81,7 @@ return static function (Router $router, Container $container): void {
 
     $registerIntegrationRoutes = require dirname(__DIR__) . '/src/Integration/Routes/integration.php';
     $registerIntegrationRoutes($router, $container);
+
+    $registerWorkflowRoutes = require dirname(__DIR__) . '/src/Workflow/Routes/workflow.php';
+    $registerWorkflowRoutes($router, $container);
 };

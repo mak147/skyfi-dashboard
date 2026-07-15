@@ -167,6 +167,11 @@ final class PermissionCatalog
             'integration.manage' => 'Manage client applications, connectors, and request logs.',
             'integration.webhooks' => 'Manage webhooks, delivery history, and retry operations.',
             'integration.apikeys' => 'Manage API keys, scopes, and key regeneration.',
+            'workflow.view' => 'View workflows, catalogs, and execution history.',
+            'workflow.create' => 'Create and clone workflows.',
+            'workflow.update' => 'Update, enable, disable, and version workflows.',
+            'workflow.execute' => 'Manually run, test, and retry workflow executions.',
+            'workflow.manage' => 'Pause, resume, cancel, and administer workflow automation.',
         ];
     }
 }

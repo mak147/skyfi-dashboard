@@ -360,6 +360,46 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Automation',
+    items: [
+      {
+        label: 'Workflow Dashboard',
+        path: '/workflows',
+        icon: '⚡',
+        description: 'Workflow automation overview and recent executions.',
+        requiredPermission: 'workflow.view',
+      },
+      {
+        label: 'Workflow Builder',
+        path: '/workflows/list',
+        icon: '▣',
+        description: 'Create, enable, clone, and manage automation workflows.',
+        requiredPermission: 'workflow.view',
+      },
+      {
+        label: 'Execution History',
+        path: '/workflows/history',
+        icon: '◷',
+        description: 'Track workflow runs, retries, durations, and errors.',
+        requiredPermission: 'workflow.view',
+      },
+      {
+        label: 'Trigger Catalog',
+        path: '/workflows/triggers',
+        icon: '◎',
+        description: 'Browse event-based triggers from all modules.',
+        requiredPermission: 'workflow.view',
+      },
+      {
+        label: 'Action Catalog',
+        path: '/workflows/actions',
+        icon: '⇢',
+        description: 'Browse reusable actions that call existing services.',
+        requiredPermission: 'workflow.view',
+      },
+    ],
+  },
+  {
     label: 'Administration',
     items: [
       {
