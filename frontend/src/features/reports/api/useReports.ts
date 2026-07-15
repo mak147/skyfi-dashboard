@@ -1,0 +1,12 @@
+import { useMutation,useQuery,useQueryClient } from '@tanstack/react-query';
+import { reportsApi } from './reportsApi';import type { ReportFilters,SavedReport } from '../types';
+export const useReportCatalog=()=>useQuery({queryKey:['reports','catalog'],queryFn:reportsApi.catalog,staleTime:300000});
+export const useReportFilters=()=>useQuery({queryKey:['reports','filters'],queryFn:reportsApi.filters,staleTime:300000});
+export const useGeneratedReport=(key:string,filters:ReportFilters,page:number,enabled=true)=>useQuery({queryKey:['reports','generated',key,filters,page],queryFn:()=>reportsApi.generate(key,filters,page),enabled:enabled&&Boolean(key)});
+export const useReportDashboard=(key:string,filters:ReportFilters={})=>useQuery({queryKey:['reports','dashboard',key,filters],queryFn:()=>reportsApi.dashboard(key,filters)});
+export const useSavedReports=()=>useQuery({queryKey:['reports','saved'],queryFn:reportsApi.saved});
+export const useSchedules=()=>useQuery({queryKey:['reports','schedules'],queryFn:reportsApi.schedules});
+export const useExports=()=>useQuery({queryKey:['reports','exports'],queryFn:reportsApi.exports,refetchInterval:15000});
+export const useSaveReport=()=>{const c=useQueryClient();return useMutation({mutationFn:(data:Partial<SavedReport>)=>data.id?reportsApi.updateSaved(data.id,data):reportsApi.save(data),onSuccess:()=>void c.invalidateQueries({queryKey:['reports','saved']})});};
+export const useDeleteSavedReport=()=>{const c=useQueryClient();return useMutation({mutationFn:reportsApi.deleteSaved,onSuccess:()=>void c.invalidateQueries({queryKey:['reports','saved']})});};
+export const useCreateExport=()=>{const c=useQueryClient();return useMutation({mutationFn:({key,format,filters}:{key:string;format:string;filters:ReportFilters})=>reportsApi.createExport(key,format,filters),onSuccess:()=>void c.invalidateQueries({queryKey:['reports','exports']})});};
