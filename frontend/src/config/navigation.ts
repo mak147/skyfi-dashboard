@@ -124,6 +124,46 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Purchasing',
+    items: [
+      {
+        label: 'Procurement Dashboard',
+        path: '/purchasing',
+        icon: '◈',
+        description: 'Purchase lifecycle, approvals, deliveries, and spend.',
+        requiredPermission: 'purchasing.view',
+      },
+      {
+        label: 'Purchase Requests',
+        path: '/purchasing/requests',
+        icon: '◫',
+        description: 'Internal procurement requests and approval workflow.',
+        requiredPermission: 'purchasing.view',
+      },
+      {
+        label: 'Purchase Orders',
+        path: '/purchasing/orders',
+        icon: '⊞',
+        description: 'Supplier purchase orders, delivery, and closure.',
+        requiredPermission: 'purchasing.view',
+      },
+      {
+        label: 'Goods Receipts',
+        path: '/purchasing/receipts',
+        icon: '⇥',
+        description: 'Record received goods, damages, and short receipts.',
+        requiredPermission: 'purchasing.view',
+      },
+      {
+        label: 'Supplier Invoices',
+        path: '/purchasing/invoices',
+        icon: '🧾',
+        description: 'Register and track supplier invoices against POs.',
+        requiredPermission: 'purchasing.view',
+      },
+    ],
+  },
+  {
     label: 'Support',
     items: [
       {

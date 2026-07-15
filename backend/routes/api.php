@@ -53,4 +53,7 @@ return static function (Router $router, Container $container): void {
 
     $registerInventoryRoutes = require dirname(__DIR__) . '/src/Inventory/Routes/inventory.php';
     $registerInventoryRoutes($router, $container);
+
+    $registerPurchasingRoutes = require dirname(__DIR__) . '/src/Purchasing/Routes/purchasing.php';
+    $registerPurchasingRoutes($router, $container);
 };
