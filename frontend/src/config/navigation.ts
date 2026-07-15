@@ -164,6 +164,46 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Vendor Management',
+    items: [
+      {
+        label: 'Supplier Dashboard',
+        path: '/purchasing/vendors',
+        icon: '◈',
+        description: 'Supplier KPIs, expiring contract alerts, and procurement spend.',
+        requiredPermission: 'vendors.view',
+      },
+      {
+        label: 'Suppliers Directory',
+        path: '/purchasing/vendors/list',
+        icon: '🏢',
+        description: 'Manage supplier profiles, ratings, tax IDs, and payment terms.',
+        requiredPermission: 'vendors.view',
+      },
+      {
+        label: 'Contacts',
+        path: '/purchasing/vendors/contacts',
+        icon: '👥',
+        description: 'Supplier representatives, primary contacts, and emergency numbers.',
+        requiredPermission: 'vendors.view',
+      },
+      {
+        label: 'Contracts & SLAs',
+        path: '/purchasing/vendors/contracts',
+        icon: '📜',
+        description: 'Master agreements, warranty terms, values, and expiration timelines.',
+        requiredPermission: 'vendors.contracts',
+      },
+      {
+        label: 'Quotations & RFQs',
+        path: '/purchasing/vendors/quotations',
+        icon: '📊',
+        description: 'Compare supplier price bids, validity dates, and item quotations.',
+        requiredPermission: 'vendors.view',
+      },
+    ],
+  },
+  {
     label: 'Support',
     items: [
       {

@@ -722,6 +722,80 @@ final class Container
         );
         // ─── End Purchasing & Procurement Module ─────────────────────────
 
+        // ─── Vendor & Supplier Management Module ─────────────────────────
+        $this->instances[\SkyFi\Vendors\Repositories\PdoVendorRepository::class] = new \SkyFi\Vendors\Repositories\PdoVendorRepository($pdo);
+        $this->instances[\SkyFi\Vendors\Contracts\VendorRepositoryContract::class] = $this->instances[\SkyFi\Vendors\Repositories\PdoVendorRepository::class];
+        $this->instances[\SkyFi\Vendors\Repositories\PdoVendorContactRepository::class] = new \SkyFi\Vendors\Repositories\PdoVendorContactRepository($pdo);
+        $this->instances[\SkyFi\Vendors\Contracts\VendorContactRepositoryContract::class] = $this->instances[\SkyFi\Vendors\Repositories\PdoVendorContactRepository::class];
+        $this->instances[\SkyFi\Vendors\Repositories\PdoVendorContractRepository::class] = new \SkyFi\Vendors\Repositories\PdoVendorContractRepository($pdo);
+        $this->instances[\SkyFi\Vendors\Contracts\VendorContractRepositoryContract::class] = $this->instances[\SkyFi\Vendors\Repositories\PdoVendorContractRepository::class];
+        $this->instances[\SkyFi\Vendors\Repositories\PdoVendorQuotationRepository::class] = new \SkyFi\Vendors\Repositories\PdoVendorQuotationRepository($pdo);
+        $this->instances[\SkyFi\Vendors\Contracts\VendorQuotationRepositoryContract::class] = $this->instances[\SkyFi\Vendors\Repositories\PdoVendorQuotationRepository::class];
+        $this->instances[\SkyFi\Vendors\Repositories\PdoVendorRatingRepository::class] = new \SkyFi\Vendors\Repositories\PdoVendorRatingRepository($pdo);
+        $this->instances[\SkyFi\Vendors\Contracts\VendorRatingRepositoryContract::class] = $this->instances[\SkyFi\Vendors\Repositories\PdoVendorRatingRepository::class];
+
+        $this->instances[\SkyFi\Vendors\Validators\VendorValidator::class] = new \SkyFi\Vendors\Validators\VendorValidator();
+        $this->instances[\SkyFi\Vendors\Validators\VendorContactValidator::class] = new \SkyFi\Vendors\Validators\VendorContactValidator();
+        $this->instances[\SkyFi\Vendors\Validators\VendorContractValidator::class] = new \SkyFi\Vendors\Validators\VendorContractValidator();
+        $this->instances[\SkyFi\Vendors\Validators\VendorQuotationValidator::class] = new \SkyFi\Vendors\Validators\VendorQuotationValidator();
+        $this->instances[\SkyFi\Vendors\Validators\VendorRatingValidator::class] = new \SkyFi\Vendors\Validators\VendorRatingValidator();
+
+        $this->instances[\SkyFi\Vendors\Services\VendorPerformanceService::class] = new \SkyFi\Vendors\Services\VendorPerformanceService($pdo);
+        $this->instances[\SkyFi\Vendors\Services\VendorDashboardService::class] = new \SkyFi\Vendors\Services\VendorDashboardService($pdo);
+
+        $this->instances[\SkyFi\Vendors\Services\VendorService::class] = new \SkyFi\Vendors\Services\VendorService(
+            $this->instances[\SkyFi\Vendors\Repositories\PdoVendorRepository::class],
+            $this->instances[\SkyFi\Vendors\Validators\VendorValidator::class],
+            $this->instances[\SkyFi\Rbac\Contracts\AuditLoggerContract::class],
+        );
+        $this->instances[\SkyFi\Vendors\Services\VendorContactService::class] = new \SkyFi\Vendors\Services\VendorContactService(
+            $this->instances[\SkyFi\Vendors\Repositories\PdoVendorContactRepository::class],
+            $this->instances[\SkyFi\Vendors\Validators\VendorContactValidator::class],
+            $this->instances[\SkyFi\Rbac\Contracts\AuditLoggerContract::class],
+        );
+        $this->instances[\SkyFi\Vendors\Services\VendorContractService::class] = new \SkyFi\Vendors\Services\VendorContractService(
+            $this->instances[\SkyFi\Vendors\Repositories\PdoVendorContractRepository::class],
+            $this->instances[\SkyFi\Vendors\Validators\VendorContractValidator::class],
+            $this->instances[\SkyFi\Rbac\Contracts\AuditLoggerContract::class],
+        );
+        $this->instances[\SkyFi\Vendors\Services\VendorQuotationService::class] = new \SkyFi\Vendors\Services\VendorQuotationService(
+            $this->instances[\SkyFi\Vendors\Repositories\PdoVendorQuotationRepository::class],
+            $this->instances[\SkyFi\Vendors\Validators\VendorQuotationValidator::class],
+            $this->instances[\SkyFi\Rbac\Contracts\AuditLoggerContract::class],
+        );
+        $this->instances[\SkyFi\Vendors\Services\VendorRatingService::class] = new \SkyFi\Vendors\Services\VendorRatingService(
+            $this->instances[\SkyFi\Vendors\Repositories\PdoVendorRatingRepository::class],
+            $this->instances[\SkyFi\Vendors\Validators\VendorRatingValidator::class],
+            $this->instances[\SkyFi\Rbac\Contracts\AuditLoggerContract::class],
+        );
+
+        $this->instances[\SkyFi\Vendors\Controllers\VendorDashboardController::class] = new \SkyFi\Vendors\Controllers\VendorDashboardController(
+            $this->instances[\SkyFi\Vendors\Services\VendorDashboardService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\SkyFi\Vendors\Controllers\VendorController::class] = new \SkyFi\Vendors\Controllers\VendorController(
+            $this->instances[\SkyFi\Vendors\Services\VendorService::class],
+            $this->instances[\SkyFi\Vendors\Services\VendorPerformanceService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\SkyFi\Vendors\Controllers\VendorContactController::class] = new \SkyFi\Vendors\Controllers\VendorContactController(
+            $this->instances[\SkyFi\Vendors\Services\VendorContactService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\SkyFi\Vendors\Controllers\VendorContractController::class] = new \SkyFi\Vendors\Controllers\VendorContractController(
+            $this->instances[\SkyFi\Vendors\Services\VendorContractService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\SkyFi\Vendors\Controllers\VendorQuotationController::class] = new \SkyFi\Vendors\Controllers\VendorQuotationController(
+            $this->instances[\SkyFi\Vendors\Services\VendorQuotationService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\SkyFi\Vendors\Controllers\VendorRatingController::class] = new \SkyFi\Vendors\Controllers\VendorRatingController(
+            $this->instances[\SkyFi\Vendors\Services\VendorRatingService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        // ─── End Vendor & Supplier Management Module ─────────────────────
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners

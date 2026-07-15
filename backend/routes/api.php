@@ -56,4 +56,7 @@ return static function (Router $router, Container $container): void {
 
     $registerPurchasingRoutes = require dirname(__DIR__) . '/src/Purchasing/Routes/purchasing.php';
     $registerPurchasingRoutes($router, $container);
+
+    $registerVendorRoutes = require dirname(__DIR__) . '/src/Vendors/Routes/vendors.php';
+    $registerVendorRoutes($router, $container);
 };
