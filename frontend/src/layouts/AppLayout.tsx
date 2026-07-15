@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 
 import { Button } from '@/components/ui/button';
 import { canViewNavigationItem, navigationGroups } from '@/config/navigation';
+import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
 
@@ -113,7 +114,7 @@ export const AppLayout = () => {
             </button>
             <div className="hidden min-w-0 sm:block">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600">Staff Portal</p>
-              <p className="truncate text-sm text-slate-500">Global search, notifications, and quick-create actions are reserved in the layout shell.</p>
+              <p className="truncate text-sm text-slate-500">Notification center is live; global search remains reserved for a future module.</p>
             </div>
           </div>
 
@@ -127,6 +128,7 @@ export const AppLayout = () => {
             >
               {theme === 'dark' ? '☀ Light' : '☾ Dark'}
             </button>
+            <NotificationBell />
             <button
               type="button"
               className="hidden rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-400 sm:inline-flex"

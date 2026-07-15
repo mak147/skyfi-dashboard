@@ -872,6 +872,89 @@ final class Container
         $this->instances[\SkyFi\Reports\Controllers\ReportExportController::class] = new \SkyFi\Reports\Controllers\ReportExportController($this->instances[\SkyFi\Reports\ExportServices\ReportExportService::class], $permission);
         // ─── End Reports & Business Intelligence Module ──────────────────
 
+        // ─── Notification Center Module ─────────────────────────────────
+        $this->instances[\SkyFi\Notifications\Services\NotificationCatalog::class] = new \SkyFi\Notifications\Services\NotificationCatalog();
+        $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationRepository::class] = new \SkyFi\Notifications\Repositories\PdoNotificationRepository($pdo);
+        $this->instances[\SkyFi\Notifications\Contracts\NotificationRepositoryContract::class] = $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationRepository::class];
+        $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationTemplateRepository::class] = new \SkyFi\Notifications\Repositories\PdoNotificationTemplateRepository($pdo);
+        $this->instances[\SkyFi\Notifications\Contracts\NotificationTemplateRepositoryContract::class] = $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationTemplateRepository::class];
+        $this->instances[\SkyFi\Notifications\Repositories\PdoUserPreferenceRepository::class] = new \SkyFi\Notifications\Repositories\PdoUserPreferenceRepository($pdo);
+        $this->instances[\SkyFi\Notifications\Contracts\UserPreferenceRepositoryContract::class] = $this->instances[\SkyFi\Notifications\Repositories\PdoUserPreferenceRepository::class];
+        $this->instances[\SkyFi\Notifications\Repositories\PdoDeliveryHistoryRepository::class] = new \SkyFi\Notifications\Repositories\PdoDeliveryHistoryRepository($pdo);
+        $this->instances[\SkyFi\Notifications\Contracts\DeliveryHistoryRepositoryContract::class] = $this->instances[\SkyFi\Notifications\Repositories\PdoDeliveryHistoryRepository::class];
+        $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationEventRepository::class] = new \SkyFi\Notifications\Repositories\PdoNotificationEventRepository($pdo);
+        $this->instances[\SkyFi\Notifications\Contracts\NotificationEventRepositoryContract::class] = $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationEventRepository::class];
+        $this->instances[\SkyFi\Notifications\Services\DeliveryService::class] = new \SkyFi\Notifications\Services\DeliveryService(
+            $this->instances[\SkyFi\Notifications\Repositories\PdoDeliveryHistoryRepository::class],
+            $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationTemplateRepository::class],
+            $this->instances[\SkyFi\Notifications\Repositories\PdoUserPreferenceRepository::class],
+            [
+                new \SkyFi\Notifications\Channels\InAppChannel(),
+                new \SkyFi\Notifications\Channels\EmailChannel(),
+                new \SkyFi\Notifications\Channels\SmsChannel(),
+                new \SkyFi\Notifications\Channels\PushChannel(),
+                new \SkyFi\Notifications\Channels\WebhookChannel(),
+            ],
+        );
+        $this->instances[\SkyFi\Notifications\EventPublishers\NotificationEventPublisher::class] = new \SkyFi\Notifications\EventPublishers\NotificationEventPublisher(
+            $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationEventRepository::class],
+        );
+        $this->instances[\SkyFi\Notifications\Validators\NotificationValidator::class] = new \SkyFi\Notifications\Validators\NotificationValidator(
+            $this->instances[\SkyFi\Notifications\Services\NotificationCatalog::class],
+        );
+        $this->instances[\SkyFi\Notifications\Validators\TemplateValidator::class] = new \SkyFi\Notifications\Validators\TemplateValidator(
+            $this->instances[\SkyFi\Notifications\Services\NotificationCatalog::class],
+        );
+        $this->instances[\SkyFi\Notifications\Validators\PreferenceValidator::class] = new \SkyFi\Notifications\Validators\PreferenceValidator(
+            $this->instances[\SkyFi\Notifications\Services\NotificationCatalog::class],
+        );
+        $this->instances[\SkyFi\Notifications\Services\NotificationService::class] = new \SkyFi\Notifications\Services\NotificationService(
+            $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationRepository::class],
+            $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationTemplateRepository::class],
+            $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationEventRepository::class],
+            $this->instances[\SkyFi\Notifications\Services\DeliveryService::class],
+            $this->instances[\SkyFi\Notifications\EventPublishers\NotificationEventPublisher::class],
+            $this->instances[\SkyFi\Notifications\Services\NotificationCatalog::class],
+            $this->instances[\SkyFi\Notifications\Validators\NotificationValidator::class],
+            $pdo,
+        );
+        $this->instances[\SkyFi\Notifications\Contracts\NotificationServiceContract::class] = $this->instances[\SkyFi\Notifications\Services\NotificationService::class];
+        $this->instances[\SkyFi\Notifications\Services\TemplateService::class] = new \SkyFi\Notifications\Services\TemplateService(
+            $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationTemplateRepository::class],
+            $this->instances[\SkyFi\Notifications\Validators\TemplateValidator::class],
+            $this->instances[\SkyFi\Notifications\Services\DeliveryService::class],
+        );
+        $this->instances[\SkyFi\Notifications\Services\PreferenceService::class] = new \SkyFi\Notifications\Services\PreferenceService(
+            $this->instances[\SkyFi\Notifications\Repositories\PdoUserPreferenceRepository::class],
+            $this->instances[\SkyFi\Notifications\Validators\PreferenceValidator::class],
+            $this->instances[\SkyFi\Notifications\Services\NotificationCatalog::class],
+        );
+        $this->instances[\SkyFi\Notifications\Controllers\NotificationController::class] = new \SkyFi\Notifications\Controllers\NotificationController(
+            $this->instances[\SkyFi\Notifications\Services\NotificationService::class],
+            $permission,
+        );
+        $this->instances[\SkyFi\Notifications\Controllers\NotificationTemplateController::class] = new \SkyFi\Notifications\Controllers\NotificationTemplateController(
+            $this->instances[\SkyFi\Notifications\Services\TemplateService::class],
+            $permission,
+        );
+        $this->instances[\SkyFi\Notifications\Controllers\UserPreferenceController::class] = new \SkyFi\Notifications\Controllers\UserPreferenceController(
+            $this->instances[\SkyFi\Notifications\Services\PreferenceService::class],
+            $permission,
+        );
+        $this->instances[\SkyFi\Notifications\Controllers\DeliveryHistoryController::class] = new \SkyFi\Notifications\Controllers\DeliveryHistoryController(
+            $this->instances[\SkyFi\Notifications\Repositories\PdoDeliveryHistoryRepository::class],
+            $permission,
+        );
+        $this->instances[\SkyFi\Notifications\Controllers\NotificationEventController::class] = new \SkyFi\Notifications\Controllers\NotificationEventController(
+            $this->instances[\SkyFi\Notifications\Repositories\PdoNotificationEventRepository::class],
+            $permission,
+        );
+        $this->instances[\SkyFi\Notifications\EventSubscribers\DomainEventSubscriber::class] = new \SkyFi\Notifications\EventSubscribers\DomainEventSubscriber(
+            $this->instances[\SkyFi\Notifications\Services\NotificationService::class],
+        );
+        $this->instances[\SkyFi\Notifications\EventSubscribers\DomainEventSubscriber::class]->register();
+        // ─── End Notification Center Module ─────────────────────────────
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners

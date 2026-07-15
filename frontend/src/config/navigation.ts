@@ -315,6 +315,39 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Communications',
+    items: [
+      {
+        label: 'Notification Center',
+        path: '/notifications',
+        icon: '🔔',
+        description: 'In-app inbox for system-wide operational notifications.',
+        requiredPermission: 'notifications.view',
+      },
+      {
+        label: 'Templates',
+        path: '/notifications/templates',
+        icon: '✎',
+        description: 'Manage email, SMS, and in-app notification templates.',
+        requiredPermission: 'notifications.templates',
+      },
+      {
+        label: 'Preferences',
+        path: '/notifications/preferences',
+        icon: '☰',
+        description: 'Personal channel toggles and quiet hours.',
+        requiredPermission: 'notifications.preferences',
+      },
+      {
+        label: 'Delivery History',
+        path: '/notifications/deliveries',
+        icon: '⇩',
+        description: 'Audit notification deliveries across all channels.',
+        requiredPermission: 'notifications.manage',
+      },
+    ],
+  },
+  {
     label: 'Administration',
     items: [
       {
