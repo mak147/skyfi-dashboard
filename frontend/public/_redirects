@@ -1,0 +1,3 @@
+# Serve index.html for all routes to support client-side routing.
+# Used by Netlify, Cloudflare Pages, and similar static hosts.
+/*  /index.html  200

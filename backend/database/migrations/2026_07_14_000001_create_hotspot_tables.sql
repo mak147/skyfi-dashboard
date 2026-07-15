@@ -206,8 +206,8 @@ INSERT INTO permissions (name, description, module) VALUES
 ON DUPLICATE KEY UPDATE description = VALUES(description);
 
 -- Assign all hotspot permissions to Super Administrator role
-INSERT INTO role_permissions (role_id, permission_id)
-SELECT r.id, p.id
+INSERT INTO permission_role (permission_id, role_id)
+SELECT p.id, r.id
 FROM roles r
 CROSS JOIN permissions p
 WHERE r.name = 'Super Administrator'

@@ -12,6 +12,7 @@ use SkyFi\Integration\Controllers\RequestLogController;
 use SkyFi\Integration\Controllers\WebhookController;
 use SkyFi\Integration\Controllers\WebhookDeliveryController;
 use SkyFi\Shared\Http\Middleware\JwtAuthMiddleware;
+use SkyFi\Shared\Http\Middleware\ProtectRoute;
 use SkyFi\Shared\Http\Request;
 use SkyFi\Shared\Http\Router;
 use SkyFi\Shared\Providers\Container;
@@ -28,61 +29,52 @@ return static function (Router $router, Container $container): void {
     $dashboard = $container->get(IntegrationDashboardController::class);
     $auth = $container->get(JwtAuthMiddleware::class);
 
-    $protect = static function (callable $handler) use ($auth): callable {
-        return static function (Request $request) use ($auth, $handler) {
-            $attributes = $request->attributes();
-            $attributes['claims'] = $auth->authenticate($request);
-
-            return $handler($request->withAttributes($attributes));
-        };
-    };
-
     // Dashboard
-    $router->add('GET', '/api/v1/integration/dashboard', $protect($dashboard->show(...)));
+    $router->add('GET', '/api/v1/integration/dashboard', ProtectRoute::wrap($auth, $dashboard->show(...)));
 
     // API Keys
-    $router->add('GET', '/api/v1/integration/api-keys', $protect($apiKeys->index(...)));
-    $router->add('POST', '/api/v1/integration/api-keys', $protect($apiKeys->store(...)));
-    $router->add('GET', '/api/v1/integration/api-keys/{id}', $protect($apiKeys->show(...)));
-    $router->add('PUT', '/api/v1/integration/api-keys/{id}', $protect($apiKeys->update(...)));
-    $router->add('DELETE', '/api/v1/integration/api-keys/{id}', $protect($apiKeys->destroy(...)));
-    $router->add('POST', '/api/v1/integration/api-keys/{id}/regenerate', $protect($apiKeys->regenerate(...)));
+    $router->add('GET', '/api/v1/integration/api-keys', ProtectRoute::wrap($auth, $apiKeys->index(...)));
+    $router->add('POST', '/api/v1/integration/api-keys', ProtectRoute::wrap($auth, $apiKeys->store(...)));
+    $router->add('GET', '/api/v1/integration/api-keys/{id}', ProtectRoute::wrap($auth, $apiKeys->show(...)));
+    $router->add('PUT', '/api/v1/integration/api-keys/{id}', ProtectRoute::wrap($auth, $apiKeys->update(...)));
+    $router->add('DELETE', '/api/v1/integration/api-keys/{id}', ProtectRoute::wrap($auth, $apiKeys->destroy(...)));
+    $router->add('POST', '/api/v1/integration/api-keys/{id}/regenerate', ProtectRoute::wrap($auth, $apiKeys->regenerate(...)));
 
     // Client Applications
-    $router->add('GET', '/api/v1/integration/applications', $protect($applications->index(...)));
-    $router->add('POST', '/api/v1/integration/applications', $protect($applications->store(...)));
-    $router->add('GET', '/api/v1/integration/applications/{id}', $protect($applications->show(...)));
-    $router->add('PUT', '/api/v1/integration/applications/{id}', $protect($applications->update(...)));
-    $router->add('DELETE', '/api/v1/integration/applications/{id}', $protect($applications->destroy(...)));
+    $router->add('GET', '/api/v1/integration/applications', ProtectRoute::wrap($auth, $applications->index(...)));
+    $router->add('POST', '/api/v1/integration/applications', ProtectRoute::wrap($auth, $applications->store(...)));
+    $router->add('GET', '/api/v1/integration/applications/{id}', ProtectRoute::wrap($auth, $applications->show(...)));
+    $router->add('PUT', '/api/v1/integration/applications/{id}', ProtectRoute::wrap($auth, $applications->update(...)));
+    $router->add('DELETE', '/api/v1/integration/applications/{id}', ProtectRoute::wrap($auth, $applications->destroy(...)));
 
     // Webhooks
-    $router->add('GET', '/api/v1/integration/webhooks', $protect($webhooks->index(...)));
-    $router->add('POST', '/api/v1/integration/webhooks', $protect($webhooks->store(...)));
-    $router->add('GET', '/api/v1/integration/webhooks/{id}', $protect($webhooks->show(...)));
-    $router->add('PUT', '/api/v1/integration/webhooks/{id}', $protect($webhooks->update(...)));
-    $router->add('DELETE', '/api/v1/integration/webhooks/{id}', $protect($webhooks->destroy(...)));
-    $router->add('POST', '/api/v1/integration/webhooks/{id}/rotate-secret', $protect($webhooks->rotateSecret(...)));
-    $router->add('POST', '/api/v1/integration/webhooks/{id}/test', $protect($webhooks->test(...)));
+    $router->add('GET', '/api/v1/integration/webhooks', ProtectRoute::wrap($auth, $webhooks->index(...)));
+    $router->add('POST', '/api/v1/integration/webhooks', ProtectRoute::wrap($auth, $webhooks->store(...)));
+    $router->add('GET', '/api/v1/integration/webhooks/{id}', ProtectRoute::wrap($auth, $webhooks->show(...)));
+    $router->add('PUT', '/api/v1/integration/webhooks/{id}', ProtectRoute::wrap($auth, $webhooks->update(...)));
+    $router->add('DELETE', '/api/v1/integration/webhooks/{id}', ProtectRoute::wrap($auth, $webhooks->destroy(...)));
+    $router->add('POST', '/api/v1/integration/webhooks/{id}/rotate-secret', ProtectRoute::wrap($auth, $webhooks->rotateSecret(...)));
+    $router->add('POST', '/api/v1/integration/webhooks/{id}/test', ProtectRoute::wrap($auth, $webhooks->test(...)));
 
     // Webhook Deliveries
-    $router->add('GET', '/api/v1/integration/webhooks/{webhookId}/deliveries', $protect($deliveries->index(...)));
-    $router->add('GET', '/api/v1/integration/deliveries', $protect($deliveries->index(...)));
-    $router->add('GET', '/api/v1/integration/deliveries/{id}', $protect($deliveries->show(...)));
-    $router->add('POST', '/api/v1/integration/deliveries/{id}/retry', $protect($deliveries->retry(...)));
+    $router->add('GET', '/api/v1/integration/webhooks/{webhookId}/deliveries', ProtectRoute::wrap($auth, $deliveries->index(...)));
+    $router->add('GET', '/api/v1/integration/deliveries', ProtectRoute::wrap($auth, $deliveries->index(...)));
+    $router->add('GET', '/api/v1/integration/deliveries/{id}', ProtectRoute::wrap($auth, $deliveries->show(...)));
+    $router->add('POST', '/api/v1/integration/deliveries/{id}/retry', ProtectRoute::wrap($auth, $deliveries->retry(...)));
 
     // Inbound Webhooks (no JWT auth — uses signature verification)
     $router->add('POST', '/api/v1/integration/webhooks/inbound', $inbound->handle(...));
 
     // Event Registry
-    $router->add('GET', '/api/v1/integration/events', $protect($events->index(...)));
-    $router->add('GET', '/api/v1/integration/events/{id}', $protect($events->show(...)));
+    $router->add('GET', '/api/v1/integration/events', ProtectRoute::wrap($auth, $events->index(...)));
+    $router->add('GET', '/api/v1/integration/events/{id}', ProtectRoute::wrap($auth, $events->show(...)));
 
     // Connectors
-    $router->add('GET', '/api/v1/integration/connectors', $protect($connectors->index(...)));
-    $router->add('GET', '/api/v1/integration/connectors/{type}', $protect($connectors->show(...)));
-    $router->add('PUT', '/api/v1/integration/connectors/{type}', $protect($connectors->update(...)));
-    $router->add('POST', '/api/v1/integration/connectors/{type}/test', $protect($connectors->test(...)));
+    $router->add('GET', '/api/v1/integration/connectors', ProtectRoute::wrap($auth, $connectors->index(...)));
+    $router->add('GET', '/api/v1/integration/connectors/{type}', ProtectRoute::wrap($auth, $connectors->show(...)));
+    $router->add('PUT', '/api/v1/integration/connectors/{type}', ProtectRoute::wrap($auth, $connectors->update(...)));
+    $router->add('POST', '/api/v1/integration/connectors/{type}/test', ProtectRoute::wrap($auth, $connectors->test(...)));
 
     // Request Logs
-    $router->add('GET', '/api/v1/integration/request-logs', $protect($requestLogs->index(...)));
+    $router->add('GET', '/api/v1/integration/request-logs', ProtectRoute::wrap($auth, $requestLogs->index(...)));
 };

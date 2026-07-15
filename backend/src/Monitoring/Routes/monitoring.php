@@ -7,6 +7,7 @@ use SkyFi\Monitoring\Controllers\DeviceHealthController;
 use SkyFi\Monitoring\Controllers\EventLogController;
 use SkyFi\Monitoring\Controllers\MonitoringDashboardController;
 use SkyFi\Shared\Http\Middleware\JwtAuthMiddleware;
+use SkyFi\Shared\Http\Middleware\ProtectRoute;
 use SkyFi\Shared\Http\Request;
 use SkyFi\Shared\Http\Router;
 use SkyFi\Shared\Providers\Container;
@@ -18,34 +19,26 @@ return static function (Router $router, Container $container): void {
     $eventLogController = $container->get(EventLogController::class);
 
     $auth = $container->get(JwtAuthMiddleware::class);
-    $protect = static function (callable $handler) use ($auth): callable {
-        return static function (Request $request) use ($auth, $handler) {
-            $attributes = $request->attributes();
-            $attributes['claims'] = $auth->authenticate($request);
-
-            return $handler($request->withAttributes($attributes));
-        };
-    };
 
     // Dashboard & Metrics
-    $router->add('GET', '/api/v1/monitoring/dashboard', $protect($dashboardController->overview(...)));
-    $router->add('GET', '/api/v1/monitoring/routers/{id}/metrics', $protect($dashboardController->routerDetailedMetrics(...)));
+    $router->add('GET', '/api/v1/monitoring/dashboard', ProtectRoute::wrap($auth, $dashboardController->overview(...)));
+    $router->add('GET', '/api/v1/monitoring/routers/{id}/metrics', ProtectRoute::wrap($auth, $dashboardController->routerDetailedMetrics(...)));
 
     // Device Health & Interfaces Polling
-    $router->add('GET', '/api/v1/monitoring/devices/health', $protect($healthController->listDeviceHealth(...)));
-    $router->add('POST', '/api/v1/monitoring/routers/{id}/poll', $protect($healthController->pollRouter(...)));
-    $router->add('POST', '/api/v1/monitoring/poll-all', $protect($healthController->pollAll(...)));
-    $router->add('GET', '/api/v1/monitoring/interfaces', $protect($healthController->listInterfaces(...)));
+    $router->add('GET', '/api/v1/monitoring/devices/health', ProtectRoute::wrap($auth, $healthController->listDeviceHealth(...)));
+    $router->add('POST', '/api/v1/monitoring/routers/{id}/poll', ProtectRoute::wrap($auth, $healthController->pollRouter(...)));
+    $router->add('POST', '/api/v1/monitoring/poll-all', ProtectRoute::wrap($auth, $healthController->pollAll(...)));
+    $router->add('GET', '/api/v1/monitoring/interfaces', ProtectRoute::wrap($auth, $healthController->listInterfaces(...)));
 
     // Alerts Management
-    $router->add('GET', '/api/v1/monitoring/alerts', $protect($alertController->index(...)));
-    $router->add('POST', '/api/v1/monitoring/alerts', $protect($alertController->store(...)));
-    $router->add('GET', '/api/v1/monitoring/alerts/{id}', $protect($alertController->show(...)));
-    $router->add('POST', '/api/v1/monitoring/alerts/{id}/acknowledge', $protect($alertController->acknowledge(...)));
-    $router->add('POST', '/api/v1/monitoring/alerts/{id}/resolve', $protect($alertController->resolve(...)));
-    $router->add('POST', '/api/v1/monitoring/alerts/{id}/dismiss', $protect($alertController->dismiss(...)));
+    $router->add('GET', '/api/v1/monitoring/alerts', ProtectRoute::wrap($auth, $alertController->index(...)));
+    $router->add('POST', '/api/v1/monitoring/alerts', ProtectRoute::wrap($auth, $alertController->store(...)));
+    $router->add('GET', '/api/v1/monitoring/alerts/{id}', ProtectRoute::wrap($auth, $alertController->show(...)));
+    $router->add('POST', '/api/v1/monitoring/alerts/{id}/acknowledge', ProtectRoute::wrap($auth, $alertController->acknowledge(...)));
+    $router->add('POST', '/api/v1/monitoring/alerts/{id}/resolve', ProtectRoute::wrap($auth, $alertController->resolve(...)));
+    $router->add('POST', '/api/v1/monitoring/alerts/{id}/dismiss', ProtectRoute::wrap($auth, $alertController->dismiss(...)));
 
     // Event & Sync Logs
-    $router->add('GET', '/api/v1/monitoring/events', $protect($eventLogController->listMonitoringEvents(...)));
-    $router->add('GET', '/api/v1/monitoring/sync-history', $protect($eventLogController->listSyncEvents(...)));
+    $router->add('GET', '/api/v1/monitoring/events', ProtectRoute::wrap($auth, $eventLogController->listMonitoringEvents(...)));
+    $router->add('GET', '/api/v1/monitoring/sync-history', ProtectRoute::wrap($auth, $eventLogController->listSyncEvents(...)));
 };

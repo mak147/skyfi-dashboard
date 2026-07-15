@@ -1,0 +1,5 @@
+# SkyFi ISP Management System
+# This is a private operational dashboard. Crawling is neither expected nor desired.
+
+User-agent: *
+Disallow: /

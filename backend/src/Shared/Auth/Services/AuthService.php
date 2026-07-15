@@ -25,6 +25,7 @@ final class AuthService implements AuthServiceContract
         private readonly RefreshTokenRepositoryContract $refreshTokens,
         private readonly PasswordResetRepositoryContract $passwordResets,
         private readonly JwtServiceContract $jwt,
+        private readonly \PDO $pdo,
         private readonly int $refreshTtl,
         private readonly int $sessionRefreshTtl,
     ) {
@@ -154,24 +155,13 @@ final class AuthService implements AuthServiceContract
 
     private function updatePassword(int $userId, string $newPassword): void
     {
-        $statement = $this->getPdo()->prepare(
+        $statement = $this->pdo->prepare(
             'UPDATE users SET password = :password, updated_at = CURRENT_TIMESTAMP WHERE id = :id',
         );
         $statement->execute([
             'id' => $userId,
             'password' => password_hash($newPassword, PASSWORD_ARGON2ID),
         ]);
-    }
-
-    /** @return \PDO */
-    private function getPdo(): \PDO
-    {
-        $reflection = new \ReflectionClass($this->users);
-        $property = $reflection->getProperty('connection');
-        $property->setAccessible(true);
-        /** @var \PDO $pdo */
-        $pdo = $property->getValue($this->users);
-        return $pdo;
     }
 
     private static function generateResetToken(): string

@@ -68,6 +68,15 @@ apiClient.interceptors.request.use((request) => {
     request.headers.set('Authorization', `Bearer ${accessToken}`);
   }
 
+  // Propagate trace ID for end-to-end request tracing
+  const existingTraceId = request.headers.get('X-Trace-Id');
+  if (!existingTraceId) {
+    request.headers.set(
+      'X-Trace-Id',
+      `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`,
+    );
+  }
+
   return request;
 });
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 use SkyFi\Shared\Config\Environment;
 use SkyFi\Shared\Http\ApiResponse;
 use SkyFi\Shared\Http\Request;
-use SkyFi\Shared\Http\Response;
 use SkyFi\Shared\Http\Router;
+use SkyFi\Shared\Http\Middleware\SecurityHeadersMiddleware;
 use SkyFi\Shared\Http\Middleware\TraceIdMiddleware;
 use SkyFi\Shared\Logging\JsonLogger;
 use SkyFi\Shared\Providers\Container;
@@ -46,6 +46,7 @@ try {
     $registerRoutes = require dirname(__DIR__) . '/routes/api.php';
     $registerRoutes($router, $container);
     $response = $router->dispatch($request)->withHeaders(['X-Trace-Id' => $traceId]);
+    $response = SecurityHeadersMiddleware::apply($response, $config['env'] === 'production');
     $response->send();
 } catch (Throwable $exception) {
     $logger->exception($exception, $traceId, [
@@ -55,7 +56,7 @@ try {
             'ip_address' => $request->ipAddress(),
         ],
     ]);
-    ApiResponse::error($exception, $traceId, (bool) $config['debug'])
-        ->withHeaders(['X-Trace-Id' => $traceId])
-        ->send();
+    $errorResponse = ApiResponse::error($exception, $traceId, (bool) $config['debug'])
+        ->withHeaders(['X-Trace-Id' => $traceId]);
+    SecurityHeadersMiddleware::apply($errorResponse, $config['env'] === 'production')->send();
 }
