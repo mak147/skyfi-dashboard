@@ -163,6 +163,10 @@ final class PermissionCatalog
             'notifications.preferences' => 'Manage personal notification delivery preferences.',
             'update:user:role' => 'Update user roles within scope.',
             'manage:ticket:own' => 'Manage the signed-in customer tickets.',
+            'integration.view' => 'View integration dashboard, events, and connector configurations.',
+            'integration.manage' => 'Manage client applications, connectors, and request logs.',
+            'integration.webhooks' => 'Manage webhooks, delivery history, and retry operations.',
+            'integration.apikeys' => 'Manage API keys, scopes, and key regeneration.',
         ];
     }
 }

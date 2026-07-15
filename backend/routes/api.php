@@ -78,4 +78,7 @@ return static function (Router $router, Container $container): void {
 
     $registerBackupRoutes = require dirname(__DIR__) . '/src/Backup/Routes/backup.php';
     $registerBackupRoutes($router, $container);
+
+    $registerIntegrationRoutes = require dirname(__DIR__) . '/src/Integration/Routes/integration.php';
+    $registerIntegrationRoutes($router, $container);
 };

@@ -22,6 +22,7 @@ import { SystemRoutes } from '@/features/system/routes';
 import { NotificationRoutes } from '@/features/notifications/routes';
 import { AuditRoutes } from '@/features/audit/routes';
 import { backupRoutes } from '@/features/backup/routes';
+import { IntegrationRoutes } from '@/features/integration/routes';
 import { AppLayout } from '@/layouts/AppLayout';
 import { ProtectedRoute } from '@/routes/protected-route';
 
@@ -60,6 +61,7 @@ export const AppRoutes = () => (
         <Route path="/admin/roles/*" element={<RbacRoutes />} />
         <Route path="/notifications/*" element={<NotificationRoutes />} />
         <Route path="/audit/*" element={<AuditRoutes />} />
+        <Route path="/integration/*" element={<IntegrationRoutes />} />
         {backupRoutes.map((route) => (
           <Route key={route.path} path={route.path} element={route.element} />
         ))}
