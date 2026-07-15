@@ -1069,6 +1069,126 @@ final class Container
         );
         // ─── End Backup, Restore & Disaster Recovery Module ───────────────
 
+        // ─── API Gateway, Webhooks & Third-Party Integrations Module ──────
+        $this->instances[\\SkyFi\\Integration\\Repositories\\PdoClientApplicationRepository::class] = new \\SkyFi\\Integration\\Repositories\\PdoClientApplicationRepository($pdo);
+        $this->instances[\\SkyFi\\Integration\\Repositories\\PdoApiKeyRepository::class] = new \\SkyFi\\Integration\\Repositories\\PdoApiKeyRepository($pdo);
+        $this->instances[\\SkyFi\\Integration\\Repositories\\PdoWebhookRepository::class] = new \\SkyFi\\Integration\\Repositories\\PdoWebhookRepository($pdo);
+        $this->instances[\\SkyFi\\Integration\\Repositories\\PdoWebhookDeliveryRepository::class] = new \\SkyFi\\Integration\\Repositories\\PdoWebhookDeliveryRepository($pdo);
+        $this->instances[\\SkyFi\\Integration\\Repositories\\PdoEventRegistryRepository::class] = new \\SkyFi\\Integration\\Repositories\\PdoEventRegistryRepository($pdo);
+        $this->instances[\\SkyFi\\Integration\\Repositories\\PdoConnectorRepository::class] = new \\SkyFi\\Integration\\Repositories\\PdoConnectorRepository($pdo);
+        $this->instances[\\SkyFi\\Integration\\Repositories\\PdoRequestLogRepository::class] = new \\SkyFi\\Integration\\Repositories\\PdoRequestLogRepository($pdo);
+
+        $this->instances[\\SkyFi\\Integration\\Services\\ApiKeyManager::class] = new \\SkyFi\\Integration\\Services\\ApiKeyManager();
+        $this->instances[\\SkyFi\\Integration\\Services\\WebhookSignatureService::class] = new \\SkyFi\\Integration\\Services\\WebhookSignatureService();
+        $this->instances[\\SkyFi\\Integration\\Services\\ConnectorRegistry::class] = new \\SkyFi\\Integration\\Services\\ConnectorRegistry();
+        $this->instances[\\SkyFi\\Integration\\Services\\RateLimitService::class] = new \\SkyFi\\Integration\\Services\\RateLimitService($pdo);
+
+        $this->instances[\\SkyFi\\Integration\\Contracts\\ApiKeyRepositoryContract::class] = $this->instances[\\SkyFi\\Integration\\Repositories\\PdoApiKeyRepository::class];
+        $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookRepositoryContract::class] = $this->instances[\\SkyFi\\Integration\\Repositories\\PdoWebhookRepository::class];
+        $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookDeliveryRepositoryContract::class] = $this->instances[\\SkyFi\\Integration\\Repositories\\PdoWebhookDeliveryRepository::class];
+        $this->instances[\\SkyFi\\Integration\\Contracts\\EventRegistryRepositoryContract::class] = $this->instances[\\SkyFi\\Integration\\Repositories\\PdoEventRegistryRepository::class];
+        $this->instances[\\SkyFi\\Integration\\Contracts\\ConnectorRepositoryContract::class] = $this->instances[\\SkyFi\\Integration\\Repositories\\PdoConnectorRepository::class];
+        $this->instances[\\SkyFi\\Integration\\Contracts\\RequestLogRepositoryContract::class] = $this->instances[\\SkyFi\\Integration\\Repositories\\PdoRequestLogRepository::class];
+
+        $this->instances[\\SkyFi\\Integration\\Validators\\ApiKeyValidator::class] = new \\SkyFi\\Integration\\Validators\\ApiKeyValidator();
+        $this->instances[\\SkyFi\\Integration\\Validators\\ClientApplicationValidator::class] = new \\SkyFi\\Integration\\Validators\\ClientApplicationValidator();
+        $this->instances[\\SkyFi\\Integration\\Validators\\WebhookValidator::class] = new \\SkyFi\\Integration\\Validators\\WebhookValidator();
+        $this->instances[\\SkyFi\\Integration\\Validators\\ConnectorValidator::class] = new \\SkyFi\\Integration\\Validators\\ConnectorValidator();
+
+        $this->instances[\\SkyFi\\Integration\\Services\\ApiKeyService::class] = new \\SkyFi\\Integration\\Services\\ApiKeyService(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\ApiKeyRepositoryContract::class],
+            $this->instances[\\SkyFi\\Integration\\Services\\ApiKeyManager::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Contracts\\ApiKeyServiceContract::class] = $this->instances[\\SkyFi\\Integration\\Services\\ApiKeyService::class];
+
+        $this->instances[\\SkyFi\\Integration\\Services\\ClientApplicationService::class] = new \\SkyFi\\Integration\\Services\\ClientApplicationService(
+            $this->instances[\\SkyFi\\Integration\\Repositories\\PdoClientApplicationRepository::class],
+        );
+
+        $this->instances[\\SkyFi\\Integration\\Services\\WebhookDispatcher::class] = new \\SkyFi\\Integration\\Services\\WebhookDispatcher(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookRepositoryContract::class],
+            $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookDeliveryRepositoryContract::class],
+            $this->instances[\\SkyFi\\Integration\\Services\\WebhookSignatureService::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookDispatcherContract::class] = $this->instances[\\SkyFi\\Integration\\Services\\WebhookDispatcher::class];
+
+        $this->instances[\\SkyFi\\Integration\\Services\\WebhookService::class] = new \\SkyFi\\Integration\\Services\\WebhookService(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookRepositoryContract::class],
+        );
+
+        $this->instances[\\SkyFi\\Integration\\Services\\EventRegistryService::class] = new \\SkyFi\\Integration\\Services\\EventRegistryService(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\EventRegistryRepositoryContract::class],
+        );
+
+        $this->instances[\\SkyFi\\Integration\\Services\\ConnectorService::class] = new \\SkyFi\\Integration\\Services\\ConnectorService(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\ConnectorRepositoryContract::class],
+            $this->instances[\\SkyFi\\Integration\\Services\\ConnectorRegistry::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Contracts\\ConnectorServiceContract::class] = $this->instances[\\SkyFi\\Integration\\Services\\ConnectorService::class];
+
+        $this->instances[\\SkyFi\\Integration\\Services\\RequestLogService::class] = new \\SkyFi\\Integration\\Services\\RequestLogService(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\RequestLogRepositoryContract::class],
+        );
+
+        $this->instances[\\SkyFi\\Integration\\Services\\IntegrationDashboardService::class] = new \\SkyFi\\Integration\\Services\\IntegrationDashboardService(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\ApiKeyRepositoryContract::class],
+            $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookRepositoryContract::class],
+            $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookDeliveryRepositoryContract::class],
+            $this->instances[\\SkyFi\\Integration\\Contracts\\EventRegistryRepositoryContract::class],
+            $this->instances[\\SkyFi\\Integration\\Contracts\\ConnectorRepositoryContract::class],
+            $this->instances[\\SkyFi\\Integration\\Contracts\\RequestLogRepositoryContract::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Contracts\\IntegrationServiceContract::class] = $this->instances[\\SkyFi\\Integration\\Services\\IntegrationDashboardService::class];
+
+        $this->instances[\\SkyFi\\Integration\\Controllers\\ApiKeyController::class] = new \\SkyFi\\Integration\\Controllers\\ApiKeyController(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\ApiKeyServiceContract::class],
+            $this->instances[\\SkyFi\\Integration\\Validators\\ApiKeyValidator::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Controllers\\ClientApplicationController::class] = new \\SkyFi\\Integration\\Controllers\\ClientApplicationController(
+            $this->instances[\\SkyFi\\Integration\\Services\\ClientApplicationService::class],
+            $this->instances[\\SkyFi\\Integration\\Validators\\ClientApplicationValidator::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Controllers\\WebhookController::class] = new \\SkyFi\\Integration\\Controllers\\WebhookController(
+            $this->instances[\\SkyFi\\Integration\\Services\\WebhookService::class],
+            $this->instances[\\SkyFi\\Integration\\Validators\\WebhookValidator::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Controllers\\WebhookDeliveryController::class] = new \\SkyFi\\Integration\\Controllers\\WebhookDeliveryController(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookDeliveryRepositoryContract::class],
+            $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookDispatcherContract::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Controllers\\EventRegistryController::class] = new \\SkyFi\\Integration\\Controllers\\EventRegistryController(
+            $this->instances[\\SkyFi\\Integration\\Services\\EventRegistryService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Controllers\\ConnectorController::class] = new \\SkyFi\\Integration\\Controllers\\ConnectorController(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\ConnectorServiceContract::class],
+            $this->instances[\\SkyFi\\Integration\\Services\\ConnectorRegistry::class],
+            $this->instances[\\SkyFi\\Integration\\Validators\\ConnectorValidator::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Controllers\\InboundWebhookController::class] = new \\SkyFi\\Integration\\Controllers\\InboundWebhookController(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookDispatcherContract::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Controllers\\RequestLogController::class] = new \\SkyFi\\Integration\\Controllers\\RequestLogController(
+            $this->instances[\\SkyFi\\Integration\\Services\\RequestLogService::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\Controllers\\IntegrationDashboardController::class] = new \\SkyFi\\Integration\\Controllers\\IntegrationDashboardController(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\IntegrationServiceContract::class],
+            $this->instances[RequirePermissionMiddleware::class],
+        );
+        // Register integration event subscriber
+        $this->instances[\\SkyFi\\Integration\\EventSubscribers\\DomainEventSubscriber::class] = new \\SkyFi\\Integration\\EventSubscribers\\DomainEventSubscriber(
+            $this->instances[\\SkyFi\\Integration\\Contracts\\WebhookDispatcherContract::class],
+            $this->instances[\\SkyFi\\Integration\\Contracts\\EventRegistryRepositoryContract::class],
+        );
+        $this->instances[\\SkyFi\\Integration\\EventSubscribers\\DomainEventSubscriber::class]->register();
+        // ─── End API Gateway, Webhooks & Integrations Module ─────────────
+
         $this->instances[Router::class] = new Router();
 
         // Register Finance Event Listeners

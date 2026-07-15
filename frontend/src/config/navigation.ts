@@ -348,6 +348,18 @@ export const navigationGroups: NavigationGroup[] = [
     ],
   },
   {
+    label: 'Integrations',
+    items: [
+      {
+        label: 'API & Webhooks',
+        path: '/integration',
+        icon: '🔗',
+        description: 'API keys, webhooks, connectors, and event routing.',
+        requiredPermission: 'integration.view',
+      },
+    ],
+  },
+  {
     label: 'Administration',
     items: [
       {
