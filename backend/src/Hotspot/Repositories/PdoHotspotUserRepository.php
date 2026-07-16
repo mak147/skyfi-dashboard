@@ -75,7 +75,13 @@ final class PdoHotspotUserRepository implements HotspotUserRepositoryContract
             $sortOrder = 'DESC';
         }
 
-        $selectSql = "SELECT h.* FROM hotspot_users h WHERE {$whereSql} ORDER BY h.{$sortField} {$sortOrder} LIMIT {$filters->perPage} OFFSET {$offset}";
+        $selectSql = "SELECT h.*, r.name as router_name, c.full_name as customer_name 
+                      FROM hotspot_users h 
+                      LEFT JOIN mikrotik_routers r ON r.id = h.router_id 
+                      LEFT JOIN customers c ON c.id = h.customer_id 
+                      WHERE {$whereSql} 
+                      ORDER BY h.{$sortField} {$sortOrder} 
+                      LIMIT {$filters->perPage} OFFSET {$offset}";
         $stmt = $this->pdo->prepare($selectSql);
         $stmt->execute($params);
 
@@ -95,7 +101,13 @@ final class PdoHotspotUserRepository implements HotspotUserRepositoryContract
 
     public function find(int $id): ?HotspotUser
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM hotspot_users WHERE id = :id AND deleted_at IS NULL');
+        $stmt = $this->pdo->prepare('
+            SELECT h.*, r.name as router_name, c.full_name as customer_name 
+            FROM hotspot_users h 
+            LEFT JOIN mikrotik_routers r ON r.id = h.router_id 
+            LEFT JOIN customers c ON c.id = h.customer_id 
+            WHERE h.id = :id AND h.deleted_at IS NULL
+        ');
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -104,7 +116,13 @@ final class PdoHotspotUserRepository implements HotspotUserRepositoryContract
 
     public function findByUsername(string $username): ?HotspotUser
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM hotspot_users WHERE username = :username AND deleted_at IS NULL');
+        $stmt = $this->pdo->prepare('
+            SELECT h.*, r.name as router_name, c.full_name as customer_name 
+            FROM hotspot_users h 
+            LEFT JOIN mikrotik_routers r ON r.id = h.router_id 
+            LEFT JOIN customers c ON c.id = h.customer_id 
+            WHERE h.username = :username AND h.deleted_at IS NULL
+        ');
         $stmt->execute(['username' => $username]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 

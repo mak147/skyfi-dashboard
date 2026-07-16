@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { apiErrorMessage } from '@/lib/apiClient';
-import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 
 import { deleteCustomer, getCustomers } from '../api/customerApi';
 import { CustomerCard } from '../components/CustomerCard';
@@ -76,9 +76,10 @@ export const CustomersListPage = () => {
     }
   };
 
-  const canCreate = user?.roles.includes('Super Administrator') || false; // Simplified; real check would use permissions
-  const canUpdate = user?.roles.includes('Super Administrator') || false;
-  const canDelete = user?.roles.includes('Super Administrator') || false;
+  const { can } = usePermissions();
+  const canCreate = can('customers.create');
+  const canUpdate = can('customers.update');
+  const canDelete = can('customers.delete');
 
   const customers = customersQuery.data?.data.map((d) => d.attributes) ?? [];
   const meta = customersQuery.data?.meta;

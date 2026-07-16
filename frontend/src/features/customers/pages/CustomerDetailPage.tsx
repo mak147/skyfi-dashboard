@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { Alert } from '@/components/ui/alert';
 import { apiErrorMessage } from '@/lib/apiClient';
-import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 
 import { getCustomer } from '../api/customerApi';
 import { CustomerProfile } from '../components/CustomerProfile';
@@ -11,7 +11,7 @@ import { CustomerProfile } from '../components/CustomerProfile';
 export const CustomerDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const customerId = Number(id);
-  const { user } = useAuth();
+  const { can } = usePermissions();
 
   const customerQuery = useQuery({
     queryKey: ['customer', customerId],
@@ -20,8 +20,8 @@ export const CustomerDetailPage = () => {
     staleTime: 30_000,
   });
 
-  const canUpdate = user?.roles.includes('Super Administrator') || false;
-  const canManage = user?.roles.includes('Super Administrator') || false;
+  const canUpdate = can('customers.update');
+  const canManage = can('customers.manage');
 
   if (customerQuery.isLoading) {
     return (

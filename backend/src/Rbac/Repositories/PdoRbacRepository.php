@@ -20,9 +20,22 @@ final class PdoRbacRepository implements RbacRepositoryContract
         $stmt = $this->pdo->query('SELECT * FROM roles ORDER BY name ASC');
         $rows = $stmt->fetchAll();
         
+        if (empty($rows)) {
+            return [];
+        }
+
+        $roleIds = array_map(fn($r) => (int)$r['id'], $rows);
+        $permissionsByRole = $this->getPermissionsForMultipleRoles($roleIds);
+
         $roles = [];
         foreach ($rows as $row) {
-            $roles[] = new Role((int)$row['id'], $row['name'], $row['description'], $this->getRolePermissions((int)$row['id']));
+            $roleId = (int)$row['id'];
+            $roles[] = new Role(
+                $roleId, 
+                $row['name'], 
+                $row['description'], 
+                $permissionsByRole[$roleId] ?? []
+            );
         }
         return $roles;
     }
@@ -108,9 +121,22 @@ final class PdoRbacRepository implements RbacRepositoryContract
         $stmt->execute([$userId]);
         $rows = $stmt->fetchAll();
         
+        if (empty($rows)) {
+            return [];
+        }
+
+        $roleIds = array_map(fn($r) => (int)$r['id'], $rows);
+        $permissionsByRole = $this->getPermissionsForMultipleRoles($roleIds);
+
         $roles = [];
         foreach ($rows as $row) {
-            $roles[] = new Role((int)$row['id'], $row['name'], $row['description'], $this->getRolePermissions((int)$row['id']));
+            $roleId = (int)$row['id'];
+            $roles[] = new Role(
+                $roleId, 
+                $row['name'], 
+                $row['description'], 
+                $permissionsByRole[$roleId] ?? []
+            );
         }
         return $roles;
     }
@@ -146,18 +172,38 @@ final class PdoRbacRepository implements RbacRepositoryContract
 
     private function getRolePermissions(int $roleId): array
     {
-        $stmt = $this->pdo->prepare('
-            SELECT p.* FROM permissions p
-            JOIN permission_role pr ON pr.permission_id = p.id
-            WHERE pr.role_id = ?
-        ');
-        $stmt->execute([$roleId]);
-        $rows = $stmt->fetchAll();
-        
-        $permissions = [];
-        foreach ($rows as $row) {
-            $permissions[] = new Permission((int)$row['id'], $row['name'], $row['description']);
+        return $this->getPermissionsForMultipleRoles([$roleId])[$roleId] ?? [];
+    }
+
+    /**
+     * @param int[] $roleIds
+     * @return array<int, array<Permission>>
+     */
+    private function getPermissionsForMultipleRoles(array $roleIds): array
+    {
+        if (empty($roleIds)) {
+            return [];
         }
-        return $permissions;
+
+        $placeholders = implode(',', array_fill(0, count($roleIds), '?'));
+        $stmt = $this->pdo->prepare("
+            SELECT p.*, pr.role_id 
+            FROM permissions p
+            JOIN permission_role pr ON pr.permission_id = p.id
+            WHERE pr.role_id IN ({$placeholders})
+        ");
+        $stmt->execute($roleIds);
+        $rows = $stmt->fetchAll();
+
+        $permissionsByRole = [];
+        foreach ($rows as $row) {
+            $roleId = (int)$row['role_id'];
+            if (!isset($permissionsByRole[$roleId])) {
+                $permissionsByRole[$roleId] = [];
+            }
+            $permissionsByRole[$roleId][] = new Permission((int)$row['id'], $row['name'], $row['description']);
+        }
+
+        return $permissionsByRole;
     }
 }
