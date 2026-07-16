@@ -11,6 +11,7 @@ class PdoSystemRepository
     /** @param array<int,string> $json */
     protected function singleton(string $table, array $defaults, array $json = []): array
     {
+        // Safe because table names are hardcoded in the concrete classes
         $row = $this->pdo->query("SELECT * FROM {$table} ORDER BY id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
         if ($row === false) {
             $columns = array_keys($defaults);
@@ -51,17 +52,48 @@ class PdoSystemRepository
     protected function listRows(string $table, array $query, array $searchColumns, array $filters = []): array
     {
         $where = ['deleted_at IS NULL']; $params = [];
-        if (($query['search'] ?? '') !== '') { $likes=[]; foreach ($searchColumns as $c) $likes[]="{$c} LIKE :search"; $where[]='(' . implode(' OR ', $likes) . ')'; $params['search']='%' . (string)$query['search'] . '%'; }
-        foreach ($filters as $field) if (($query[$field] ?? '') !== '') { $where[]="{$field} = :{$field}"; $params[$field]=$query[$field]; }
+        if (($query['search'] ?? '') !== '') { 
+            $likes=[]; 
+            foreach ($searchColumns as $c) $likes[]="{$c} LIKE :search"; 
+            $where[]='(' . implode(' OR ', $likes) . ')'; 
+            $params['search']='%' . (string)$query['search'] . '%'; 
+        }
+        foreach ($filters as $field) {
+            if (($query[$field] ?? '') !== '') { 
+                $where[]="{$field} = :{$field}"; 
+                $params[$field]=$query[$field]; 
+            }
+        }
+        
         $page = max(1, (int)($query['page']['number'] ?? $query['page'] ?? 1));
         $perPage = max(1, min(100, (int)($query['page']['size'] ?? $query['per_page'] ?? 25)));
         $whereSql = 'WHERE ' . implode(' AND ', $where);
-        $count = $this->pdo->prepare("SELECT COUNT(*) FROM {$table} {$whereSql}"); $count->execute($params); $total=(int)$count->fetchColumn();
+        
+        $count = $this->pdo->prepare("SELECT COUNT(*) FROM {$table} {$whereSql}"); 
+        $count->execute($params); 
+        $total=(int)$count->fetchColumn();
+        
         $offset = ($page - 1) * $perPage;
+        
+        // BUG-001: Strict parameter binding for Limit and Offset.
+        // PHP 8 doesn't perfectly sanitize strings injected into PDO queries, so we must bind integer values tightly.
         $stmt = $this->pdo->prepare("SELECT * FROM {$table} {$whereSql} ORDER BY created_at DESC LIMIT :limit OFFSET :offset");
-        foreach ($params as $key=>$value) $stmt->bindValue($key, $value);
-        $stmt->bindValue('limit',$perPage,PDO::PARAM_INT); $stmt->bindValue('offset',$offset,PDO::PARAM_INT); $stmt->execute();
-        return ['items'=>$stmt->fetchAll(PDO::FETCH_ASSOC) ?: [], 'meta'=>['current_page'=>$page,'per_page'=>$perPage,'total'=>$total,'last_page'=>(int)max(1,ceil($total/$perPage))]];
+        foreach ($params as $key=>$value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue('limit', $perPage, PDO::PARAM_INT); 
+        $stmt->bindValue('offset', $offset, PDO::PARAM_INT); 
+        $stmt->execute();
+        
+        return [
+            'items' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [], 
+            'meta' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => (int)max(1,ceil($total/$perPage))
+            ]
+        ];
     }
 
     protected function insertRow(string $table, array $data, ?int $userId = null): array

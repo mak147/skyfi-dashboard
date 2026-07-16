@@ -17,7 +17,6 @@ export const CustomersListPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
 
   const page = Math.max(1, Number(searchParams.get('page') ?? '1'));
   const perPage = 15;
