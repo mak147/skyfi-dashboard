@@ -507,23 +507,32 @@ final class HotspotUserService implements HotspotUserServiceContract
     private function enrichUserInfo(HotspotUser $user): HotspotUser
     {
         $attributes = $user->toArray();
+        $raw = $user->rawAttributes(); // I'll add this method to the model
 
-        try {
-            $router = $this->routerService->get($user->routerId());
-            $attributes['router_name'] = $router->toArray()['name'] ?? 'Unknown Router';
-        } catch (\Throwable) {
-            $attributes['router_name'] = 'Router #' . $user->routerId();
+        if (!isset($raw['router_name'])) {
+            try {
+                $router = $this->routerService->get($user->routerId());
+                $attributes['router_name'] = $router->toArray()['name'] ?? 'Unknown Router';
+            } catch (\Throwable) {
+                $attributes['router_name'] = 'Router #' . $user->routerId();
+            }
+        } else {
+            $attributes['router_name'] = $raw['router_name'];
         }
 
-        if ($user->customerId() !== null) {
-            try {
-                $customer = $this->customers->find($user->customerId());
-                $attributes['customer_name'] = $customer ? ($customer->toArray()['full_name'] ?? $customer->toArray()['name'] ?? 'Customer #' . $user->customerId()) : null;
-            } catch (\Throwable) {
+        if (!isset($raw['customer_name'])) {
+            if ($user->customerId() !== null) {
+                try {
+                    $customer = $this->customers->find($user->customerId());
+                    $attributes['customer_name'] = $customer ? ($customer->toArray()['full_name'] ?? $customer->toArray()['name'] ?? 'Customer #' . $user->customerId()) : null;
+                } catch (\Throwable) {
+                    $attributes['customer_name'] = null;
+                }
+            } else {
                 $attributes['customer_name'] = null;
             }
         } else {
-            $attributes['customer_name'] = null;
+            $attributes['customer_name'] = $raw['customer_name'];
         }
 
         $attributes['password_encrypted'] = $user->encryptedPassword();

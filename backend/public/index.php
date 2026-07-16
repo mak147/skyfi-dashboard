@@ -5,6 +5,7 @@ declare(strict_types=1);
 use SkyFi\Shared\Config\Environment;
 use SkyFi\Shared\Http\ApiResponse;
 use SkyFi\Shared\Http\Request;
+use SkyFi\Shared\Http\Response;
 use SkyFi\Shared\Http\Router;
 use SkyFi\Shared\Http\Middleware\SecurityHeadersMiddleware;
 use SkyFi\Shared\Http\Middleware\TraceIdMiddleware;

@@ -24,4 +24,5 @@ interface PackageRepositoryContract
     /** @return array<int,array<string,mixed>> */ public function activity(
         int $id,
     ): array;
+    public function getPrice(int $id, string $billingPeriod): float;
 }

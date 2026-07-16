@@ -247,6 +247,14 @@ final class PdoPackageRepository implements PackageRepositoryContract
             return $r;
         }, $s->fetchAll());
     }
+    public function getPrice(int $id, string $period): float
+    {
+        $s = $this->pdo->prepare(
+            "SELECT amount FROM package_prices WHERE package_id=? AND billing_period=? LIMIT 1",
+        );
+        $s->execute([$id, $period]);
+        return (float) ($s->fetchColumn() ?: 0.0);
+    }
     private function categoryId(string $code): int
     {
         $s = $this->pdo->prepare(

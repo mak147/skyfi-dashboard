@@ -13,6 +13,8 @@ use SkyFi\Billing\Data\GenerateInvoiceData;
 use SkyFi\Billing\Data\InvoiceListFilters;
 use SkyFi\Billing\Data\UpdateInvoiceData;
 use SkyFi\Billing\Models\Invoice;
+use SkyFi\Connections\Contracts\ConnectionRepositoryContract;
+use SkyFi\Packages\Contracts\PackageRepositoryContract;
 use SkyFi\Rbac\Contracts\AuditLoggerContract;
 use SkyFi\Shared\Exceptions\NotFoundException;
 use SkyFi\Shared\Exceptions\ValidationException;
@@ -37,6 +39,8 @@ final class InvoiceService implements InvoiceServiceContract
     public function __construct(
         private readonly InvoiceRepositoryContract $invoiceRepository,
         private readonly BillingScheduleRepositoryContract $scheduleRepository,
+        private readonly ConnectionRepositoryContract $connectionRepository,
+        private readonly PackageRepositoryContract $packageRepository,
         private readonly AuditLoggerContract $auditLogger,
     ) {
     }
@@ -223,35 +227,21 @@ final class InvoiceService implements InvoiceServiceContract
             throw new NotFoundException('Billing schedule not found for this connection.');
         }
 
-        $connectionStatement = $this->invoiceRepository->findActive(0);
-        if ($connectionStatement === null) {
-            // We need connection details; use a lightweight query via PDO
-        }
-
-        // Fetch connection details
-        $pdo = $this->getPdo();
-        $connStmt = $pdo->prepare('SELECT c.*, cust.id as customer_id, cust.full_name as customer_name, p.id as package_id, p.name as package_name FROM connections c LEFT JOIN customers cust ON c.customer_id = cust.id LEFT JOIN packages p ON c.package_id = p.id WHERE c.id = :id AND c.deleted_at IS NULL');
-        $connStmt->execute(['id' => $data->connectionId]);
-        $connection = $connStmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($connection === false) {
+        $connection = $this->connectionRepository->find($data->connectionId);
+        if ($connection === null) {
             throw new NotFoundException('Connection not found.');
         }
 
-        if ($connection['status'] !== 'active') {
+        $connectionData = $connection->toArray();
+
+        if ($connectionData['status'] !== 'active') {
             throw new ValidationException([
                 ['code' => 'inactive_connection', 'detail' => 'Cannot generate invoice for an inactive connection.', 'source' => ['pointer' => '/data/attributes/connection_id']],
             ]);
         }
 
         // Fetch package price for the billing cycle
-        $priceStmt = $pdo->prepare('SELECT amount FROM package_prices WHERE package_id = :package_id AND billing_period = :period LIMIT 1');
-        $priceStmt->execute([
-            'package_id' => $connection['package_id'],
-            'period' => $schedule->billingCycle,
-        ]);
-        $priceRow = $priceStmt->fetch(\PDO::FETCH_ASSOC);
-        $unitPrice = $priceRow !== false ? (float) $priceRow['amount'] : 0.0;
+        $unitPrice = $this->packageRepository->getPrice($connectionData['package_id'], $schedule->billingCycle);
 
         // Determine billing period
         $billingStart = $data->billingPeriodStart ?? $schedule->nextBillDate;
@@ -263,7 +253,7 @@ final class InvoiceService implements InvoiceServiceContract
         $items = [];
         $items[] = [
             'item_type' => 'recurring',
-            'description' => $connection['package_name'] . ' (' . $schedule->billingCycle . ') — ' . $billingStart . ' to ' . $billingEnd,
+            'description' => ($connectionData['package_name'] ?? 'Package') . ' (' . $schedule->billingCycle . ') — ' . $billingStart . ' to ' . $billingEnd,
             'quantity' => 1.0,
             'unit_price' => $unitPrice,
             'amount' => $unitPrice,
@@ -278,9 +268,9 @@ final class InvoiceService implements InvoiceServiceContract
 
         $invoice = $this->invoiceRepository->create([
             'invoice_number' => $invoiceNumber,
-            'customer_id' => (int) $connection['customer_id'],
+            'customer_id' => (int) $connectionData['customer_id'],
             'connection_id' => $data->connectionId,
-            'package_id' => (int) $connection['package_id'],
+            'package_id' => (int) $connectionData['package_id'],
             'status' => 'draft',
             'billing_period_start' => $billingStart,
             'billing_period_end' => $billingEnd,
@@ -306,10 +296,7 @@ final class InvoiceService implements InvoiceServiceContract
         $this->scheduleRepository->updateNextBillDate($data->connectionId, $newNextBillDate);
 
         // Update connection next_billing_date for backward compatibility
-        $pdo->prepare('UPDATE connections SET next_billing_date = :next_billing_date WHERE id = :id')->execute([
-            'next_billing_date' => $newNextBillDate,
-            'id' => $data->connectionId,
-        ]);
+        $this->connectionRepository->update($data->connectionId, ['next_billing_date' => $newNextBillDate]);
 
         $this->auditLogger->log(
             userId: $authUserId,
@@ -415,14 +402,5 @@ final class InvoiceService implements InvoiceServiceContract
             default => date('Y-m-d', strtotime($current . ' +1 month')),
         };
     }
-
-    private function getPdo(): \PDO
-    {
-        $reflection = new \ReflectionClass($this->invoiceRepository);
-        $property = $reflection->getProperty('pdo');
-        $property->setAccessible(true);
-        /** @var \PDO $pdo */
-        $pdo = $property->getValue($this->invoiceRepository);
-        return $pdo;
-    }
+}
 }

@@ -125,6 +125,12 @@ final class HotspotUser
         return $data;
     }
 
+    /** @return array<string, mixed> */
+    public function rawAttributes(): array
+    {
+        return $this->attributes;
+    }
+
     /** @param array<string, mixed> $row */
     public static function fromRow(array $row): self
     {

@@ -129,7 +129,7 @@ final class Container
             (string) $config['refresh_cookie_name'],
             (string) $config['refresh_cookie_path'],
             (bool) $config['refresh_cookie_secure'],
-            (bool) $config['expose_password_reset_token'],
+            ($config['env'] ?? 'production') !== 'production' && (bool) ($config['expose_password_reset_token'] ?? false),
         );
         $this->instances[JwtAuthMiddleware::class] = new JwtAuthMiddleware($this->instances[JwtTokenService::class]);
         $this->instances[RateLimitMiddleware::class] = new RateLimitMiddleware($pdo, 20, 60);
@@ -223,6 +223,8 @@ final class Container
         $this->instances[InvoiceService::class] = new InvoiceService(
             $this->instances[PdoInvoiceRepository::class],
             $this->instances[PdoBillingScheduleRepository::class],
+            $this->instances[PdoConnectionRepository::class],
+            $this->instances[PdoPackageRepository::class],
             $this->instances[PdoAuditLogger::class],
         );
         $this->instances[InvoiceController::class] = new InvoiceController(
